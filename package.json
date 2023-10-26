@@ -1,0 +1,26 @@
+{
+  "name": "fluidcalendar",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "main": "dist/fluidcalendar.js",
+  "module": "dist/fluidcalendar.mjs",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Cédric Métairie",
+  "license": "ISC",
+  "peerDependencies": {
+    "vue": "^3.2.21"
+  },
+  "devDependencies": {
+    "rollup": "^4.1.4",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-vue": "^6.0.0"
+  }
+}
