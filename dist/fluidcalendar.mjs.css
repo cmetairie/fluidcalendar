@@ -12,13 +12,11 @@
   --scroller-height: 12px;
   --ressources-width: 16rem;
   --width-navigation-button: 0.75rem;
-
   --shadow-s: 1px 1px 3px rgba(187, 194, 202, 0.15);
   --shadow-m: 1px 1px 0.5rem rgba(187, 194, 202, 0.25);
   --shadow-xl: 0px 1px 4rem rgba(56, 60, 68, 0.05);
   --shadow-xxl: rgba(0, 0, 0, 0.1) 0px 25px 50px -12px;
   --shadow-xxl-strong: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
-
   --color-focus: #1692ff;
   --color-focus-link: #1692ff;
   --color-focus-alpha: rgba(22, 146, 255, 0.15);
@@ -46,6 +44,7 @@
   --color-focuslight-hover-light: #f5ffff;
   --color-focuslight-hover-dark: #bfe4ff;
 }
+
 .t__frame__rate {
   color: white;
   position: fixed;
@@ -55,6 +54,7 @@
   padding: 1rem;
   z-index: 99;
 }
+
 .t__debugg {
   pointer-events: none;
   font-size: 13px;
@@ -71,12 +71,11 @@
   background: rgba(0, 0, 0, 0.95);
   z-index: 10;
 }
+
 .t__fluid__calendar {
   position: relative;
   display: grid;
-  grid-template-columns: var(--ressources-width) calc(
-      100% - var(--ressources-width)
-    );
+  grid-template-columns: var(--ressources-width) calc(100% - var(--ressources-width));
   overflow: hidden;
   color: var(--color-txt);
   margin-top: var(--space);
@@ -92,7 +91,7 @@
 
 .t__fluid__calendar.--debug::before {
   pointer-events: none;
-  content: '';
+  content: "";
   display: block;
   position: absolute;
   inset: 0;
@@ -117,7 +116,7 @@
 }
 
 .t__fluid__calendar__header::before {
-  content: '';
+  content: "";
   display: block;
   position: absolute;
   bottom: -0.5px;
@@ -127,10 +126,12 @@
   background: var(--color-border-m);
   z-index: 2;
 }
+
 .t__fluid__calendar__inner {
   line-height: 0;
   height: 100000px;
 }
+
 .t__fluid__calendar__header__cell {
   display: flex;
   align-items: center;
@@ -140,6 +141,7 @@
   padding: 0 var(--space);
   box-sizing: border-box;
 }
+
 .t__fluid__calendar__header__cell > span {
   white-space: nowrap;
   overflow: hidden;
@@ -155,12 +157,14 @@
   background: red;
   z-index: 9;
 }
+
 .t__fluid__calendar__header__grid {
   color: var(--color-border-m);
   position: absolute;
   width: 100%;
   z-index: 2;
 }
+
 .t__fluid__calendar__grid {
   height: 100%;
   width: 100%;
@@ -175,18 +179,14 @@
 }
 
 .t__fluid__calendar__ressources::after {
-  content: '';
+  content: "";
   display: block;
   position: absolute;
   top: 0;
   right: calc(var(--space) * -0.75);
   bottom: 0;
   width: calc(var(--space) * 0.75);
-  background: linear-gradient(
-    90deg,
-    var(--color-border) 0%,
-    rgba(0, 0, 0, 0) 100%
-  );
+  background: linear-gradient(90deg, var(--color-border) 0%, rgba(0, 0, 0, 0) 100%);
   opacity: 0.25;
 }
 
@@ -200,7 +200,7 @@
 }
 
 .t__fluid__calendar__ressources__header::before {
-  content: '';
+  content: "";
   display: block;
   position: absolute;
   bottom: 0;
@@ -220,7 +220,7 @@
 }
 
 .t__fluid__calendar__ressource::before {
-  content: '';
+  content: "";
   display: block;
   position: absolute;
   top: -0.5px;
@@ -240,11 +240,13 @@
   left: 0;
   padding-left: var(--ressources-width);
 }
+
 .t__fluid__calendar__scroll__area {
   position: relative;
   background: var(--color-border);
   height: var(--scroller-height);
 }
+
 .t__fluid__calendar__scroller {
   all: unset;
   position: absolute;
@@ -263,6 +265,7 @@
   left: 0;
   z-index: 1;
 }
+
 .t__fluid__calendar__booking {
   position: absolute;
   width: 4rem;
@@ -287,9 +290,11 @@
   padding: 3px 0;
   box-sizing: border-box;
 }
+
 .t__fluid__calendar__booking.--collision .t__fluid__calendar__booking__inner {
   animation: minishake 0.85s;
 }
+
 .t__fluid__calendar__booking__inner {
   flex: 1;
   display: flex;
@@ -301,6 +306,7 @@
   box-sizing: border-box;
   max-width: 100%;
 }
+
 .t__fluid__calendar__booking__label {
   white-space: nowrap;
   overflow: hidden;
@@ -318,32 +324,38 @@
   overflow: visible;
   z-index: 2;
 }
+
 .t__fluid__calendar__navigate.--x {
   right: 0;
   bottom: 0;
   left: var(--ressources-width);
   height: 0;
 }
+
 .t__fluid__calendar__navigate.--y {
   top: 0;
   right: 0;
   bottom: 0;
   width: var(--width-navigation-button);
 }
+
 .t__fluid__calendar__navigate__btn {
   background: var(--color-title);
   border-radius: var(--width-navigation-button);
 }
+
 .t__fluid__calendar__navigate__btn.--x {
   margin-top: 1px;
   height: calc(var(--width-navigation-button) - 2px);
   width: calc(var(--width-navigation-button) * 3);
 }
+
 .t__fluid__calendar__navigate__btn.--y {
   margin-left: 1px;
   width: calc(var(--width-navigation-button) - 2px);
   height: calc(var(--width-navigation-button) * 3);
 }
+
 .t__fluid__calendar__navigate__btn.--grab {
   cursor: grab;
   display: flex;
@@ -363,9 +375,11 @@
   box-shadow: 0 0 1rem rgba(187, 194, 202, 0.25);
   padding: 0 0.5rem;
 }
+
 .t__fluid__calendar__navigate__btn.--grab:active {
   cursor: grabbing;
 }
+
 .t__fluid__calendar__navigate__btn.--grab svg {
   opacity: 0.75;
 }
@@ -375,33 +389,39 @@
   overflow: visible;
   z-index: 2;
 }
+
 .t__fluid__calendar__navigate.--x {
   right: 0;
   bottom: 0;
   left: var(--ressources-width);
   height: 0;
 }
+
 .t__fluid__calendar__navigate.--y {
   top: 0;
   right: 0;
   bottom: 0;
   width: var(--width-navigation-button);
 }
+
 .t__fluid__calendar__navigate__btn {
   background: var(--color-title);
   border-radius: var(--width-navigation-button);
 }
+
 .t__fluid__calendar__navigate__btn.--x {
   margin-top: 1px;
   height: calc(var(--width-navigation-button) - 2px);
   width: calc(var(--width-navigation-button) * 3);
 }
+
 .t__fluid__calendar__navigate__btn.--y {
   margin-left: 1px;
   width: calc(var(--width-navigation-button) - 2px);
   height: calc(var(--width-navigation-button) * 3);
   min-height: var(--width-navigation-button);
 }
+
 .t__fluid__calendar__navigate__btn.--grab {
   cursor: grab;
   display: flex;
@@ -421,50 +441,40 @@
   box-shadow: 0 0 1rem rgba(187, 194, 202, 0.25);
   padding: 0 0.5rem;
 }
+
 .t__fluid__calendar__navigate__btn.--grab svg {
   opacity: 0.75;
 }
+
 .t__fluid__calendar__navigate__btn.--grab:active {
   cursor: grabbing;
 }
 
 @keyframes shake {
-  10%,
-  90% {
+  10%, 90% {
     transform: translate3d(-1px, 0, 0);
   }
-  20%,
-  80% {
+  20%, 80% {
     transform: translate3d(2px, 0, 0);
   }
-  30%,
-  50%,
-  70% {
+  30%, 50%, 70% {
     transform: translate3d(-4px, 0, 0);
   }
-  40%,
-  60% {
+  40%, 60% {
     transform: translate3d(4px, 0, 0);
   }
 }
-
 @keyframes minishake {
-  10%,
-  90% {
+  10%, 90% {
     transform: translate3d(-1px, 0, 0);
   }
-  20%,
-  80% {
+  20%, 80% {
     transform: translate3d(2px, 0, 0);
   }
-  30%,
-  50%,
-  70% {
+  30%, 50%, 70% {
     transform: translate3d(-2px, 0, 0);
   }
-  40%,
-  60% {
+  40%, 60% {
     transform: translate3d(2px, 0, 0);
   }
 }
-

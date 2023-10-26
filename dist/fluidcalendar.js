@@ -7187,6 +7187,8 @@ function render$1(_ctx, _cache, $props, $setup, $data, $options) {
 script$1.render = render$1;
 script$1.__file = "src/components/FluidCalendarNavigator.vue";
 
+// import '../styles.css'
+
 function generateRessources(num) {
   const entries = [];
   for (let i = 1; i <= num; i++) {

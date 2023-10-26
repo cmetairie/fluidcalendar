@@ -209,7 +209,7 @@ import FluidCalendarBooking from './FluidCalendarBooking.vue'
 import FluidCalendarScroller from './FluidCalendarScroller.vue'
 import FluidCalendarNavigator from './FluidCalendarNavigator.vue'
 
-import '../styles.css'
+// import '../styles.css'
 
 function generateRessources(num) {
   const entries = []
@@ -719,7 +719,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 :root {
   --border-w: 1px;
   --color-txt: #60668a;

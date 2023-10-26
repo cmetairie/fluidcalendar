@@ -1,6 +1,6 @@
 {
   "name": "fluidcalendar",
-  "version": "0.0.142",
+  "version": "0.0.143",
   "description": "",
   "type": "module",
   "main": "dist/fluidcalendar.js",
@@ -25,10 +25,15 @@
     "rollup": "^4.1.4",
     "rollup-plugin-import-css": "^3.3.5",
     "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-vue": "^6.0.0"
+    "rollup-plugin-scss": "^3.0.0",
+    "rollup-plugin-vue": "^6.0.0",
+    "sass": "^1.69.5"
   },
   "dependencies": {
     "dayjs": "^1.11.10",
     "gsap": "^3.12.2"
+  },
+  "exports": {
+    "./src/style.css": "./dist/style.css"
   }
 }
