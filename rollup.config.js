@@ -22,8 +22,9 @@ export default [
       // commonjs(),
       nodeResolve({ moduleDirectories: ['node_modules'] }),
       // commonjs(),
-      css(),
+
       vue(),
+      css(),
       peerDepsExternal(),
     ],
   },
