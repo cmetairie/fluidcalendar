@@ -1,6 +1,6 @@
 {
   "name": "fluidcalendar",
-  "version": "0.0.143",
+  "version": "0.0.144",
   "description": "",
   "type": "module",
   "main": "dist/fluidcalendar.js",
@@ -32,8 +32,5 @@
   "dependencies": {
     "dayjs": "^1.11.10",
     "gsap": "^3.12.2"
-  },
-  "exports": {
-    "./src/style.css": "./dist/style.css"
   }
 }
