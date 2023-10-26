@@ -201,7 +201,7 @@
 </template>
 
 <script>
-import dayjs from 'dayjs'
+import dayjs from 'dayjs/esm';
 
 import gsap from 'gsap'
 

@@ -1,6 +1,9 @@
 import vue from 'rollup-plugin-vue'
 import peerDepsExternal from 'rollup-plugin-peer-deps-external'
-import css from 'rollup-plugin-css-only'
+import css from 'rollup-plugin-import-css'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+// import commonjs from '@rollup/plugin-commonjs'
+// import commonjs from '@rollup/plugin-commonjs'
 
 export default [
   {
@@ -15,6 +18,13 @@ export default [
         file: 'dist/fluidcalendar.js',
       },
     ],
-    plugins: [css(), vue({ css: false }), peerDepsExternal()],
+    plugins: [
+      // commonjs(),
+      nodeResolve({ moduleDirectories: ['node_modules'] }),
+      // commonjs(),
+      css(),
+      vue(),
+      peerDepsExternal(),
+    ],
   },
 ]

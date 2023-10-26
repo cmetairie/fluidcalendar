@@ -1,6 +1,6 @@
 {
   "name": "fluidcalendar",
-  "version": "0.0.12",
+  "version": "0.0.141",
   "description": "",
   "type": "module",
   "main": "dist/fluidcalendar.js",
@@ -16,15 +16,19 @@
   "author": "Cédric Métairie",
   "license": "ISC",
   "peerDependencies": {
-    "dayjs": "^1.11.6",
-    "gsap": "^3.10.4",
     "vue": "^3.3.4"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "@vue/compiler-sfc": "^3.3.7",
     "rollup": "^4.1.4",
-    "rollup-plugin-css-only": "^4.3.0",
+    "rollup-plugin-import-css": "^3.3.5",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-vue": "^6.0.0"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.10",
+    "gsap": "^3.12.2"
   }
 }
