@@ -1,6 +1,6 @@
 {
   "name": "fluidcalendar",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "",
   "type": "module",
   "main": "dist/fluidcalendar.js",
@@ -16,7 +16,9 @@
   "author": "Cédric Métairie",
   "license": "ISC",
   "peerDependencies": {
-    "vue": "^3.3.4"
+    "vue": "^3.3.4",
+    "dayjs": "^1.11.6",
+    "gsap": "^3.10.4"
   },
   "devDependencies": {
     "rollup": "^4.1.4",
