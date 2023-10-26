@@ -1,5 +1,6 @@
 import vue from 'rollup-plugin-vue'
 import peerDepsExternal from 'rollup-plugin-peer-deps-external'
+import css from 'rollup-plugin-css-only'
 
 export default [
   {
@@ -14,6 +15,6 @@ export default [
         file: 'dist/fluidcalendar.js',
       },
     ],
-    plugins: [vue(), peerDepsExternal()],
+    plugins: [css(), vue({ css: false }), peerDepsExternal()],
   },
 ]
