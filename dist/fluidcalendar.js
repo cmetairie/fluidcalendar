@@ -6698,7 +6698,6 @@ var script$3 = {
 };
 
 const _hoisted_1$2 = { class: "t__fluid__calendar__booking__inner" };
-const _hoisted_2$2 = { class: "t__fluid__calendar__booking__label" };
 
 function render$3(_ctx, _cache, $props, $setup, $data, $options) {
   return (vue.openBlock(), vue.createElementBlock("div", {
@@ -6706,10 +6705,8 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
     style: vue.normalizeStyle($options.stl)
   }, [
     vue.createElementVNode("div", _hoisted_1$2, [
-      vue.createElementVNode("span", _hoisted_2$2, [
-        vue.createElementVNode("span", null, vue.toDisplayString($options.format($props.booking.start_at)), 1 /* TEXT */),
-        vue.createElementVNode("span", null, vue.toDisplayString($options.format($props.booking.end_at)), 1 /* TEXT */)
-      ])
+      vue.renderSlot(_ctx.$slots, "default"),
+      vue.createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
     ])
   ], 6 /* CLASS, STYLE */))
 }
@@ -7189,7 +7186,7 @@ script$1.__file = "src/components/FluidCalendarNavigator.vue";
 
 // import '../styles.css'
 
-function generateRessources(num) {
+function generateBookables(num) {
   const entries = [];
   for (let i = 1; i <= num; i++) {
     const id = i;
@@ -7199,7 +7196,7 @@ function generateRessources(num) {
   return entries
 }
 
-function generateEntriesWithDetails(resources, num = 100) {
+function generateEntriesWithDetails(bookables, num = 100) {
   const entriesWithDetails = [];
 
   for (let i = 1; i <= num; i++) {
@@ -7207,9 +7204,9 @@ function generateEntriesWithDetails(resources, num = 100) {
     const start_at = getRandomDateTime();
     const end_at = dayjs(start_at).add(getRandomNumber(1, 4), 'day').format();
     const label = `Lorem ipsum${i % 2 === 0 ? ' solor' : ''}`;
-    const ressourceId = resources[i % resources.length].id;
+    const bookableId = bookables[i % bookables.length].id;
 
-    entriesWithDetails.push({ id, start_at, end_at, label, ressourceId });
+    entriesWithDetails.push({ id, start_at, end_at, label, bookableId });
   }
 
   return entriesWithDetails
@@ -7248,7 +7245,7 @@ var script = {
       type: Array,
       default: () => [],
     },
-    ressources: {
+    bookables: {
       type: Array,
       default: () => [],
     },
@@ -7276,7 +7273,7 @@ var script = {
       fakeMove: 0,
       fixtures: {
         bookings: [],
-        ressources: [],
+        bookables: [],
       },
     }
   },
@@ -7329,17 +7326,17 @@ var script = {
     _bookings() {
       return this.bookings.concat(this.fixtures.bookings)
     },
-    _ressources() {
-      return this.ressources.concat(this.fixtures.ressources)
+    _bookables() {
+      return this.bookables.concat(this.fixtures.bookables)
     },
     fullHeight() {
-      if (!this.filteredRessources || !this.filteredRessources.length) return 0
-      return (this.filteredRessources.length + 1) * this.rowHeight
+      if (!this.filteredBookables || !this.filteredBookables.length) return 0
+      return (this.filteredBookables.length + 1) * this.rowHeight
     },
-    filteredRessources() {
-      return this._ressources //.filter((f) => this.test.includes(f.id))
+    filteredBookables() {
+      return this._bookables //.filter((f) => this.test.includes(f.id))
     },
-    nbRessourcesDisplayed() {
+    nbBookablesDisplayed() {
       return Math.ceil(this.height / this.rowHeight)
     },
     visibleBookings() {
@@ -7347,8 +7344,8 @@ var script = {
       return this._bookings.filter((f) => {
         if (dayjs(f.start_at).isAfter(dayjs(this.rangeX.end))) return false
         if (dayjs(f.end_at).isBefore(dayjs(this.rangeX.start))) return false
-        const visibleRessources = this.rangeY.rows.map((m) => m.id);
-        return visibleRessources.includes(f.ressourceId)
+        const visibleBookables = this.rangeY.rows.map((m) => m.id);
+        return visibleBookables.includes(f.bookableId)
       })
     },
     scroller() {
@@ -7362,10 +7359,6 @@ var script = {
       //   }
       // }
     },
-    // height() {
-    //   if (!this.ressources) return 0
-    //   return this.ressources.length * this.rowHeight
-    // },
     pointerDate() {
       if (!this.rangeX) return
       const start = this.rangeX.start;
@@ -7399,13 +7392,13 @@ var script = {
       return this.decalY * -1 * this.rowHeight
     },
     rangeY() {
-      const ressources = this.filteredRessources;
-      if (!ressources) return {}
+      const bookables = this.filteredBookables;
+      if (!bookables) return {}
       const pointerY = this.decalY * -1;
       return {
         // start: pointerY,
         // end: pointerY + this.nbRessourcesDisplayed,
-        rows: ressources.slice(pointerY, pointerY + this.nbRessourcesDisplayed),
+        rows: bookables.slice(pointerY, pointerY + this.nbBookablesDisplayed),
       }
     },
     rangeX() {
@@ -7442,36 +7435,20 @@ var script = {
   },
   methods: {
     reset() {
-      this.fixtures.ressources = [];
+      this.fixtures.bookables = [];
       this.fixtures.bookings = [];
     },
     generate() {
       // console.log(generateRessources(50))
       // this.ressources = []
-      this.fixtures.ressources = generateRessources(getRandomNumber(2, 100));
+      this.fixtures.bookables = generateBookables(getRandomNumber(2, 100));
       this.fixtures.bookings = generateEntriesWithDetails(
-        this.fixtures.ressources,
+        this.fixtures.bookables,
         getRandomNumber(10, 2000),
       );
       this.positionY = 0;
-      // this.ressources = [...generateRessources(50)]
-      // this.bookings = [
-      //   ...generateEntriesWithDetails(generateRessources(50), 1000),
-      // ]
-      //   bookings: {
-      //   type: Array,
-      //   default: () => generateEntriesWithDetails(generateRessources(50), 1000),
-      // },
-      // ressources: {
-      //   type: Array,
-      //   default: () => generateRessources(50),
-      // },
-    },
-    pointHasCollision(point) {
-      // console.log('check collision ', point)
     },
     mousedown(event) {
-      // this.selection = {}
       this.dragData = null;
       const point = {
         x: event.clientX,
@@ -7513,7 +7490,7 @@ var script = {
         this.addCollision(current.collision.id);
         return
       }
-      if (current.ressource.id != this.dragData[0].ressource.id) return
+      if (current.bookable.id != this.dragData[0].bookable.id) return
 
       const exist = this.dragData.find((f) =>
         dayjs(f.date).isSame(dayjs(current.date), 'day'),
@@ -7555,7 +7532,7 @@ var script = {
         const max =
           this.positionY -
           this.height +
-          (this._ressources.length + 1) * this.rowHeight;
+          (this._bookables.length + 1) * this.rowHeight;
         const nextY = this.positionY - y;
         if (nextY > 0) {
           this.positionY = 0;
@@ -7563,7 +7540,7 @@ var script = {
         }
         if (max < 0) {
           this.positionY =
-            ((this._ressources.length + 1) * this.rowHeight - this.height) * -1;
+            ((this._bookables.length + 1) * this.rowHeight - this.height) * -1;
         }
 
         this.positionY = this.positionY - y;
@@ -7617,11 +7594,11 @@ var script = {
     format(date) {
       return dayjs(date).format('DD MMM YYYY')
     },
-    ressourceToY(ressourceId) {
-      const ressourceIndex = this.filteredRessources.findIndex(
-        (f) => f.id === ressourceId,
+    bookableToY(bookableId) {
+      const bookableIndex = this.filteredBookables.findIndex(
+        (f) => f.id === bookableId,
       );
-      return (ressourceIndex + 1) * this.rowHeight
+      return (bookableIndex + 1) * this.rowHeight
     },
     pointToData({ x, y }) {
       const top =
@@ -7629,32 +7606,30 @@ var script = {
         this.$refs.fluidCalendar.getBoundingClientRect().top +
         this.positionY * -1;
       const date = this.xToDate(x);
-      const ressource = this.yToRessource(top);
+      const bookable = this.yToBookable(top);
       const collision = this._bookings.find((f) => {
         return (
-          f.ressourceId === ressource.id &&
+          f.bookableId === bookable.id &&
           !dayjs(f.end_at).isBefore(dayjs(date), 'day') &&
           !dayjs(f.start_at).isAfter(dayjs(date), 'day')
         )
       });
-      // console.log('Collision ', date, ressource, collision)
       return {
         date: date,
-        ressource: ressource,
+        bookable: bookable,
         x: this.dateToX(date),
-        y: this.ressourceToY(this.yToRessource(top).id),
+        y: this.bookableToY(this.yToBookable(top).id),
         collision: collision,
       }
-      // console.log('coordsToData ', x, y)
     },
-    yToRessource(top) {
-      return this.filteredRessources[((top / this.rowHeight) | 0) - 1]
+    yToBookable(top) {
+      return this.filteredBookables[((top / this.rowHeight) | 0) - 1]
     },
     xToDate(x) {
       const zero =
         x -
         this.$refs.fluidCalendar.getBoundingClientRect().left -
-        this.$refs.ressources.getBoundingClientRect().width;
+        this.$refs.bookables.getBoundingClientRect().width;
       const p = zero + this.translateX * -1;
       const days = p / this.widthByMinute / 60 / 24;
       const date = dayjs(this.rangeX.start)
@@ -7701,10 +7676,10 @@ const _hoisted_6 = {
   class: "t__debugg"
 };
 const _hoisted_7 = {
-  class: "t__fluid__calendar__ressources",
-  ref: "ressources"
+  class: "t__fluid__calendar__bookables",
+  ref: "bookables"
 };
-const _hoisted_8 = /*#__PURE__*/vue.createElementVNode("span", null, "ressources", -1 /* HOISTED */);
+const _hoisted_8 = /*#__PURE__*/vue.createElementVNode("span", null, "bookables", -1 /* HOISTED */);
 const _hoisted_9 = [
   _hoisted_8
 ];
@@ -7740,8 +7715,8 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_2, vue.toDisplayString($options._bookings.length) + " rézas", 1 /* TEXT */))
             : vue.createCommentVNode("v-if", true),
           _hoisted_3,
-          ($options._ressources)
-            ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_4, vue.toDisplayString($options._ressources.length) + " ressources", 1 /* TEXT */))
+          ($options._bookables)
+            ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_4, vue.toDisplayString($options._bookables.length) + " bookables", 1 /* TEXT */))
             : vue.createCommentVNode("v-if", true),
           _hoisted_5,
           vue.createTextVNode(" " + vue.toDisplayString($data.frameRate) + " FPS ", 1 /* TEXT */)
@@ -7780,21 +7755,21 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }, [
       vue.createElementVNode("div", _hoisted_7, [
         vue.createElementVNode("div", {
-          class: "t__fluid__calendar__ressources__header",
+          class: "t__fluid__calendar__bookables__header",
           style: vue.normalizeStyle({ height: $data.rowHeight + 'px' })
         }, [..._hoisted_9], 4 /* STYLE */),
         vue.createElementVNode("div", {
-          class: "t__fluid__calendar__ressources__inner",
+          class: "t__fluid__calendar__bookables__inner",
           style: vue.normalizeStyle({
           transform: `translateY(${$data.positionY}px) translateY(${$options.translateY}px)`,
         })
         }, [
-          (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.rangeY.rows, (ressource) => {
+          (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.rangeY.rows, (bookable) => {
             return (vue.openBlock(), vue.createElementBlock("div", {
-              key: ressource.id,
+              key: bookable.id,
               style: vue.normalizeStyle({ height: $data.rowHeight + 'px' }),
-              class: "t__fluid__calendar__ressource"
-            }, vue.toDisplayString(ressource.label), 5 /* TEXT, STYLE */))
+              class: "t__fluid__calendar__bookable"
+            }, vue.toDisplayString(bookable.label), 5 /* TEXT, STYLE */))
           }), 128 /* KEYED_FRAGMENT */))
         ], 4 /* STYLE */)
       ], 512 /* NEED_PATCH */),
@@ -7849,9 +7824,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                 widthByMinute: $options.widthByMinute,
                 rowHeight: $data.rowHeight,
                 collisions: $data.collisions,
-                y: $options.ressourceToY(booking.ressourceId),
+                y: $options.bookableToY(booking.bookableId),
                 x: $options.dateToX(booking.start_at)
-              }, null, 8 /* PROPS */, ["booking", "widthByMinute", "rowHeight", "collisions", "y", "x"]))
+              }, {
+                default: vue.withCtx(() => [
+                  vue.renderSlot(_ctx.$slots, "booking", { booking: booking })
+                ]),
+                _: 2 /* DYNAMIC */
+              }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "y", "x"]))
             }), 128 /* KEYED_FRAGMENT */))
           ], 4 /* STYLE */),
           (vue.openBlock(), vue.createElementBlock("svg", {

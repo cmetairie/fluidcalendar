@@ -10,7 +10,7 @@
   --space: 12px;
   --radius: 0.4854rem;
   --scroller-height: 12px;
-  --ressources-width: 16rem;
+  --bookables-width: 16rem;
   --width-navigation-button: 0.75rem;
 
   --shadow-s: 1px 1px 3px rgba(187, 194, 202, 0.15);
@@ -74,8 +74,8 @@
 .t__fluid__calendar {
   position: relative;
   display: grid;
-  grid-template-columns: var(--ressources-width) calc(
-      100% - var(--ressources-width)
+  grid-template-columns: var(--bookables-width) calc(
+      100% - var(--bookables-width)
     );
   overflow: hidden;
   color: var(--color-txt);
@@ -100,7 +100,7 @@
   z-index: 9;
 }
 
-.t__fluid__calendar.--debug .t__fluid__calendar__ressources {
+.t__fluid__calendar.--debug .t__fluid__calendar__bookables {
   opacity: 0.75;
 }
 
@@ -167,14 +167,14 @@
   color: var(--color-border-m);
 }
 
-.t__fluid__calendar__ressources {
+.t__fluid__calendar__bookables {
   position: relative;
   z-index: 2;
   background: var(--color-bg1);
   border-top: solid var(--color-border-m) 0.5px;
 }
 
-.t__fluid__calendar__ressources::after {
+.t__fluid__calendar__bookables::after {
   content: '';
   display: block;
   position: absolute;
@@ -190,7 +190,7 @@
   opacity: 0.25;
 }
 
-.t__fluid__calendar__ressources__header {
+.t__fluid__calendar__bookables__header {
   position: relative;
   display: flex;
   align-items: center;
@@ -199,7 +199,7 @@
   background: var(--color-bg1);
 }
 
-.t__fluid__calendar__ressources__header::before {
+.t__fluid__calendar__bookables__header::before {
   content: '';
   display: block;
   position: absolute;
@@ -211,7 +211,7 @@
   z-index: 2;
 }
 
-.t__fluid__calendar__ressource {
+.t__fluid__calendar__bookable {
   position: relative;
   display: flex;
   align-items: center;
@@ -219,7 +219,7 @@
   color: var(--color-title);
 }
 
-.t__fluid__calendar__ressource::before {
+.t__fluid__calendar__bookable::before {
   content: '';
   display: block;
   position: absolute;
@@ -238,7 +238,7 @@
   right: 0;
   bottom: 0;
   left: 0;
-  padding-left: var(--ressources-width);
+  padding-left: var(--bookables-width);
 }
 .t__fluid__calendar__scroll__area {
   position: relative;
@@ -275,7 +275,7 @@
   opacity: 0.4;
 }
 
-.t__fluid__calendar__ressources__inner,
+.t__fluid__calendar__bookables__inner,
 .t__fluid__calendar__bookings,
 .t__fluid__calendar__canva,
 .t__fluid__calendar__inner {
@@ -321,7 +321,7 @@
 .t__fluid__calendar__navigate.--x {
   right: 0;
   bottom: 0;
-  left: var(--ressources-width);
+  left: var(--bookables-width);
   height: 0;
 }
 .t__fluid__calendar__navigate.--y {
@@ -378,7 +378,7 @@
 .t__fluid__calendar__navigate.--x {
   right: 0;
   bottom: 0;
-  left: var(--ressources-width);
+  left: var(--bookables-width);
   height: 0;
 }
 .t__fluid__calendar__navigate.--y {

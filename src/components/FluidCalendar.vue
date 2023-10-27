@@ -2,7 +2,7 @@
   <div v-if="displayFR" class="t__frame__rate">
     <span v-if="_bookings">{{ _bookings.length }} rézas</span>
     <br />
-    <span v-if="_ressources">{{ _ressources.length }} ressources</span>
+    <span v-if="_bookables">{{ _bookables.length }} bookables</span>
     <br />
     {{ frameRate }} FPS
   </div>
@@ -51,26 +51,27 @@
     :style="{ height: Math.min(fullHeight, height) + 'px' }"
     :class="{ '--debug': debug }"
   >
-    <div class="t__fluid__calendar__ressources" ref="ressources">
+    <div class="t__fluid__calendar__bookables" ref="bookables">
       <div
-        class="t__fluid__calendar__ressources__header"
+        class="t__fluid__calendar__bookables__header"
         :style="{ height: rowHeight + 'px' }"
       >
-        <span>ressources</span>
+        <span>bookables</span>
       </div>
       <div
-        class="t__fluid__calendar__ressources__inner"
+        class="t__fluid__calendar__bookables__inner"
         :style="{
           transform: `translateY(${positionY}px) translateY(${translateY}px)`,
         }"
       >
         <div
-          v-for="ressource of rangeY.rows"
-          :key="ressource.id"
+          v-for="bookable of rangeY.rows"
+          :key="bookable.id"
           :style="{ height: rowHeight + 'px' }"
-          class="t__fluid__calendar__ressource"
+          class="t__fluid__calendar__bookable"
         >
-          {{ ressource.label }}
+          <slot v-if="$slots.bookable" name="bookable" :bookable="bookable" />
+          <span v-else>{{ bookable.label }}</span>
         </div>
       </div>
     </div>
@@ -117,9 +118,12 @@
             :widthByMinute="widthByMinute"
             :rowHeight="rowHeight"
             :collisions="collisions"
-            :y="ressourceToY(booking.ressourceId)"
+            :y="bookableToY(booking.bookableId)"
             :x="dateToX(booking.start_at)"
-          />
+          >
+            <slot v-if="$slots.booking" name="booking" :booking="booking" />
+            <span v-else>{{ booking.label }}</span>
+          </FluidCalendarBooking>
         </div>
         <svg
           class="t__fluid__calendar__header__grid"
@@ -156,7 +160,8 @@
             :key="cell.date"
             :style="{ width: `${cellWidth}px` }"
           >
-            <span>{{ format(cell.date) }}</span>
+            <slot v-if="$slots.date" name="date" :date="format(cell.date)" />
+            <span v-else>{{ format(cell.date) }}</span>
           </div>
         </div>
         <div
@@ -211,7 +216,7 @@ import FluidCalendarNavigator from './FluidCalendarNavigator.vue'
 
 // import '../styles.css'
 
-function generateRessources(num) {
+function generateBookables(num) {
   const entries = []
   for (let i = 1; i <= num; i++) {
     const id = i
@@ -221,7 +226,7 @@ function generateRessources(num) {
   return entries
 }
 
-function generateEntriesWithDetails(resources, num = 100) {
+function generateEntriesWithDetails(bookables, num = 100) {
   const entriesWithDetails = []
 
   for (let i = 1; i <= num; i++) {
@@ -229,9 +234,9 @@ function generateEntriesWithDetails(resources, num = 100) {
     const start_at = getRandomDateTime()
     const end_at = dayjs(start_at).add(getRandomNumber(1, 4), 'day').format()
     const label = `Lorem ipsum${i % 2 === 0 ? ' solor' : ''}`
-    const ressourceId = resources[i % resources.length].id
+    const bookableId = bookables[i % bookables.length].id
 
-    entriesWithDetails.push({ id, start_at, end_at, label, ressourceId })
+    entriesWithDetails.push({ id, start_at, end_at, label, bookableId })
   }
 
   return entriesWithDetails
@@ -270,7 +275,7 @@ export default {
       type: Array,
       default: () => [],
     },
-    ressources: {
+    bookables: {
       type: Array,
       default: () => [],
     },
@@ -298,7 +303,7 @@ export default {
       fakeMove: 0,
       fixtures: {
         bookings: [],
-        ressources: [],
+        bookables: [],
       },
     }
   },
@@ -359,17 +364,17 @@ export default {
     _bookings() {
       return this.bookings.concat(this.fixtures.bookings)
     },
-    _ressources() {
-      return this.ressources.concat(this.fixtures.ressources)
+    _bookables() {
+      return this.bookables.concat(this.fixtures.bookables)
     },
     fullHeight() {
-      if (!this.filteredRessources || !this.filteredRessources.length) return 0
-      return (this.filteredRessources.length + 1) * this.rowHeight
+      if (!this.filteredBookables || !this.filteredBookables.length) return 0
+      return (this.filteredBookables.length + 1) * this.rowHeight
     },
-    filteredRessources() {
-      return this._ressources //.filter((f) => this.test.includes(f.id))
+    filteredBookables() {
+      return this._bookables //.filter((f) => this.test.includes(f.id))
     },
-    nbRessourcesDisplayed() {
+    nbBookablesDisplayed() {
       return Math.ceil(this.height / this.rowHeight)
     },
     visibleBookings() {
@@ -377,8 +382,8 @@ export default {
       return this._bookings.filter((f) => {
         if (dayjs(f.start_at).isAfter(dayjs(this.rangeX.end))) return false
         if (dayjs(f.end_at).isBefore(dayjs(this.rangeX.start))) return false
-        const visibleRessources = this.rangeY.rows.map((m) => m.id)
-        return visibleRessources.includes(f.ressourceId)
+        const visibleBookables = this.rangeY.rows.map((m) => m.id)
+        return visibleBookables.includes(f.bookableId)
       })
     },
     scroller() {
@@ -392,10 +397,6 @@ export default {
       //   }
       // }
     },
-    // height() {
-    //   if (!this.ressources) return 0
-    //   return this.ressources.length * this.rowHeight
-    // },
     pointerDate() {
       if (!this.rangeX) return
       const start = this.rangeX.start
@@ -429,13 +430,13 @@ export default {
       return this.decalY * -1 * this.rowHeight
     },
     rangeY() {
-      const ressources = this.filteredRessources
-      if (!ressources) return {}
+      const bookables = this.filteredBookables
+      if (!bookables) return {}
       const pointerY = this.decalY * -1
       return {
         // start: pointerY,
         // end: pointerY + this.nbRessourcesDisplayed,
-        rows: ressources.slice(pointerY, pointerY + this.nbRessourcesDisplayed),
+        rows: bookables.slice(pointerY, pointerY + this.nbBookablesDisplayed),
       }
     },
     rangeX() {
@@ -472,36 +473,20 @@ export default {
   },
   methods: {
     reset() {
-      this.fixtures.ressources = []
+      this.fixtures.bookables = []
       this.fixtures.bookings = []
     },
     generate() {
       // console.log(generateRessources(50))
       // this.ressources = []
-      this.fixtures.ressources = generateRessources(getRandomNumber(2, 100))
+      this.fixtures.bookables = generateBookables(getRandomNumber(2, 100))
       this.fixtures.bookings = generateEntriesWithDetails(
-        this.fixtures.ressources,
+        this.fixtures.bookables,
         getRandomNumber(10, 2000),
       )
       this.positionY = 0
-      // this.ressources = [...generateRessources(50)]
-      // this.bookings = [
-      //   ...generateEntriesWithDetails(generateRessources(50), 1000),
-      // ]
-      //   bookings: {
-      //   type: Array,
-      //   default: () => generateEntriesWithDetails(generateRessources(50), 1000),
-      // },
-      // ressources: {
-      //   type: Array,
-      //   default: () => generateRessources(50),
-      // },
-    },
-    pointHasCollision(point) {
-      // console.log('check collision ', point)
     },
     mousedown(event) {
-      // this.selection = {}
       this.dragData = null
       const point = {
         x: event.clientX,
@@ -543,7 +528,7 @@ export default {
         this.addCollision(current.collision.id)
         return
       }
-      if (current.ressource.id != this.dragData[0].ressource.id) return
+      if (current.bookable.id != this.dragData[0].bookable.id) return
 
       const exist = this.dragData.find((f) =>
         dayjs(f.date).isSame(dayjs(current.date), 'day'),
@@ -585,7 +570,7 @@ export default {
         const max =
           this.positionY -
           this.height +
-          (this._ressources.length + 1) * this.rowHeight
+          (this._bookables.length + 1) * this.rowHeight
         const nextY = this.positionY - y
         if (nextY > 0) {
           this.positionY = 0
@@ -593,7 +578,7 @@ export default {
         }
         if (max < 0) {
           this.positionY =
-            ((this._ressources.length + 1) * this.rowHeight - this.height) * -1
+            ((this._bookables.length + 1) * this.rowHeight - this.height) * -1
         }
 
         this.positionY = this.positionY - y
@@ -647,11 +632,11 @@ export default {
     format(date) {
       return dayjs(date).format('DD MMM YYYY')
     },
-    ressourceToY(ressourceId) {
-      const ressourceIndex = this.filteredRessources.findIndex(
-        (f) => f.id === ressourceId,
+    bookableToY(bookableId) {
+      const bookableIndex = this.filteredBookables.findIndex(
+        (f) => f.id === bookableId,
       )
-      return (ressourceIndex + 1) * this.rowHeight
+      return (bookableIndex + 1) * this.rowHeight
     },
     pointToData({ x, y }) {
       const top =
@@ -659,32 +644,30 @@ export default {
         this.$refs.fluidCalendar.getBoundingClientRect().top +
         this.positionY * -1
       const date = this.xToDate(x)
-      const ressource = this.yToRessource(top)
+      const bookable = this.yToBookable(top)
       const collision = this._bookings.find((f) => {
         return (
-          f.ressourceId === ressource.id &&
+          f.bookableId === bookable.id &&
           !dayjs(f.end_at).isBefore(dayjs(date), 'day') &&
           !dayjs(f.start_at).isAfter(dayjs(date), 'day')
         )
       })
-      // console.log('Collision ', date, ressource, collision)
       return {
         date: date,
-        ressource: ressource,
+        bookable: bookable,
         x: this.dateToX(date),
-        y: this.ressourceToY(this.yToRessource(top).id),
+        y: this.bookableToY(this.yToBookable(top).id),
         collision: collision,
       }
-      // console.log('coordsToData ', x, y)
     },
-    yToRessource(top) {
-      return this.filteredRessources[((top / this.rowHeight) | 0) - 1]
+    yToBookable(top) {
+      return this.filteredBookables[((top / this.rowHeight) | 0) - 1]
     },
     xToDate(x) {
       const zero =
         x -
         this.$refs.fluidCalendar.getBoundingClientRect().left -
-        this.$refs.ressources.getBoundingClientRect().width
+        this.$refs.bookables.getBoundingClientRect().width
       const p = zero + this.translateX * -1
       const days = p / this.widthByMinute / 60 / 24
       const date = dayjs(this.rangeX.start)
@@ -718,475 +701,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss">
-:root {
-  --border-w: 1px;
-  --color-txt: #60668a;
-  --color-title: #2b3363;
-  --color-border: #eaebf3;
-  --color-border-m: #dadeed;
-  --color-bg1: #fff;
-  --color-bg2: #f8fafe;
-  --color-skeleton: #f2f5f9;
-  --space: 12px;
-  --radius: 0.4854rem;
-  --scroller-height: 12px;
-  --ressources-width: 16rem;
-  --width-navigation-button: 0.75rem;
-
-  --shadow-s: 1px 1px 3px rgba(187, 194, 202, 0.15);
-  --shadow-m: 1px 1px 0.5rem rgba(187, 194, 202, 0.25);
-  --shadow-xl: 0px 1px 4rem rgba(56, 60, 68, 0.05);
-  --shadow-xxl: rgba(0, 0, 0, 0.1) 0px 25px 50px -12px;
-  --shadow-xxl-strong: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
-
-  --color-focus: #1692ff;
-  --color-focus-link: #1692ff;
-  --color-focus-alpha: rgba(22, 146, 255, 0.15);
-  --color-focus-shadow: rgba(22, 146, 255, 0.15);
-  --color-focus-highlight: #2fabff;
-  --color-focus-light: #ffffff;
-  --color-focus-soft-light: #ffffff;
-  --color-focus-soft-dark: #005daf;
-  --color-focus-dark: #003462;
-  --color-focus-readable: #ffffff;
-  --color-focus-bright: #49c5ff;
-  --color-focus-hover-light: #28a4ff;
-  --color-focus-hover-dark: #0080f1;
-  --color-focuslight: #e3f3ff;
-  --color-focuslight-link: #7dc7ff;
-  --color-focuslight-alpha: rgba(227, 243, 255, 0.15);
-  --color-focuslight-shadow: rgba(227, 243, 255, 0.15);
-  --color-focuslight-highlight: #fcffff;
-  --color-focuslight-light: #ffffff;
-  --color-focuslight-soft-light: #ffffff;
-  --color-focuslight-soft-dark: #7dc7ff;
-  --color-focuslight-dark: #30a6ff;
-  --color-focuslight-readable: #000000;
-  --color-focuslight-bright: #ffffff;
-  --color-focuslight-hover-light: #f5ffff;
-  --color-focuslight-hover-dark: #bfe4ff;
-}
-.t__frame__rate {
-  color: white;
-  position: fixed;
-  background: rgba(0, 0, 0, 0.9);
-  top: 0;
-  right: 0;
-  padding: 1rem;
-  z-index: 99;
-}
-.t__debugg {
-  pointer-events: none;
-  font-size: 13px;
-  line-height: 1.5;
-  width: 20rem;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  color: white;
-  background: rgba(0, 0, 0, 0.95);
-  z-index: 10;
-}
-.t__fluid__calendar {
-  position: relative;
-  display: grid;
-  grid-template-columns: var(--ressources-width) calc(
-      100% - var(--ressources-width)
-    );
-  overflow: hidden;
-  color: var(--color-txt);
-  margin-top: var(--space);
-  border-bottom: solid var(--color-border-m) 0.5px;
-  border-left: solid var(--color-border-m) 0.5px;
-}
-
-.t__fluid__calendar.--debug {
-  max-width: 80rem;
-  margin: var(--space) auto;
-  overflow: visible;
-}
-
-.t__fluid__calendar.--debug::before {
-  pointer-events: none;
-  content: '';
-  display: block;
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 0, 0, 0.05);
-  z-index: 9;
-}
-
-.t__fluid__calendar.--debug .t__fluid__calendar__ressources {
-  opacity: 0.75;
-}
-
-.t__fluid__calendar__content {
-  position: relative;
-  z-index: 1;
-}
-
-.t__fluid__calendar__header {
-  position: relative;
-  display: flex;
-  background: var(--color-bg2);
-  z-index: 1;
-}
-
-.t__fluid__calendar__header::before {
-  content: '';
-  display: block;
-  position: absolute;
-  bottom: -0.5px;
-  right: 0;
-  left: 0;
-  height: 0.5px;
-  background: var(--color-border-m);
-  z-index: 2;
-}
-.t__fluid__calendar__inner {
-  line-height: 0;
-  height: 100000px;
-}
-.t__fluid__calendar__header__cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  text-align: center;
-  padding: 0 var(--space);
-  box-sizing: border-box;
-}
-.t__fluid__calendar__header__cell > span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.t__fluid__calendar__pointer {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 125px;
-  width: 1px;
-  background: red;
-  z-index: 9;
-}
-.t__fluid__calendar__header__grid {
-  color: var(--color-border-m);
-  position: absolute;
-  width: 100%;
-  z-index: 2;
-}
-.t__fluid__calendar__grid {
-  height: 100%;
-  width: 100%;
-  color: var(--color-border-m);
-}
-
-.t__fluid__calendar__ressources {
-  position: relative;
-  z-index: 2;
-  background: var(--color-bg1);
-  border-top: solid var(--color-border-m) 0.5px;
-}
-
-.t__fluid__calendar__ressources::after {
-  content: '';
-  display: block;
-  position: absolute;
-  top: 0;
-  right: calc(var(--space) * -0.75);
-  bottom: 0;
-  width: calc(var(--space) * 0.75);
-  background: linear-gradient(
-    90deg,
-    var(--color-border) 0%,
-    rgba(0, 0, 0, 0) 100%
-  );
-  opacity: 0.25;
-}
-
-.t__fluid__calendar__ressources__header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 0 var(--space);
-  z-index: 1;
-  background: var(--color-bg1);
-}
-
-.t__fluid__calendar__ressources__header::before {
-  content: '';
-  display: block;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  height: 0.5px;
-  background: var(--color-border-m);
-  z-index: 2;
-}
-
-.t__fluid__calendar__ressource {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 0 var(--space);
-  color: var(--color-title);
-}
-
-.t__fluid__calendar__ressource::before {
-  content: '';
-  display: block;
-  position: absolute;
-  top: -0.5px;
-  right: 0;
-  left: 0;
-  height: 0.5px;
-  background: var(--color-border-m);
-  z-index: 1;
-}
-
-.t__fluid__calendar__scrollbar {
-  position: absolute;
-  background: var(--color-bg2);
-  width: 100%;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding-left: var(--ressources-width);
-}
-.t__fluid__calendar__scroll__area {
-  position: relative;
-  background: var(--color-border);
-  height: var(--scroller-height);
-}
-.t__fluid__calendar__scroller {
-  all: unset;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 2rem;
-  height: calc(var(--scroller-height) - 2px);
-  background: #fff;
-  border-radius: 1rem;
-  transform: translateY(-50%);
-}
-
-.t__fluid__calendar__bookings {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-}
-.t__fluid__calendar__booking {
-  position: absolute;
-  width: 4rem;
-}
-
-.t__fluid__calendar__selection {
-  position: absolute;
-  background: var(--color-focuslight);
-  z-index: 3;
-  opacity: 0.4;
-}
-
-.t__fluid__calendar__ressources__inner,
-.t__fluid__calendar__bookings,
-.t__fluid__calendar__canva,
-.t__fluid__calendar__inner {
-  will-change: transform;
-}
-
-.t__fluid__calendar__booking {
-  display: flex;
-  padding: 3px 0;
-  box-sizing: border-box;
-}
-.t__fluid__calendar__booking.--collision .t__fluid__calendar__booking__inner {
-  animation: minishake 0.85s;
-}
-.t__fluid__calendar__booking__inner {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  background: #e2f0ff;
-  border: solid #b9dbff 2px;
-  border-radius: var(--radius);
-  padding: 0 calc(var(--space) * 0.75);
-  box-sizing: border-box;
-  max-width: 100%;
-}
-.t__fluid__calendar__booking__label {
-  white-space: nowrap;
-  overflow: hidden;
-  font-size: 12px;
-  font-weight: 500;
-  flex: 1;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.t__fluid__calendar__navigate {
-  position: absolute;
-  overflow: visible;
-  z-index: 2;
-}
-.t__fluid__calendar__navigate.--x {
-  right: 0;
-  bottom: 0;
-  left: var(--ressources-width);
-  height: 0;
-}
-.t__fluid__calendar__navigate.--y {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: var(--width-navigation-button);
-}
-.t__fluid__calendar__navigate__btn {
-  background: var(--color-title);
-  border-radius: var(--width-navigation-button);
-}
-.t__fluid__calendar__navigate__btn.--x {
-  margin-top: 1px;
-  height: calc(var(--width-navigation-button) - 2px);
-  width: calc(var(--width-navigation-button) * 3);
-}
-.t__fluid__calendar__navigate__btn.--y {
-  margin-left: 1px;
-  width: calc(var(--width-navigation-button) - 2px);
-  height: calc(var(--width-navigation-button) * 3);
-}
-.t__fluid__calendar__navigate__btn.--grab {
-  cursor: grab;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0;
-  border: solid var(--color-border) 1px;
-  color: #fff;
-  background: var(--color-title);
-  position: absolute;
-  left: 0;
-  top: -2.2rem;
-  height: 2.25rem;
-  width: 2.25rem;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  box-shadow: 0 0 1rem rgba(187, 194, 202, 0.25);
-  padding: 0 0.5rem;
-}
-.t__fluid__calendar__navigate__btn.--grab:active {
-  cursor: grabbing;
-}
-.t__fluid__calendar__navigate__btn.--grab svg {
-  opacity: 0.75;
-}
-
-.t__fluid__calendar__navigate {
-  position: absolute;
-  overflow: visible;
-  z-index: 2;
-}
-.t__fluid__calendar__navigate.--x {
-  right: 0;
-  bottom: 0;
-  left: var(--ressources-width);
-  height: 0;
-}
-.t__fluid__calendar__navigate.--y {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: var(--width-navigation-button);
-}
-.t__fluid__calendar__navigate__btn {
-  background: var(--color-title);
-  border-radius: var(--width-navigation-button);
-}
-.t__fluid__calendar__navigate__btn.--x {
-  margin-top: 1px;
-  height: calc(var(--width-navigation-button) - 2px);
-  width: calc(var(--width-navigation-button) * 3);
-}
-.t__fluid__calendar__navigate__btn.--y {
-  margin-left: 1px;
-  width: calc(var(--width-navigation-button) - 2px);
-  height: calc(var(--width-navigation-button) * 3);
-  min-height: var(--width-navigation-button);
-}
-.t__fluid__calendar__navigate__btn.--grab {
-  cursor: grab;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0;
-  border: solid var(--color-border) 1px;
-  color: #fff;
-  background: var(--color-title);
-  position: absolute;
-  left: 0;
-  top: -2.2rem;
-  height: 2.25rem;
-  width: 2.25rem;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  box-shadow: 0 0 1rem rgba(187, 194, 202, 0.25);
-  padding: 0 0.5rem;
-}
-.t__fluid__calendar__navigate__btn.--grab svg {
-  opacity: 0.75;
-}
-.t__fluid__calendar__navigate__btn.--grab:active {
-  cursor: grabbing;
-}
-
-@keyframes shake {
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-  40%,
-  60% {
-    transform: translate3d(4px, 0, 0);
-  }
-}
-
-@keyframes minishake {
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-2px, 0, 0);
-  }
-  40%,
-  60% {
-    transform: translate3d(2px, 0, 0);
-  }
-}
-</style>

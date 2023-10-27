@@ -9,7 +9,10 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "rollup -c",
+    "generate-scss": "node generate-theme.js",
+    "build:css": "sass src/assets/fluidcalendar.scss dist/fluidcalendar.css && sass src/assets/fluidcalendartheme.scss dist/fluidcalendartheme.css",
+    "build:js": "rollup -c rollup.config.js",
+    "build": "npm run generate-scss && npm run build:css && npm run build:js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,13 +22,11 @@
     "vue": "^3.3.4"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.7",
+    "@ctrl/tinycolor": "^4.0.2",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@vue/compiler-sfc": "^3.3.7",
     "rollup": "^4.1.4",
-    "rollup-plugin-import-css": "^3.3.5",
     "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-scss": "^3.0.0",
     "rollup-plugin-vue": "^6.0.0",
     "sass": "^1.69.5"
   },

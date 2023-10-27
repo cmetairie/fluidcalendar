@@ -1,10 +1,11 @@
 <template>
   <div class="t__fluid__calendar__booking" :style="stl" :class="clss">
     <div class="t__fluid__calendar__booking__inner">
-      <span class="t__fluid__calendar__booking__label">
+      <slot />
+      <!-- <span class="t__fluid__calendar__booking__label">
         <span>{{ format(booking.start_at) }}</span>
         <span>{{ format(booking.end_at) }}</span>
-      </span>
+      </span> -->
     </div>
   </div>
 </template>
