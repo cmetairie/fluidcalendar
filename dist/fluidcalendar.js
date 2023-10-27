@@ -7241,6 +7241,10 @@ var script = {
     FluidCalendarNavigator: script$1,
   },
   props: {
+    lang: {
+      type: String,
+      default: 'fr',
+    },
     bookings: {
       type: Array,
       default: () => [],
@@ -7683,21 +7687,24 @@ const _hoisted_8 = /*#__PURE__*/vue.createElementVNode("span", null, "bookables"
 const _hoisted_9 = [
   _hoisted_8
 ];
-const _hoisted_10 = /*#__PURE__*/vue.createElementVNode("span", { class: "t__fluid__calendar__pointer" }, null, -1 /* HOISTED */);
-const _hoisted_11 = ["width", "height"];
-const _hoisted_12 = ["d"];
-const _hoisted_13 = /*#__PURE__*/vue.createElementVNode("rect", {
+const _hoisted_10 = { key: 1 };
+const _hoisted_11 = /*#__PURE__*/vue.createElementVNode("span", { class: "t__fluid__calendar__pointer" }, null, -1 /* HOISTED */);
+const _hoisted_12 = { key: 1 };
+const _hoisted_13 = ["width", "height"];
+const _hoisted_14 = ["d"];
+const _hoisted_15 = /*#__PURE__*/vue.createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_14 = {
+const _hoisted_16 = { key: 1 };
+const _hoisted_17 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_15 = ["width", "height"];
-const _hoisted_16 = ["d"];
-const _hoisted_17 = /*#__PURE__*/vue.createElementVNode("rect", {
+const _hoisted_18 = ["width", "height"];
+const _hoisted_19 = ["d"];
+const _hoisted_20 = /*#__PURE__*/vue.createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#grid)"
@@ -7769,7 +7776,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
               key: bookable.id,
               style: vue.normalizeStyle({ height: $data.rowHeight + 'px' }),
               class: "t__fluid__calendar__bookable"
-            }, vue.toDisplayString(bookable.label), 5 /* TEXT, STYLE */))
+            }, [
+              (_ctx.$slots.bookable)
+                ? vue.renderSlot(_ctx.$slots, "bookable", {
+                    key: 0,
+                    bookable: bookable
+                  })
+                : (vue.openBlock(), vue.createElementBlock("span", _hoisted_10, vue.toDisplayString(bookable.label), 1 /* TEXT */))
+            ], 4 /* STYLE */))
           }), 128 /* KEYED_FRAGMENT */))
         ], 4 /* STYLE */)
       ], 512 /* NEED_PATCH */),
@@ -7791,7 +7805,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         class: "t__fluid__calendar__content",
         onMousedown: _cache[0] || (_cache[0] = (...args) => ($options.mousedown && $options.mousedown(...args)))
       }, [
-        _hoisted_10,
+        _hoisted_11,
         ($data.dragData)
           ? (vue.openBlock(), vue.createElementBlock("span", {
               key: 0,
@@ -7828,7 +7842,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                 x: $options.dateToX(booking.start_at)
               }, {
                 default: vue.withCtx(() => [
-                  vue.renderSlot(_ctx.$slots, "booking", { booking: booking })
+                  (_ctx.$slots.booking)
+                    ? vue.renderSlot(_ctx.$slots, "booking", {
+                        key: 0,
+                        booking: booking
+                      })
+                    : (vue.openBlock(), vue.createElementBlock("span", _hoisted_12, vue.toDisplayString(booking.label), 1 /* TEXT */))
                 ]),
                 _: 2 /* DYNAMIC */
               }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "y", "x"]))
@@ -7851,10 +7870,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                   fill: "none",
                   stroke: "currentColor",
                   "stroke-width": "1"
-                }, null, 8 /* PROPS */, _hoisted_12)
-              ], 8 /* PROPS */, _hoisted_11)
+                }, null, 8 /* PROPS */, _hoisted_14)
+              ], 8 /* PROPS */, _hoisted_13)
             ]),
-            _hoisted_13
+            _hoisted_15
           ], 4 /* STYLE */)),
           vue.createElementVNode("div", {
             class: "t__fluid__calendar__header",
@@ -7869,7 +7888,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                 key: cell.date,
                 style: vue.normalizeStyle({ width: `${$options.cellWidth}px` })
               }, [
-                vue.createElementVNode("span", null, vue.toDisplayString($options.format(cell.date)), 1 /* TEXT */)
+                (_ctx.$slots.date)
+                  ? vue.renderSlot(_ctx.$slots, "date", {
+                      key: 0,
+                      date: $options.format(cell.date)
+                    })
+                  : (vue.openBlock(), vue.createElementBlock("span", _hoisted_16, vue.toDisplayString($options.format(cell.date)), 1 /* TEXT */))
               ], 4 /* STYLE */))
             }), 128 /* KEYED_FRAGMENT */))
           ], 4 /* STYLE */),
@@ -7880,7 +7904,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             transform: `translateY(${$data.positionY}px)`,
           })
           }, [
-            (vue.openBlock(), vue.createElementBlock("svg", _hoisted_14, [
+            (vue.openBlock(), vue.createElementBlock("svg", _hoisted_17, [
               vue.createElementVNode("defs", null, [
                 vue.createElementVNode("pattern", {
                   id: "grid",
@@ -7893,10 +7917,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                     fill: "none",
                     stroke: "currentColor",
                     "stroke-width": "1"
-                  }, null, 8 /* PROPS */, _hoisted_16)
-                ], 8 /* PROPS */, _hoisted_15)
+                  }, null, 8 /* PROPS */, _hoisted_19)
+                ], 8 /* PROPS */, _hoisted_18)
               ]),
-              _hoisted_17
+              _hoisted_20
             ]))
           ], 4 /* STYLE */),
           vue.createCommentVNode(" </div> ")

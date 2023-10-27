@@ -271,6 +271,10 @@ export default {
     FluidCalendarNavigator,
   },
   props: {
+    lang: {
+      type: String,
+      default: 'fr',
+    },
     bookings: {
       type: Array,
       default: () => [],
