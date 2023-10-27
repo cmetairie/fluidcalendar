@@ -10,22 +10,22 @@
   <div v-if="debug" class="t__debugg">
     <pre>{{
       {
-        scroller,
-        zooming,
-        widthByMinute,
+        // scroller,
+        // zooming,
+        // widthByMinute,
         decalX,
-        height,
-        decalY,
+        // height,
+        // decalY,
         positionX,
-        positionY,
+        // positionY,
         translateX,
-        translateY,
-        width,
-        pointer,
-        pointerDate,
+        // translateY,
+        // width,
+        // pointer,
+        // pointerDate,
         start: rangeX.start,
         end: rangeX.end,
-        cellWidth,
+        // cellWidth,
         // rangeY,
       }
     }}</pre>
@@ -266,7 +266,7 @@ function padZero(number) {
 }
 
 export default {
-  name: 'FluidCalendar',
+  name: 'FluidCalendarContent',
   components: {
     FluidCalendarBooking,
     FluidCalendarScroller,
@@ -285,10 +285,6 @@ export default {
       type: Array,
       default: () => [],
     },
-    debug: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
@@ -297,7 +293,7 @@ export default {
       dragData: null,
       selection: {},
       displayFR: false,
-      // debug: false,
+      debug: false,
       rangeDays: 5,
       threshold: 2,
       rowHeight: 40,
@@ -356,9 +352,10 @@ export default {
     width: {
       immediate: true,
       async handler(width, oldWidth) {
-        const now = dayjs()
+        // console.log('WWWW ', width, oldWidth)
         if (!oldWidth) {
-          this.centerViewTo(now.date, false)
+            console.log('=> ', dayjs())
+          this.centerViewTo(dayjs().format(), false)
         }
         if (this.zooming) {
           // const pointerX =
@@ -411,11 +408,10 @@ export default {
     },
     pointerDate() {
       if (!this.rangeX) return
-      const start = dayjs(this.rangeX.start)
+      const start = this.rangeX.start
       const dist =
         (this.translateX * -1) / this.widthByMinute + 125 / this.widthByMinute
-
-      return start.add(dist, 'minute').format()
+      return dayjs(start).add(dist, 'minute').format()
     },
     widthByMinute() {
       return this.zoom / 10
@@ -453,37 +449,22 @@ export default {
       }
     },
     rangeX() {
-      const now = dayjs().startOf('day').date
-      console.log(
-        'NOW => ',
-        now,
-        this.rangeDays,
-        -60 * 24 * (this.rangeDays + this.decalX * this.threshold),
-        dayjs(now).add(
-          -60 * 24 * (this.rangeDays + this.decalX * this.threshold),
-          'minute',
-        ),
-      )
-      const start = dayjs(now)
+      const start = dayjs(dayjs(this.moment).startOf('day'))
         .add(
           -60 * 24 * (this.rangeDays + this.decalX * this.threshold),
           'minute',
         )
         .startOf('day')
-        .format('iso')
-
-      const end = dayjs(now)
+        .format()
+      const end = dayjs(dayjs(this.moment).startOf('day'))
         .add(
           60 * 24 * (this.rangeDays + 1 - this.decalX * this.threshold),
           'minute',
         )
         .endOf('day')
-        .format('iso')
-
-      console.log('rangeX => ', start, end)
+        .format()
 
       const diffInDays = dayjs(end).diff(dayjs(start), 'day')
-
       let cells = []
       for (let i = 0; i < diffInDays; i++) {
         const date = dayjs(start).add(i, 'day').format()
@@ -632,6 +613,9 @@ export default {
       if (y != undefined) {
         this.positionY = y
       }
+      // console.log('position => ', x, y)
+      // this.scroll({ x: x, y: y })
+      //
     },
     updateFrameRate() {
       const currentTime = performance.now()
@@ -668,7 +652,7 @@ export default {
       this.centerViewTo(date)
     },
     format(date) {
-      return dayjs(date).format('DD MMMM')
+      return dayjs(date).locale(this.lang).format('DD MMMM')
     },
     bookableToY(bookableId) {
       const bookableIndex = this.filteredBookables.findIndex(
@@ -718,10 +702,10 @@ export default {
       return diff * this.widthByMinute
     },
     centerViewTo(date, animate = true) {
-      const d = dayjs(date)
-      const r = dayjs(this.rangeX.start)
-      const diff = r.diff(d.startOf('day'), 'minute')
-      console.log('Diff => ', date)
+      const diff = dayjs(this.rangeX.start).diff(
+        dayjs(date).startOf('day'),
+        'minute',
+      )
       const t = this.positionX - this.translateX + diff * this.widthByMinute
       if (!animate) {
         this.positionX = t

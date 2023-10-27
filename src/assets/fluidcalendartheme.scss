@@ -18,5 +18,5 @@
   // -webkit-text-size-adjust: 100%;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   line-height: 1.618;
-  font-size: 16px;
+  font-size: clamp(14px, 1vw, 16px);
 }

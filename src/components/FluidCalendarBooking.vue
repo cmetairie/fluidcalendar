@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import dayjs from 'dayjs/esm'
+import { dayjs } from '../dayjs.js'
 export default {
   name: 'FluidCalendarBooking',
   props: {

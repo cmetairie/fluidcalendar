@@ -132,6 +132,7 @@
   height: 100000px;
 }
 .t__fluid__calendar__header__cell {
+  font-size: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -291,6 +292,7 @@
   animation: minishake 0.85s;
 }
 .t__fluid__calendar__booking__inner {
+  font-size: 0.9rem;
   flex: 1;
   display: flex;
   align-items: center;
@@ -300,6 +302,7 @@
   padding: 0 calc(var(--space) * 0.75);
   box-sizing: border-box;
   max-width: 100%;
+  font-weight: 500;
 }
 .t__fluid__calendar__booking__label {
   white-space: nowrap;
