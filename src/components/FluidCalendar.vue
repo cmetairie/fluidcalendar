@@ -319,7 +319,7 @@ export default {
     }
   },
   async mounted() {
-    this.loadLocale(this.lang)
+    // this.loadLocale(this.lang)
     if (this.displayFR) {
       this.updateFrameRate()
     }
@@ -453,18 +453,9 @@ export default {
       }
     },
     rangeX() {
-      const now = dayjs().startOf('day').date
-      console.log(
-        'NOW => ',
-        now,
-        this.rangeDays,
-        -60 * 24 * (this.rangeDays + this.decalX * this.threshold),
-        dayjs(now).add(
-          -60 * 24 * (this.rangeDays + this.decalX * this.threshold),
-          'minute',
-        ),
-      )
-      const start = dayjs(now)
+      const now = new Date() //dayjs().startOf('day').date
+      const v = this.rangeDays + this.decalX * this.threshold
+      const start = dayjs(dayjs().startOf('day').date)
         .add(
           -60 * 24 * (this.rangeDays + this.decalX * this.threshold),
           'minute',
@@ -472,21 +463,19 @@ export default {
         .startOf('day')
         .format('iso')
 
-      const end = dayjs(now)
+      const end = dayjs(dayjs().startOf('day').date)
         .add(
-          60 * 24 * (this.rangeDays + 1 - this.decalX * this.threshold),
+          60 * 24 * (this.rangeDays - this.decalX * this.threshold),
           'minute',
         )
         .endOf('day')
         .format('iso')
 
-      console.log('rangeX => ', start, end)
-
       const diffInDays = dayjs(end).diff(dayjs(start), 'day')
 
       let cells = []
       for (let i = 0; i < diffInDays; i++) {
-        const date = dayjs(start).add(i, 'day').format()
+        const date = dayjs(start).add(i, 'day').date
         const cell = {
           date: date,
         }
@@ -500,19 +489,17 @@ export default {
     },
   },
   methods: {
-    loadLocale(locale) {
-      console.log('* load local ', locale)
-      // Dynamically import the locale and set it in Day.js
-      import(`dayjs/locale/${locale}`)
-        .then(() => {
-          dayjs.locale(locale)
-          this.locale = locale
-        })
-        .catch((error) => {
-          // console.error(`Failed to load the locale for '${locale}': ${error}`)
-          // Fallback to the default locale (e.g., 'en' for English)
-        })
-    },
+    // loadLocale(locale) {
+    //   import(`dayjs/locale/${locale}`)
+    //     .then(() => {
+    //       dayjs.locale(locale)
+    //       this.locale = locale
+    //     })
+    //     .catch((error) => {
+    //       // console.error(`Failed to load the locale for '${locale}': ${error}`)
+    //       // Fallback to the default locale (e.g., 'en' for English)
+    //     })
+    // },
     reset() {
       this.fixtures.bookables = []
       this.fixtures.bookings = []
@@ -652,7 +639,7 @@ export default {
 
       const visibleDays = coords.width / widthByDay
 
-      this.rangeDays = Math.ceil(visibleDays)
+      // this.rangeDays = Math.ceil(visibleDays)
       // console.log('COORDS => ', this.rangeDays)
 
       this.height = this.debug
