@@ -216,54 +216,13 @@ import FluidCalendarBooking from './FluidCalendarBooking.vue'
 import FluidCalendarScroller from './FluidCalendarScroller.vue'
 import FluidCalendarNavigator from './FluidCalendarNavigator.vue'
 
+import {
+  generateBookables,
+  getRandomNumber,
+  generateEntriesWithDetails,
+} from '../utils.js'
+
 // import '../styles.css'
-
-function generateBookables(num) {
-  const entries = []
-  for (let i = 1; i <= num; i++) {
-    const id = i
-    const label = i % 3 === 0 ? 'dolor' : i % 2 === 0 ? 'ipsum' : 'lorem'
-    entries.push({ id, label: label + ' - ' + id })
-  }
-  return entries
-}
-
-function generateEntriesWithDetails(bookables, num = 100) {
-  const entriesWithDetails = []
-
-  for (let i = 1; i <= num; i++) {
-    const id = i
-    const start_at = getRandomDateTime()
-    const end_at = dayjs(start_at).add(getRandomNumber(1, 4), 'day').format()
-    const label = `Lorem ipsum${i % 2 === 0 ? ' solor' : ''}`
-    const bookableId = bookables[i % bookables.length].id
-
-    entriesWithDetails.push({ id, start_at, end_at, label, bookableId })
-  }
-
-  return entriesWithDetails
-}
-
-function getRandomDateTime() {
-  const year = 2023
-  const month = getRandomNumber(6, 12)
-  const day = getRandomNumber(1, 28)
-  const hours = getRandomNumber(0, 23)
-  const minutes = getRandomNumber(0, 59)
-  const seconds = getRandomNumber(0, 59)
-
-  return `${year}-${padZero(month)}-${padZero(day)}T${padZero(hours)}:${padZero(
-    minutes,
-  )}:${padZero(seconds)}+02:00`
-}
-
-function getRandomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-function padZero(number) {
-  return number.toString().padStart(2, '0')
-}
 
 export default {
   name: 'FluidCalendar',
@@ -298,7 +257,7 @@ export default {
       selection: {},
       displayFR: false,
       // debug: false,
-      rangeDays: 5,
+      rangeDays: 8,
       threshold: 2,
       rowHeight: 40,
       moment: new Date(),
