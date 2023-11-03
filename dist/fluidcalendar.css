@@ -141,6 +141,9 @@
   text-align: center;
   padding: 0 var(--space);
   box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .t__fluid__calendar__header__cell > span {
@@ -268,6 +271,7 @@
 }
 
 .t__fluid__calendar__booking {
+  all: unset;
   position: absolute;
   width: 4rem;
 }
@@ -297,6 +301,7 @@
 }
 
 .t__fluid__calendar__booking__inner {
+  user-select: none;
   font-size: 0.9rem;
   flex: 1;
   display: flex;
@@ -311,15 +316,13 @@
 }
 
 .t__fluid__calendar__booking__label {
+  font-size: 0.85rem;
   white-space: nowrap;
   overflow: hidden;
-  font-size: 12px;
   font-weight: 500;
-  flex: 1;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .t__fluid__calendar__navigate {

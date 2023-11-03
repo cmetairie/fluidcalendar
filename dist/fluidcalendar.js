@@ -17,7 +17,7 @@ function dayjs(s) {
     // console.log('Format ', date)
     const options = {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
     };
     if (s === 'iso') return date.toISOString()
@@ -113,7 +113,6 @@ function dayjs(s) {
 
   function diff(otherDate, unit = 'day') {
     const timeDiff = date - otherDate.date;
-
     if (unit === 'day') {
       return Math.round(timeDiff / (1000 * 60 * 60 * 24))
     } else if (unit === 'month') {
@@ -6215,11 +6214,12 @@ var script$3 = {
 const _hoisted_1$2 = { class: "t__fluid__calendar__booking__inner" };
 
 function render$3(_ctx, _cache, $props, $setup, $data, $options) {
-  return (vue.openBlock(), vue.createElementBlock("div", {
+  return (vue.openBlock(), vue.createElementBlock("button", {
     class: vue.normalizeClass(["t__fluid__calendar__booking", $options.clss]),
     style: vue.normalizeStyle($options.stl)
   }, [
     vue.createElementVNode("div", _hoisted_1$2, [
+      vue.createCommentVNode(" {{ $slots.bookable }} "),
       vue.renderSlot(_ctx.$slots, "default"),
       vue.createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
     ])
@@ -6235,6 +6235,53 @@ function wait(secondes) {
       resolve(timer);
     }, secondes * 1000);
   })
+}
+
+function generateBookables(num) {
+  const entries = [];
+  for (let i = 1; i <= num; i++) {
+    const id = i;
+    const label = i % 3 === 0 ? 'dolor' : i % 2 === 0 ? 'ipsum' : 'lorem';
+    entries.push({ id, label: label + ' - ' + id });
+  }
+  return entries
+}
+
+function generateEntriesWithDetails(bookables, num = 100) {
+  const entriesWithDetails = [];
+
+  for (let i = 1; i <= num; i++) {
+    const id = i;
+    const start_at = getRandomDateTime();
+    const end_at = dayjs(start_at).add(getRandomNumber(1, 4), 'day').format();
+    const label = `Lorem ipsum${i % 2 === 0 ? ' solor' : ''}`;
+    const bookableId = bookables[i % bookables.length].id;
+
+    entriesWithDetails.push({ id, start_at, end_at, label, bookableId });
+  }
+
+  return entriesWithDetails
+}
+
+function getRandomDateTime() {
+  const year = 2023;
+  const month = getRandomNumber(6, 12);
+  const day = getRandomNumber(1, 28);
+  const hours = getRandomNumber(0, 23);
+  const minutes = getRandomNumber(0, 59);
+  const seconds = getRandomNumber(0, 59);
+
+  return `${year}-${padZero(month)}-${padZero(day)}T${padZero(hours)}:${padZero(
+    minutes,
+  )}:${padZero(seconds)}+02:00`
+}
+
+function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+function padZero(number) {
+  return number.toString().padStart(2, '0')
 }
 
 var script$2 = {
@@ -6701,53 +6748,6 @@ script$1.__file = "src/components/FluidCalendarNavigator.vue";
 
 // import '../styles.css'
 
-function generateBookables(num) {
-  const entries = [];
-  for (let i = 1; i <= num; i++) {
-    const id = i;
-    const label = i % 3 === 0 ? 'dolor' : i % 2 === 0 ? 'ipsum' : 'lorem';
-    entries.push({ id, label: label + ' - ' + id });
-  }
-  return entries
-}
-
-function generateEntriesWithDetails(bookables, num = 100) {
-  const entriesWithDetails = [];
-
-  for (let i = 1; i <= num; i++) {
-    const id = i;
-    const start_at = getRandomDateTime();
-    const end_at = dayjs(start_at).add(getRandomNumber(1, 4), 'day').format();
-    const label = `Lorem ipsum${i % 2 === 0 ? ' solor' : ''}`;
-    const bookableId = bookables[i % bookables.length].id;
-
-    entriesWithDetails.push({ id, start_at, end_at, label, bookableId });
-  }
-
-  return entriesWithDetails
-}
-
-function getRandomDateTime() {
-  const year = 2023;
-  const month = getRandomNumber(6, 12);
-  const day = getRandomNumber(1, 28);
-  const hours = getRandomNumber(0, 23);
-  const minutes = getRandomNumber(0, 59);
-  const seconds = getRandomNumber(0, 59);
-
-  return `${year}-${padZero(month)}-${padZero(day)}T${padZero(hours)}:${padZero(
-    minutes,
-  )}:${padZero(seconds)}+02:00`
-}
-
-function getRandomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-function padZero(number) {
-  return number.toString().padStart(2, '0')
-}
-
 var script = {
   name: 'FluidCalendar',
   components: {
@@ -6781,7 +6781,7 @@ var script = {
       selection: {},
       displayFR: false,
       // debug: false,
-      rangeDays: 5,
+      rangeDays: 8,
       threshold: 2,
       rowHeight: 40,
       moment: new Date(),
@@ -6802,7 +6802,7 @@ var script = {
     }
   },
   async mounted() {
-    this.loadLocale(this.lang);
+    // this.loadLocale(this.lang)
     if (this.displayFR) {
       this.updateFrameRate();
     }
@@ -6928,7 +6928,7 @@ var script = {
       }
     },
     rangeX() {
-      const start = dayjs(dayjs(this.moment).startOf('day').date)
+      const start = dayjs(dayjs().startOf('day').date)
         .add(
           -60 * 24 * (this.rangeDays + this.decalX * this.threshold),
           'minute',
@@ -6936,9 +6936,9 @@ var script = {
         .startOf('day')
         .format('iso');
 
-      const end = dayjs(dayjs(this.moment).startOf('day').date)
+      const end = dayjs(dayjs().startOf('day').date)
         .add(
-          60 * 24 * (this.rangeDays + 1 - this.decalX * this.threshold),
+          60 * 24 * (this.rangeDays - this.decalX * this.threshold),
           'minute',
         )
         .endOf('day')
@@ -6946,10 +6946,9 @@ var script = {
 
       const diffInDays = dayjs(end).diff(dayjs(start), 'day');
 
-      console.log('Diff => ', diffInDays);
       let cells = [];
       for (let i = 0; i < diffInDays; i++) {
-        const date = dayjs(start).add(i, 'day').format();
+        const date = dayjs(start).add(i, 'day').date;
         const cell = {
           date: date,
         };
@@ -6963,19 +6962,17 @@ var script = {
     },
   },
   methods: {
-    loadLocale(locale) {
-      console.log('* load local ', locale);
-      // Dynamically import the locale and set it in Day.js
-      import(`dayjs/locale/${locale}`)
-        .then(() => {
-          dayjs.locale(locale);
-          this.locale = locale;
-        })
-        .catch((error) => {
-          // console.error(`Failed to load the locale for '${locale}': ${error}`)
-          // Fallback to the default locale (e.g., 'en' for English)
-        });
-    },
+    // loadLocale(locale) {
+    //   import(`dayjs/locale/${locale}`)
+    //     .then(() => {
+    //       dayjs.locale(locale)
+    //       this.locale = locale
+    //     })
+    //     .catch((error) => {
+    //       // console.error(`Failed to load the locale for '${locale}': ${error}`)
+    //       // Fallback to the default locale (e.g., 'en' for English)
+    //     })
+    // },
     reset() {
       this.fixtures.bookables = [];
       this.fixtures.bookings = [];
@@ -7113,9 +7110,9 @@ var script = {
 
       const widthByDay = this.widthByMinute * 60 * 24;
 
-      const visibleDays = coords.width / widthByDay;
+      coords.width / widthByDay;
 
-      this.rangeDays = Math.ceil(visibleDays);
+      // this.rangeDays = Math.ceil(visibleDays)
       // console.log('COORDS => ', this.rangeDays)
 
       this.height = this.debug
@@ -7184,7 +7181,6 @@ var script = {
       const d = dayjs(date);
       const r = dayjs(this.rangeX.start);
       const diff = r.diff(d.startOf('day'), 'minute');
-      console.log('Diff => ', date);
       const t = this.positionX - this.translateX + diff * this.widthByMinute;
       if (!animate) {
         this.positionX = t;
@@ -7224,7 +7220,10 @@ const _hoisted_9 = [
 ];
 const _hoisted_10 = { key: 1 };
 const _hoisted_11 = /*#__PURE__*/vue.createElementVNode("span", { class: "t__fluid__calendar__pointer" }, null, -1 /* HOISTED */);
-const _hoisted_12 = { key: 1 };
+const _hoisted_12 = {
+  key: 1,
+  class: "t__fluid__calendar__booking__label"
+};
 const _hoisted_13 = ["width", "height"];
 const _hoisted_14 = ["d"];
 const _hoisted_15 = /*#__PURE__*/vue.createElementVNode("rect", {

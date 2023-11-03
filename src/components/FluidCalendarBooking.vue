@@ -1,13 +1,14 @@
 <template>
-  <div class="t__fluid__calendar__booking" :style="stl" :class="clss">
+  <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
     <div class="t__fluid__calendar__booking__inner">
+      <!-- {{ $slots.bookable }} -->
       <slot />
       <!-- <span class="t__fluid__calendar__booking__label">
         <span>{{ format(booking.start_at) }}</span>
         <span>{{ format(booking.end_at) }}</span>
       </span> -->
     </div>
-  </div>
+  </button>
 </template>
 
 <script>

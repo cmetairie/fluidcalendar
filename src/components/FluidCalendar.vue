@@ -122,7 +122,9 @@
             :x="dateToX(booking.start_at)"
           >
             <slot v-if="$slots.booking" name="booking" :booking="booking" />
-            <span v-else>{{ booking.label }}</span>
+            <span class="t__fluid__calendar__booking__label" v-else>
+              {{ booking.label }}
+            </span>
           </FluidCalendarBooking>
         </div>
         <svg
@@ -412,8 +414,6 @@ export default {
       }
     },
     rangeX() {
-      const now = new Date() //dayjs().startOf('day').date
-      const v = this.rangeDays + this.decalX * this.threshold
       const start = dayjs(dayjs().startOf('day').date)
         .add(
           -60 * 24 * (this.rangeDays + this.decalX * this.threshold),
@@ -667,7 +667,6 @@ export default {
       const d = dayjs(date)
       const r = dayjs(this.rangeX.start)
       const diff = r.diff(d.startOf('day'), 'minute')
-      console.log('Diff => ', date)
       const t = this.positionX - this.translateX + diff * this.widthByMinute
       if (!animate) {
         this.positionX = t

@@ -13,7 +13,7 @@ export function dayjs(s) {
     // console.log('Format ', date)
     const options = {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
     }
     if (s === 'iso') return date.toISOString()
