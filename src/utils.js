@@ -1,5 +1,15 @@
 import { dayjs } from './dayjs.js'
 
+let debounceId = null
+export function debounce(fn, delay = 500) {
+  clearTimeout(debounceId)
+  const args = arguments
+  const that = this
+  debounceId = setTimeout(function () {
+    fn.apply(that, args)
+  }, delay)
+}
+
 export function wait(secondes) {
   return new Promise((resolve) => {
     const timer = setTimeout(() => {

@@ -6229,6 +6229,16 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
 script$3.render = render$3;
 script$3.__file = "src/components/FluidCalendarBooking.vue";
 
+let debounceId = null;
+function debounce(fn, delay = 500) {
+  clearTimeout(debounceId);
+  const args = arguments;
+  const that = this;
+  debounceId = setTimeout(function () {
+    fn.apply(that, args);
+  }, delay);
+}
+
 function wait(secondes) {
   return new Promise((resolve) => {
     const timer = setTimeout(() => {
@@ -6768,11 +6778,16 @@ var script = {
       type: Array,
       default: () => [],
     },
+    debounce: {
+      type: Number,
+      default: 0,
+    },
     debug: {
       type: Boolean,
       default: false,
     },
   },
+  emits: ['updateDate', 'updateRange'],
   data() {
     return {
       locale: null,
@@ -6825,6 +6840,16 @@ var script = {
     this.generate();
   },
   watch: {
+    pointerDate(date) {
+      debounce(() => {
+        this.$emit('updateDate', date);
+        this.$emit('updateRange', {
+          start: this.rangeX.start,
+          end: this.rangeX.end,
+        });
+        // console.log('Range ?', this.rangeX)
+      }, this.debounce);
+    },
     zoom(value, oldValue) {
       // console.log('ZOOM ?', value)
       // const width = (value / 10) * 60 * 24
@@ -6874,15 +6899,7 @@ var script = {
       })
     },
     scroller() {
-      const p = (this.positionX / this.width) * 100;
-      return p
-      // if (this.$refs.timeline) {
-      //   const timeline = this.$refs.timeline.getBoundingClientRect()
-      //   return {
-      //     left: timeline.left,
-      //     width: timeline.width,
-      //   }
-      // }
+      return (this.positionX / this.width) * 100
     },
     pointerDate() {
       if (!this.rangeX) return
@@ -6890,7 +6907,7 @@ var script = {
       const dist =
         (this.translateX * -1) / this.widthByMinute + 125 / this.widthByMinute;
 
-      return start.add(dist, 'minute').format()
+      return start.add(dist, 'minute').format('iso')
     },
     widthByMinute() {
       return this.zoom / 10
@@ -6922,8 +6939,6 @@ var script = {
       if (!bookables) return {}
       const pointerY = this.decalY * -1;
       return {
-        // start: pointerY,
-        // end: pointerY + this.nbRessourcesDisplayed,
         rows: bookables.slice(pointerY, pointerY + this.nbBookablesDisplayed),
       }
     },
@@ -6948,7 +6963,7 @@ var script = {
 
       let cells = [];
       for (let i = 0; i < diffInDays; i++) {
-        const date = dayjs(start).add(i, 'day').date;
+        const date = dayjs(start).add(i, 'day').format('iso');
         const cell = {
           date: date,
         };
@@ -6962,17 +6977,6 @@ var script = {
     },
   },
   methods: {
-    // loadLocale(locale) {
-    //   import(`dayjs/locale/${locale}`)
-    //     .then(() => {
-    //       dayjs.locale(locale)
-    //       this.locale = locale
-    //     })
-    //     .catch((error) => {
-    //       // console.error(`Failed to load the locale for '${locale}': ${error}`)
-    //       // Fallback to the default locale (e.g., 'en' for English)
-    //     })
-    // },
     reset() {
       this.fixtures.bookables = [];
       this.fixtures.bookings = [];
