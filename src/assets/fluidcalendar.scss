@@ -83,7 +83,11 @@
   border-bottom: solid var(--color-border-m) 0.5px;
   border-left: solid var(--color-border-m) 0.5px;
 }
-
+.t__fluid__calendar__area {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
 .t__fluid__calendar.--debug {
   max-width: 80rem;
   margin: var(--space) auto;
@@ -269,6 +273,7 @@
 }
 .t__fluid__calendar__booking {
   all: unset;
+  cursor: pointer;
   position: absolute;
   width: 4rem;
 }

@@ -47,10 +47,10 @@
   <!-- {{ dragData }} -->
   <div
     class="t__fluid__calendar"
-    ref="fluidCalendar"
     :style="{ height: Math.min(fullHeight, height) + 'px' }"
     :class="{ '--debug': debug }"
   >
+    <div class="t__fluid__calendar__area" ref="fluidCalendar"></div>
     <div class="t__fluid__calendar__bookables" ref="bookables">
       <div
         class="t__fluid__calendar__bookables__header"
@@ -87,7 +87,7 @@
 
     <!-- <button class="t__fluid__calendar__prev" @click="prev"></button> -->
     <div class="t__fluid__calendar__content" @mousedown="mousedown">
-      <span class="t__fluid__calendar__pointer"></span>
+      <!-- <span class="t__fluid__calendar__pointer"></span> -->
       <span
         v-if="dragData"
         :style="{
@@ -162,7 +162,7 @@
             :key="cell.date"
             :style="{ width: `${cellWidth}px` }"
           >
-            <slot v-if="$slots.date" name="date" :date="format(cell.date)" />
+            <slot v-if="$slots.date" name="date" :date="cell" />
             <span v-else>{{ format(cell.date) }}</span>
           </div>
         </div>
@@ -263,7 +263,7 @@ export default {
       collisions: [],
       dragData: null,
       selection: {},
-      displayFR: false,
+      displayFR: true,
       // debug: false,
       rangeDays: 8,
       threshold: 2,
@@ -624,6 +624,19 @@ export default {
         this.positionY * -1
       const date = this.xToDate(x)
       const bookable = this.yToBookable(top)
+
+      // console.log('Date ', date)
+
+      if (!bookable) {
+        return {
+          date: date,
+          x: this.dateToX(date),
+          // y: this.bookableToY(this.yToBookable(top).id),
+        }
+      }
+      // const booking = this._bookings.find(f => {
+      //   return f.bookableId === bookable.id &&
+      // })
       const collision = this._bookings.find((f) => {
         return (
           f.bookableId === bookable.id &&
@@ -648,11 +661,8 @@ export default {
         this.$refs.fluidCalendar.getBoundingClientRect().left -
         this.$refs.bookables.getBoundingClientRect().width
       const p = zero + this.translateX * -1
-      const days = p / this.widthByMinute / 60 / 24
-      const date = dayjs(this.rangeX.start)
-        .add(days | 0, 'day')
-        .format()
-      return date
+      const days = p / this.widthByMinute
+      return dayjs(this.rangeX.start).add(days, 'minute').date
     },
     dateToX(date) {
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute')

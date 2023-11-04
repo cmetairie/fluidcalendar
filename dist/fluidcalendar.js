@@ -6273,6 +6273,14 @@ function generateEntriesWithDetails(bookables, num = 100) {
   return entriesWithDetails
 }
 
+function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+function padZero(number) {
+  return number.toString().padStart(2, '0')
+}
+
 function getRandomDateTime() {
   const year = 2023;
   const month = getRandomNumber(6, 12);
@@ -6281,17 +6289,11 @@ function getRandomDateTime() {
   const minutes = getRandomNumber(0, 59);
   const seconds = getRandomNumber(0, 59);
 
-  return `${year}-${padZero(month)}-${padZero(day)}T${padZero(hours)}:${padZero(
-    minutes,
-  )}:${padZero(seconds)}+02:00`
-}
+  const isoString = `${year}-${padZero(month)}-${padZero(day)}T${padZero(
+    hours,
+  )}:${padZero(minutes)}:${padZero(seconds)}+02:00`;
 
-function getRandomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-function padZero(number) {
-  return number.toString().padStart(2, '0')
+  return isoString
 }
 
 var script$2 = {
@@ -6794,7 +6796,7 @@ var script = {
       collisions: [],
       dragData: null,
       selection: {},
-      displayFR: false,
+      displayFR: true,
       // debug: false,
       rangeDays: 8,
       threshold: 2,
@@ -7147,6 +7149,19 @@ var script = {
         this.positionY * -1;
       const date = this.xToDate(x);
       const bookable = this.yToBookable(top);
+
+      // console.log('Date ', date)
+
+      if (!bookable) {
+        return {
+          date: date,
+          x: this.dateToX(date),
+          // y: this.bookableToY(this.yToBookable(top).id),
+        }
+      }
+      // const booking = this._bookings.find(f => {
+      //   return f.bookableId === bookable.id &&
+      // })
       const collision = this._bookings.find((f) => {
         return (
           f.bookableId === bookable.id &&
@@ -7171,11 +7186,8 @@ var script = {
         this.$refs.fluidCalendar.getBoundingClientRect().left -
         this.$refs.bookables.getBoundingClientRect().width;
       const p = zero + this.translateX * -1;
-      const days = p / this.widthByMinute / 60 / 24;
-      const date = dayjs(this.rangeX.start)
-        .add(days | 0, 'day')
-        .format();
-      return date
+      const days = p / this.widthByMinute;
+      return dayjs(this.rangeX.start).add(days, 'minute').date
     },
     dateToX(date) {
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute');
@@ -7215,15 +7227,18 @@ const _hoisted_6 = {
   class: "t__debugg"
 };
 const _hoisted_7 = {
+  class: "t__fluid__calendar__area",
+  ref: "fluidCalendar"
+};
+const _hoisted_8 = {
   class: "t__fluid__calendar__bookables",
   ref: "bookables"
 };
-const _hoisted_8 = /*#__PURE__*/vue.createElementVNode("span", null, "bookables", -1 /* HOISTED */);
-const _hoisted_9 = [
-  _hoisted_8
+const _hoisted_9 = /*#__PURE__*/vue.createElementVNode("span", null, "bookables", -1 /* HOISTED */);
+const _hoisted_10 = [
+  _hoisted_9
 ];
-const _hoisted_10 = { key: 1 };
-const _hoisted_11 = /*#__PURE__*/vue.createElementVNode("span", { class: "t__fluid__calendar__pointer" }, null, -1 /* HOISTED */);
+const _hoisted_11 = { key: 1 };
 const _hoisted_12 = {
   key: 1,
   class: "t__fluid__calendar__booking__label"
@@ -7295,14 +7310,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     vue.createCommentVNode(" {{ dragData }} "),
     vue.createElementVNode("div", {
       class: vue.normalizeClass(["t__fluid__calendar", { '--debug': $props.debug }]),
-      ref: "fluidCalendar",
       style: vue.normalizeStyle({ height: Math.min($options.fullHeight, $data.height) + 'px' })
     }, [
-      vue.createElementVNode("div", _hoisted_7, [
+      vue.createElementVNode("div", _hoisted_7, null, 512 /* NEED_PATCH */),
+      vue.createElementVNode("div", _hoisted_8, [
         vue.createElementVNode("div", {
           class: "t__fluid__calendar__bookables__header",
           style: vue.normalizeStyle({ height: $data.rowHeight + 'px' })
-        }, [..._hoisted_9], 4 /* STYLE */),
+        }, [..._hoisted_10], 4 /* STYLE */),
         vue.createElementVNode("div", {
           class: "t__fluid__calendar__bookables__inner",
           style: vue.normalizeStyle({
@@ -7320,7 +7335,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                     key: 0,
                     bookable: bookable
                   })
-                : (vue.openBlock(), vue.createElementBlock("span", _hoisted_10, vue.toDisplayString(bookable.label), 1 /* TEXT */))
+                : (vue.openBlock(), vue.createElementBlock("span", _hoisted_11, vue.toDisplayString(bookable.label), 1 /* TEXT */))
             ], 4 /* STYLE */))
           }), 128 /* KEYED_FRAGMENT */))
         ], 4 /* STYLE */)
@@ -7343,7 +7358,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         class: "t__fluid__calendar__content",
         onMousedown: _cache[0] || (_cache[0] = (...args) => ($options.mousedown && $options.mousedown(...args)))
       }, [
-        _hoisted_11,
+        vue.createCommentVNode(" <span class=\"t__fluid__calendar__pointer\"></span> "),
         ($data.dragData)
           ? (vue.openBlock(), vue.createElementBlock("span", {
               key: 0,
@@ -7429,7 +7444,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                 (_ctx.$slots.date)
                   ? vue.renderSlot(_ctx.$slots, "date", {
                       key: 0,
-                      date: $options.format(cell.date)
+                      date: cell
                     })
                   : (vue.openBlock(), vue.createElementBlock("span", _hoisted_16, vue.toDisplayString($options.format(cell.date)), 1 /* TEXT */))
               ], 4 /* STYLE */))

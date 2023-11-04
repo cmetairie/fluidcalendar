@@ -44,6 +44,14 @@ export function generateEntriesWithDetails(bookables, num = 100) {
   return entriesWithDetails
 }
 
+export function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+export function padZero(number) {
+  return number.toString().padStart(2, '0')
+}
+
 export function getRandomDateTime() {
   const year = 2023
   const month = getRandomNumber(6, 12)
@@ -52,15 +60,9 @@ export function getRandomDateTime() {
   const minutes = getRandomNumber(0, 59)
   const seconds = getRandomNumber(0, 59)
 
-  return `${year}-${padZero(month)}-${padZero(day)}T${padZero(hours)}:${padZero(
-    minutes,
-  )}:${padZero(seconds)}+02:00`
-}
+  const isoString = `${year}-${padZero(month)}-${padZero(day)}T${padZero(
+    hours,
+  )}:${padZero(minutes)}:${padZero(seconds)}+02:00`
 
-export function getRandomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-export function padZero(number) {
-  return number.toString().padStart(2, '0')
+  return isoString
 }
