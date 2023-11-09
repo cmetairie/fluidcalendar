@@ -1,4 +1,4 @@
-import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createElementVNode, createCommentVNode, renderSlot, resolveComponent, Fragment, toDisplayString, createTextVNode, renderList, createVNode, createBlock, withCtx } from 'vue';
+import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createCommentVNode, createElementVNode, renderSlot, withModifiers, resolveComponent, Fragment, createTextVNode, toDisplayString, renderList, createVNode, createBlock, withCtx } from 'vue';
 
 function dayjs(s) {
   let date;
@@ -35,50 +35,120 @@ function dayjs(s) {
     return this // For method chaining
   }
 
-  function isSame(otherDate, unit = 'day') {
+  function isSame(d, unit = 'day') {
     if (unit === 'day') {
-      return date.getTime() === otherDate.date.getTime()
+      return (
+        date.getDate() === d.date.getDate() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getFullYear() === d.date.getFullYear()
+      )
     } else if (unit === 'month') {
       return (
-        date.getMonth() === otherDate.date.getMonth() &&
-        date.getFullYear() === otherDate.date.getFullYear()
+        date.getMonth() === d.date.getMonth() &&
+        date.getFullYear() === d.date.getFullYear()
       )
     } else if (unit === 'year') {
-      return date.getFullYear() === otherDate.date.getFullYear()
+      return date.getFullYear() === d.date.getFullYear()
+    } else if (unit === 'minute') {
+      return (
+        date.getDate() === d.date.getDate() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMinutes() === d.date.getMinutes() &&
+        date.getHours() === d.date.getHours()
+      )
     }
     return false // Invalid unit
   }
 
-  function isBefore(otherDate, unit = 'day') {
+  function isBefore(d, unit = 'day') {
     if (unit === 'day') {
-      return date.getTime() < otherDate.date.getTime()
+      return date.getTime() < d.date.getTime()
     } else if (unit === 'month') {
-      if (date.getFullYear() < otherDate.date.getFullYear()) return true
+      if (date.getFullYear() < d.date.getFullYear()) return true
       if (
-        date.getFullYear() === otherDate.date.getFullYear() &&
-        date.getMonth() < otherDate.date.getMonth()
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() < d.date.getMonth()
       )
         return true
       return false
     } else if (unit === 'year') {
-      return date.getFullYear() < otherDate.date.getFullYear()
+      return date.getFullYear() < d.date.getFullYear()
+    } else if (unit === 'minute') {
+      if (date.getFullYear() < d.date.getFullYear()) return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() < d.date.getMonth()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() < d.date.getDate()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() === d.date.getDate() &&
+        date.getHours() < d.date.getHours()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() === d.date.getDate() &&
+        date.getHours() === d.date.getHours() &&
+        date.getMinutes() < d.date.getMinutes()
+      )
+        return true
+      return false
     }
     return false // Invalid unit
   }
 
-  function isAfter(otherDate, unit = 'day') {
+  function isAfter(d, unit = 'day') {
     if (unit === 'day') {
-      return date.getTime() > otherDate.date.getTime()
+      return date.getTime() > d.date.getTime()
     } else if (unit === 'month') {
-      if (date.getFullYear() > otherDate.date.getFullYear()) return true
+      if (date.getFullYear() > d.date.getFullYear()) return true
       if (
-        date.getFullYear() === otherDate.date.getFullYear() &&
-        date.getMonth() > otherDate.date.getMonth()
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() > d.date.getMonth()
       )
         return true
       return false
     } else if (unit === 'year') {
-      return date.getFullYear() > otherDate.date.getFullYear()
+      return date.getFullYear() > d.date.getFullYear()
+    } else if (unit === 'minute') {
+      if (date.getFullYear() > d.date.getFullYear()) return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() > d.date.getMonth()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() > d.date.getDate()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() === d.date.getDate() &&
+        date.getHours() > d.date.getHours()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() === d.date.getDate() &&
+        date.getHours() === d.date.getHours() &&
+        date.getMinutes() > d.date.getMinutes()
+      )
+        return true
+      return false
     }
     return false // Invalid unit
   }
@@ -6154,19 +6224,11 @@ var gsapWithCSS = gsap.registerPlugin(CSSPlugin) || gsap;
     // to protect from tree shaking
 gsapWithCSS.core.Tween;
 
-var script$3 = {
+var script$4 = {
   name: 'FluidCalendarBooking',
   props: {
     booking: {
       type: Object,
-    },
-    x: {
-      type: Number,
-      default: 0,
-    },
-    y: {
-      type: Number,
-      default: 0,
     },
     widthByMinute: {
       type: Number,
@@ -6181,15 +6243,21 @@ var script$3 = {
       default: () => [],
     },
   },
+  data() {
+    return {
+      baseX: 0,
+      diff: 0,
+    }
+  },
   computed: {
     clss() {
       const clss = [];
       if (this.collisions.includes(this.booking.id)) clss.push('--collision');
+      if (this.booking.ghost) clss.push('--ghost');
       return clss
     },
     stl() {
       const stl = [];
-      stl.push({ transform: `translate(${this.x}px, ${this.y}px)` });
       stl.push({ width: this.width + 'px' });
       stl.push({ height: this.rowHeight + 'px' });
       return stl
@@ -6199,33 +6267,56 @@ var script$3 = {
         dayjs(this.booking.start_at),
         'minute',
       );
-      return diff * this.widthByMinute
+      return diff * this.widthByMinute + this.diff
     },
   },
   methods: {
     format(date) {
       return dayjs(date).format('DD MMM')
     },
+    click() {
+      console.log('Click', this.booking);
+    },
+    startSize(event) {
+      this.baseX = event.clientX;
+      document.addEventListener('mousemove', this.size);
+      document.addEventListener('mouseup', this.endSize);
+    },
+    size(event) {
+      this.diff = event.clientX - this.baseX;
+    },
+    endSize(event) {
+      this.baseX = event.clientX;
+      document.removeEventListener('mousemove', this.size);
+      document.removeEventListener('mouseup', this.endSize);
+    },
   },
 };
 
 const _hoisted_1$2 = { class: "t__fluid__calendar__booking__inner" };
 
-function render$3(_ctx, _cache, $props, $setup, $data, $options) {
-  return (openBlock(), createElementBlock("button", {
+function render$4(_ctx, _cache, $props, $setup, $data, $options) {
+  return (openBlock(), createElementBlock("div", {
     class: normalizeClass(["t__fluid__calendar__booking", $options.clss]),
     style: normalizeStyle($options.stl)
   }, [
+    createCommentVNode(" <button>m</button> "),
     createElementVNode("div", _hoisted_1$2, [
       createCommentVNode(" {{ $slots.bookable }} "),
       renderSlot(_ctx.$slots, "default"),
       createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
-    ])
+    ]),
+    createElementVNode("button", {
+      class: "t__fluid__calendar__booking__resize",
+      onMousedown: _cache[0] || (_cache[0] = withModifiers((...args) => ($options.startSize && $options.startSize(...args)), ["stop"]))
+    }, [
+      createCommentVNode(" {{ diff }} ")
+    ], 32 /* HYDRATE_EVENTS */)
   ], 6 /* CLASS, STYLE */))
 }
 
-script$3.render = render$3;
-script$3.__file = "src/components/FluidCalendarBooking.vue";
+script$4.render = render$4;
+script$4.__file = "src/components/FluidCalendarBooking.vue";
 
 let debounceId = null;
 function debounce(fn, delay = 500) {
@@ -6261,7 +6352,7 @@ function generateEntriesWithDetails(bookables, num = 100) {
   for (let i = 1; i <= num; i++) {
     const id = i;
     const start_at = getRandomDateTime();
-    const end_at = dayjs(start_at).add(getRandomNumber(1, 4), 'day').format();
+    const end_at = dayjs(start_at).add(getRandomNumber(1, 4), 'day').format('iso');
     const label = `Lorem ipsum${i % 2 === 0 ? ' solor' : ''}`;
     const bookableId = bookables[i % bookables.length].id;
 
@@ -6291,10 +6382,10 @@ function getRandomDateTime() {
     hours,
   )}:${padZero(minutes)}:${padZero(seconds)}+02:00`;
 
-  return isoString
+  return dayjs(isoString).format('iso')
 }
 
-var script$2 = {
+var script$3 = {
   name: 'FluidCalendarScroller',
   props: {
     x: {
@@ -6451,7 +6542,7 @@ var script$2 = {
   },
 };
 
-function render$2(_ctx, _cache, $props, $setup, $data, $options) {
+function render$3(_ctx, _cache, $props, $setup, $data, $options) {
   return (openBlock(), createElementBlock("div", {
     class: normalizeClass(["t__fluid__calendar__navigate", $options.clss]),
     ref: "scroller"
@@ -6468,10 +6559,10 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
   ], 2 /* CLASS */))
 }
 
-script$2.render = render$2;
-script$2.__file = "src/components/FluidCalendarScroller.vue";
+script$3.render = render$3;
+script$3.__file = "src/components/FluidCalendarScroller.vue";
 
-var script$1 = {
+var script$2 = {
   name: 'FluidCalendarNavigator',
   props: {
     x: {
@@ -6728,7 +6819,7 @@ const _hoisted_6$1 = [
   _hoisted_5$1
 ];
 
-function render$1(_ctx, _cache, $props, $setup, $data, $options) {
+function render$2(_ctx, _cache, $props, $setup, $data, $options) {
   return (openBlock(), createElementBlock("div", {
     class: normalizeClass(["t__fluid__calendar__navigate", $options.clss]),
     ref: "scroller"
@@ -6753,17 +6844,55 @@ function render$1(_ctx, _cache, $props, $setup, $data, $options) {
   ], 2 /* CLASS */))
 }
 
+script$2.render = render$2;
+script$2.__file = "src/components/FluidCalendarNavigator.vue";
+
+var script$1 = {
+  name: 'FluidDraggable',
+  props: {
+    x: {
+      type: Number,
+      default: 0,
+    },
+    y: {
+      type: Number,
+      default: 0,
+    },
+  },
+  //   emits: ['increment', 'position'],
+  //   data() {},
+  //   watch: {},
+  computed: {
+    stl() {
+      const stl = [];
+      stl.push({ transform: `translate(${this.x}px, ${this.y}px)` });
+      return stl
+    },
+  },
+  methods: {},
+};
+
+function render$1(_ctx, _cache, $props, $setup, $data, $options) {
+  return (openBlock(), createElementBlock("div", {
+    class: "t__fluid__calendar__draggable",
+    style: normalizeStyle($options.stl)
+  }, [
+    renderSlot(_ctx.$slots, "default")
+  ], 4 /* STYLE */))
+}
+
 script$1.render = render$1;
-script$1.__file = "src/components/FluidCalendarNavigator.vue";
+script$1.__file = "src/components/FluidDraggable.vue";
 
 // import '../styles.css'
 
 var script = {
   name: 'FluidCalendar',
   components: {
-    FluidCalendarBooking: script$3,
-    FluidCalendarScroller: script$2,
-    FluidCalendarNavigator: script$1,
+    FluidCalendarBooking: script$4,
+    FluidCalendarScroller: script$3,
+    FluidCalendarNavigator: script$2,
+    FluidDraggable: script$1,
   },
   props: {
     lang: {
@@ -6790,6 +6919,9 @@ var script = {
   emits: ['updateDate', 'updateRange'],
   data() {
     return {
+      moveY: 0,
+      mouseMoveStartPoint: 0,
+      mouseMoveListener: null,
       locale: null,
       collisions: [],
       dragData: null,
@@ -6978,6 +7110,9 @@ var script = {
     },
   },
   methods: {
+    dragStart(event) {
+      console.log('dragStart =< ', event);
+    },
     reset() {
       this.fixtures.bookables = [];
       this.fixtures.bookings = [];
@@ -7002,25 +7137,64 @@ var script = {
       if (data.collision) {
         this.addCollision(data.collision.id);
         document.body.style.cursor = 'not-allowed';
+      } else if (data.booking) {
+        // console.log('Click booking ', event, data)
+        this.mouseMoveStartPoint = { x: event.clientX, y: event.clientY };
+        this.mouseMoveListener = (event) => {
+          this.move(event, data.booking);
+        };
+        document.addEventListener('mousemove', this.mouseMoveListener);
+        document.addEventListener('mouseup', this.endMove);
+        return
+        // document.addEventListener('mouseup', this.endDrag)
       } else {
         this.dragData = [data];
         document.body.style.cursor = 'ew-resize';
       }
 
-      // event.dataTransfer.setData('application/json', JSON.stringify(data))
       document.body.style.userSelect = 'none';
       document.addEventListener('mousemove', this.drag);
       document.addEventListener('mouseup', this.endDrag);
-      // console.log('Point => ', data)
-      // const collision = this.pointHasCollision(point)
-      // console.log('POINT TO DATA => ', this.pointToData(selection))
-      // this.selection = data
     },
-    // startDrag(event) {
-    //   document.body.style.userSelect = 'none'
-    //   document.addEventListener('mousemove', this.drag)
-    //   document.addEventListener('mouseup', this.endDrag)
-    // },
+    move(event, booking) {
+      const x = event.clientX - this.mouseMoveStartPoint.x;
+      const y = event.clientY - this.mouseMoveStartPoint.y;
+      const m = x / this.widthByMinute;
+      const diff = {
+        x: x,
+        y: y,
+        xInMinutes: m,
+      };
+      const newBooking = {
+        ...booking,
+        start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
+        end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
+        diff: diff,
+      };
+      const ghost = {
+        ...booking,
+        id: booking.id + '-ghost',
+        start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
+        end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
+        bookableId: this.yToBookable(event.clientY)?.id,
+        ghost: true,
+      };
+      const ghosti = this.fixtures.bookings.findIndex(
+        (f) => f.id === booking.id + '-ghost',
+      );
+      if (ghosti < 0) {
+        console.log('Push ?', ghosti);
+        this.fixtures.bookings.push(ghost);
+      } else {
+        this.fixtures.bookings.splice(ghosti, 1, ghost);
+      }
+      const i = this.fixtures.bookings.findIndex((f) => f.id === booking.id);
+      this.fixtures.bookings.splice(i, 1, newBooking);
+    },
+    endMove(event) {
+      document.removeEventListener('mousemove', this.mouseMoveListener);
+      document.removeEventListener('mouseup', this.endMove);
+    },
     drag(event) {
       this.dragData;
       const point = {
@@ -7135,11 +7309,11 @@ var script = {
     format(date) {
       return dayjs(date).format('DD MMMM')
     },
-    bookableToY(bookableId) {
+    bookableToY(bookableId, diffY = 0) {
       const bookableIndex = this.filteredBookables.findIndex(
         (f) => f.id === bookableId,
       );
-      return (bookableIndex + 1) * this.rowHeight
+      return (bookableIndex + 1) * this.rowHeight + diffY
     },
     pointToData({ x, y }) {
       const top =
@@ -7158,9 +7332,29 @@ var script = {
           // y: this.bookableToY(this.yToBookable(top).id),
         }
       }
-      // const booking = this._bookings.find(f => {
-      //   return f.bookableId === bookable.id &&
-      // })
+
+      const clickOnBooking = this._bookings.find((f) => {
+        const d = dayjs(date);
+        const start = dayjs(f.start_at);
+        const end = dayjs(f.end_at);
+        const checkDate =
+          (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) &&
+          (d.isBefore(end, 'minute') || d.isSame(end, 'minute'));
+        return f.bookableId === bookable.id && checkDate
+      });
+
+      if (clickOnBooking) {
+        return {
+          date: date,
+          bookable: bookable,
+          x: this.dateToX(date),
+          y: this.bookableToY(this.yToBookable(top).id),
+          booking: clickOnBooking,
+        }
+      }
+
+      // console.log('clickOnBooking => ', clickOnBooking?.id)
+
       const collision = this._bookings.find((f) => {
         return (
           f.bookableId === bookable.id &&
@@ -7262,8 +7456,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_FluidCalendarNavigator = resolveComponent("FluidCalendarNavigator");
   const _component_FluidCalendarScroller = resolveComponent("FluidCalendarScroller");
   const _component_FluidCalendarBooking = resolveComponent("FluidCalendarBooking");
+  const _component_FluidDraggable = resolveComponent("FluidDraggable");
 
   return (openBlock(), createElementBlock(Fragment, null, [
+    createTextVNode(toDisplayString($data.dragData) + " ", 1 /* TEXT */),
     ($data.displayFR)
       ? (openBlock(), createElementBlock("div", _hoisted_1, [
           ($options._bookings)
@@ -7380,25 +7576,31 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             style: normalizeStyle({ transform: `translateY(${$data.positionY}px)` })
           }, [
             (openBlock(true), createElementBlock(Fragment, null, renderList($options.visibleBookings, (booking) => {
-              return (openBlock(), createBlock(_component_FluidCalendarBooking, {
+              return (openBlock(), createBlock(_component_FluidDraggable, {
                 key: booking.id,
-                booking: booking,
-                widthByMinute: $options.widthByMinute,
-                rowHeight: $data.rowHeight,
-                collisions: $data.collisions,
-                y: $options.bookableToY(booking.bookableId),
+                y: $options.bookableToY(booking.bookableId, booking.diff?.y),
                 x: $options.dateToX(booking.start_at)
               }, {
                 default: withCtx(() => [
-                  (_ctx.$slots.booking)
-                    ? renderSlot(_ctx.$slots, "booking", {
-                        key: 0,
-                        booking: booking
-                      })
-                    : (openBlock(), createElementBlock("span", _hoisted_11, toDisplayString(booking.label), 1 /* TEXT */))
+                  createVNode(_component_FluidCalendarBooking, {
+                    booking: booking,
+                    widthByMinute: $options.widthByMinute,
+                    rowHeight: $data.rowHeight,
+                    collisions: $data.collisions
+                  }, {
+                    default: withCtx(() => [
+                      (_ctx.$slots.booking)
+                        ? renderSlot(_ctx.$slots, "booking", {
+                            key: 0,
+                            booking: booking
+                          })
+                        : (openBlock(), createElementBlock("span", _hoisted_11, toDisplayString(booking.id) + " " + toDisplayString(booking.label), 1 /* TEXT */))
+                    ]),
+                    _: 2 /* DYNAMIC */
+                  }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions"])
                 ]),
                 _: 2 /* DYNAMIC */
-              }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "y", "x"]))
+              }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["y", "x"]))
             }), 128 /* KEYED_FRAGMENT */))
           ], 4 /* STYLE */),
           (openBlock(), createElementBlock("svg", {

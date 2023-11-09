@@ -276,6 +276,12 @@
   // cursor: pointer;
   position: absolute;
   width: 4rem;
+  z-index: 2;
+}
+.t__fluid__calendar__booking.--ghost {
+  pointer-events: none;
+  opacity: 0.25;
+  z-index: 1;
 }
 
 .t__fluid__calendar__selection {
@@ -440,6 +446,16 @@
 }
 .t__fluid__calendar__navigate__btn.--grab:active {
   cursor: grabbing;
+}
+
+.t__fluid__calendar__booking__resize {
+  all: unset;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  cursor: ew-resize;
+  width: 1rem;
 }
 
 @keyframes shake {

@@ -280,6 +280,13 @@
   all: unset;
   position: absolute;
   width: 4rem;
+  z-index: 2;
+}
+
+.t__fluid__calendar__booking.--ghost {
+  pointer-events: none;
+  opacity: 0.25;
+  z-index: 1;
 }
 
 .t__fluid__calendar__selection {
@@ -319,9 +326,6 @@
   box-sizing: border-box;
   max-width: 100%;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .t__fluid__calendar__booking__label {
@@ -463,6 +467,16 @@
 
 .t__fluid__calendar__navigate__btn.--grab:active {
   cursor: grabbing;
+}
+
+.t__fluid__calendar__booking__resize {
+  all: unset;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  cursor: ew-resize;
+  width: 1rem;
 }
 
 @keyframes shake {

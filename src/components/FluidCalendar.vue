@@ -526,13 +526,22 @@ export default {
         diff: diff,
       }
       const ghost = {
-        id: booking.id + '-ghost',
         ...booking,
+        id: booking.id + '-ghost',
         start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
         end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
         bookableId: this.yToBookable(event.clientY)?.id,
+        ghost: true,
       }
-
+      const ghosti = this.fixtures.bookings.findIndex(
+        (f) => f.id === booking.id + '-ghost',
+      )
+      if (ghosti < 0) {
+        console.log('Push ?', ghosti)
+        this.fixtures.bookings.push(ghost)
+      } else {
+        this.fixtures.bookings.splice(ghosti, 1, ghost)
+      }
       const i = this.fixtures.bookings.findIndex((f) => f.id === booking.id)
       this.fixtures.bookings.splice(i, 1, newBooking)
     },

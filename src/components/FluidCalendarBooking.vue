@@ -49,6 +49,7 @@ export default {
     clss() {
       const clss = []
       if (this.collisions.includes(this.booking.id)) clss.push('--collision')
+      if (this.booking.ghost) clss.push('--ghost')
       return clss
     },
     stl() {
@@ -89,14 +90,3 @@ export default {
 }
 </script>
 
-<style>
-.t__fluid__calendar__booking__resize {
-  all: unset;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  cursor: ew-resize;
-  width: 1rem;
-}
-</style>
