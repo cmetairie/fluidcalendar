@@ -48,9 +48,9 @@
   <div
     class="t__fluid__calendar"
     :style="{ height: Math.min(fullHeight, height) + 'px' }"
+    ref="fluidCalendar"
     :class="{ '--debug': debug }"
   >
-    <div class="t__fluid__calendar__area" ref="fluidCalendar"></div>
     <div class="t__fluid__calendar__bookables" ref="bookables">
       <div
         class="t__fluid__calendar__bookables__header"
@@ -443,6 +443,7 @@ export default {
         const date = dayjs(start).add(i, 'day').format('iso')
         const cell = {
           date: date,
+          short: dayjs(start).add(i, 'day').format(),
         }
         cells.push(cell)
       }

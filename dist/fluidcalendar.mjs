@@ -7225,37 +7225,33 @@ const _hoisted_6 = {
   class: "t__debugg"
 };
 const _hoisted_7 = {
-  class: "t__fluid__calendar__area",
-  ref: "fluidCalendar"
-};
-const _hoisted_8 = {
   class: "t__fluid__calendar__bookables",
   ref: "bookables"
 };
-const _hoisted_9 = /*#__PURE__*/createElementVNode("span", null, "bookables", -1 /* HOISTED */);
-const _hoisted_10 = [
-  _hoisted_9
+const _hoisted_8 = /*#__PURE__*/createElementVNode("span", null, "bookables", -1 /* HOISTED */);
+const _hoisted_9 = [
+  _hoisted_8
 ];
-const _hoisted_11 = { key: 1 };
-const _hoisted_12 = {
+const _hoisted_10 = { key: 1 };
+const _hoisted_11 = {
   key: 1,
   class: "t__fluid__calendar__booking__label"
 };
-const _hoisted_13 = ["width", "height"];
-const _hoisted_14 = ["d"];
-const _hoisted_15 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_12 = ["width", "height"];
+const _hoisted_13 = ["d"];
+const _hoisted_14 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_16 = { key: 1 };
-const _hoisted_17 = {
+const _hoisted_15 = { key: 1 };
+const _hoisted_16 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_18 = ["width", "height"];
-const _hoisted_19 = ["d"];
-const _hoisted_20 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_17 = ["width", "height"];
+const _hoisted_18 = ["d"];
+const _hoisted_19 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#grid)"
@@ -7308,14 +7304,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     createCommentVNode(" {{ dragData }} "),
     createElementVNode("div", {
       class: normalizeClass(["t__fluid__calendar", { '--debug': $props.debug }]),
-      style: normalizeStyle({ height: Math.min($options.fullHeight, $data.height) + 'px' })
+      style: normalizeStyle({ height: Math.min($options.fullHeight, $data.height) + 'px' }),
+      ref: "fluidCalendar"
     }, [
-      createElementVNode("div", _hoisted_7, null, 512 /* NEED_PATCH */),
-      createElementVNode("div", _hoisted_8, [
+      createElementVNode("div", _hoisted_7, [
         createElementVNode("div", {
           class: "t__fluid__calendar__bookables__header",
           style: normalizeStyle({ height: $data.rowHeight + 'px' })
-        }, [..._hoisted_10], 4 /* STYLE */),
+        }, [..._hoisted_9], 4 /* STYLE */),
         createElementVNode("div", {
           class: "t__fluid__calendar__bookables__inner",
           style: normalizeStyle({
@@ -7333,7 +7329,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                     key: 0,
                     bookable: bookable
                   })
-                : (openBlock(), createElementBlock("span", _hoisted_11, toDisplayString(bookable.label), 1 /* TEXT */))
+                : (openBlock(), createElementBlock("span", _hoisted_10, toDisplayString(bookable.label), 1 /* TEXT */))
             ], 4 /* STYLE */))
           }), 128 /* KEYED_FRAGMENT */))
         ], 4 /* STYLE */)
@@ -7398,7 +7394,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                         key: 0,
                         booking: booking
                       })
-                    : (openBlock(), createElementBlock("span", _hoisted_12, toDisplayString(booking.label), 1 /* TEXT */))
+                    : (openBlock(), createElementBlock("span", _hoisted_11, toDisplayString(booking.label), 1 /* TEXT */))
                 ]),
                 _: 2 /* DYNAMIC */
               }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "y", "x"]))
@@ -7421,10 +7417,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                   fill: "none",
                   stroke: "currentColor",
                   "stroke-width": "1"
-                }, null, 8 /* PROPS */, _hoisted_14)
-              ], 8 /* PROPS */, _hoisted_13)
+                }, null, 8 /* PROPS */, _hoisted_13)
+              ], 8 /* PROPS */, _hoisted_12)
             ]),
-            _hoisted_15
+            _hoisted_14
           ], 4 /* STYLE */)),
           createElementVNode("div", {
             class: "t__fluid__calendar__header",
@@ -7444,7 +7440,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                       key: 0,
                       date: cell
                     })
-                  : (openBlock(), createElementBlock("span", _hoisted_16, toDisplayString($options.format(cell.date)), 1 /* TEXT */))
+                  : (openBlock(), createElementBlock("span", _hoisted_15, toDisplayString($options.format(cell.date)), 1 /* TEXT */))
               ], 4 /* STYLE */))
             }), 128 /* KEYED_FRAGMENT */))
           ], 4 /* STYLE */),
@@ -7455,7 +7451,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             transform: `translateY(${$data.positionY}px)`,
           })
           }, [
-            (openBlock(), createElementBlock("svg", _hoisted_17, [
+            (openBlock(), createElementBlock("svg", _hoisted_16, [
               createElementVNode("defs", null, [
                 createElementVNode("pattern", {
                   id: "grid",
@@ -7468,10 +7464,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                     fill: "none",
                     stroke: "currentColor",
                     "stroke-width": "1"
-                  }, null, 8 /* PROPS */, _hoisted_19)
-                ], 8 /* PROPS */, _hoisted_18)
+                  }, null, 8 /* PROPS */, _hoisted_18)
+                ], 8 /* PROPS */, _hoisted_17)
               ]),
-              _hoisted_20
+              _hoisted_19
             ]))
           ], 4 /* STYLE */),
           createCommentVNode(" </div> ")
