@@ -1,5 +1,6 @@
 <template>
-  <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
+  <div class="t__fluid__calendar__booking" :style="stl" :class="clss">
+    <!-- <button>m</button> -->
     <div class="t__fluid__calendar__booking__inner">
       <!-- {{ $slots.bookable }} -->
       <slot />
@@ -8,7 +9,13 @@
         <span>{{ format(booking.end_at) }}</span>
       </span> -->
     </div>
-  </button>
+    <button
+      class="t__fluid__calendar__booking__resize"
+      @mousedown.stop="startSize"
+    >
+      <!-- {{ diff }} -->
+    </button>
+  </div>
 </template>
 
 <script>
@@ -40,6 +47,12 @@ export default {
       default: () => [],
     },
   },
+  data() {
+    return {
+      baseX: 0,
+      diff: 0,
+    }
+  },
   computed: {
     clss() {
       const clss = []
@@ -58,13 +71,41 @@ export default {
         dayjs(this.booking.start_at),
         'minute',
       )
-      return diff * this.widthByMinute
+      return diff * this.widthByMinute + this.diff
     },
   },
   methods: {
     format(date) {
       return dayjs(date).format('DD MMM')
     },
+    click() {
+      console.log('Click', this.booking)
+    },
+    startSize(event) {
+      this.baseX = event.clientX
+      document.addEventListener('mousemove', this.size)
+      document.addEventListener('mouseup', this.endSize)
+    },
+    size(event) {
+      this.diff = event.clientX - this.baseX
+    },
+    endSize(event) {
+      this.baseX = event.clientX
+      document.removeEventListener('mousemove', this.size)
+      document.removeEventListener('mouseup', this.endSize)
+    },
   },
 }
 </script>
+
+<style>
+.t__fluid__calendar__booking__resize {
+  all: unset;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  cursor: ew-resize;
+  width: 1rem;
+}
+</style>

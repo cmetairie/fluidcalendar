@@ -1,4 +1,5 @@
 <template>
+  {{ dragData }}
   <div v-if="displayFR" class="t__frame__rate">
     <span v-if="_bookings">{{ _bookings.length }} rézas</span>
     <br />
@@ -479,6 +480,8 @@ export default {
       if (data.collision) {
         this.addCollision(data.collision.id)
         document.body.style.cursor = 'not-allowed'
+      } else if (data.booking) {
+        console.log('Click booking ', data)
       } else {
         this.dragData = [data]
         document.body.style.cursor = 'ew-resize'
@@ -635,6 +638,16 @@ export default {
           (d.isBefore(end, 'minute') || d.isSame(end, 'minute'))
         return f.bookableId === bookable.id && checkDate
       })
+
+      if (clickOnBooking) {
+        return {
+          date: date,
+          bookable: bookable,
+          x: this.dateToX(date),
+          y: this.bookableToY(this.yToBookable(top).id),
+          booking: clickOnBooking,
+        }
+      }
 
       // console.log('clickOnBooking => ', clickOnBooking?.id)
 
