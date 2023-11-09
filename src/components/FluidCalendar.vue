@@ -123,7 +123,7 @@
           >
             <slot v-if="$slots.booking" name="booking" :booking="booking" />
             <span class="t__fluid__calendar__booking__label" v-else>
-              {{ booking.label }}
+              {{ booking.id }} {{ booking.label }}
             </span>
           </FluidCalendarBooking>
         </div>
@@ -484,20 +484,10 @@ export default {
         document.body.style.cursor = 'ew-resize'
       }
 
-      // event.dataTransfer.setData('application/json', JSON.stringify(data))
       document.body.style.userSelect = 'none'
       document.addEventListener('mousemove', this.drag)
       document.addEventListener('mouseup', this.endDrag)
-      // console.log('Point => ', data)
-      // const collision = this.pointHasCollision(point)
-      // console.log('POINT TO DATA => ', this.pointToData(selection))
-      // this.selection = data
     },
-    // startDrag(event) {
-    //   document.body.style.userSelect = 'none'
-    //   document.addEventListener('mousemove', this.drag)
-    //   document.addEventListener('mouseup', this.endDrag)
-    // },
     drag(event) {
       const first = this.dragData
       const point = {
@@ -635,9 +625,19 @@ export default {
           // y: this.bookableToY(this.yToBookable(top).id),
         }
       }
-      // const booking = this._bookings.find(f => {
-      //   return f.bookableId === bookable.id &&
-      // })
+
+      const clickOnBooking = this._bookings.find((f) => {
+        const d = dayjs(date)
+        const start = dayjs(f.start_at)
+        const end = dayjs(f.end_at)
+        const checkDate =
+          (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) &&
+          (d.isBefore(end, 'minute') || d.isSame(end, 'minute'))
+        return f.bookableId === bookable.id && checkDate
+      })
+
+      // console.log('clickOnBooking => ', clickOnBooking?.id)
+
       const collision = this._bookings.find((f) => {
         return (
           f.bookableId === bookable.id &&

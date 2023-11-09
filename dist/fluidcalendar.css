@@ -319,6 +319,9 @@
   box-sizing: border-box;
   max-width: 100%;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .t__fluid__calendar__booking__label {

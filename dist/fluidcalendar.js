@@ -6968,6 +6968,7 @@ var script = {
         const date = dayjs(start).add(i, 'day').format('iso');
         const cell = {
           date: date,
+          short: dayjs(start).add(i, 'day').format(),
         };
         cells.push(cell);
       }

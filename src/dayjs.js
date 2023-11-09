@@ -33,50 +33,120 @@ export function dayjs(s) {
     return this // For method chaining
   }
 
-  function isSame(otherDate, unit = 'day') {
+  function isSame(d, unit = 'day') {
     if (unit === 'day') {
-      return date.getTime() === otherDate.date.getTime()
+      return (
+        date.getDate() === d.date.getDate() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getFullYear() === d.date.getFullYear()
+      )
     } else if (unit === 'month') {
       return (
-        date.getMonth() === otherDate.date.getMonth() &&
-        date.getFullYear() === otherDate.date.getFullYear()
+        date.getMonth() === d.date.getMonth() &&
+        date.getFullYear() === d.date.getFullYear()
       )
     } else if (unit === 'year') {
-      return date.getFullYear() === otherDate.date.getFullYear()
+      return date.getFullYear() === d.date.getFullYear()
+    } else if (unit === 'minute') {
+      return (
+        date.getDate() === d.date.getDate() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMinutes() === d.date.getMinutes() &&
+        date.getHours() === d.date.getHours()
+      )
     }
     return false // Invalid unit
   }
 
-  function isBefore(otherDate, unit = 'day') {
+  function isBefore(d, unit = 'day') {
     if (unit === 'day') {
-      return date.getTime() < otherDate.date.getTime()
+      return date.getTime() < d.date.getTime()
     } else if (unit === 'month') {
-      if (date.getFullYear() < otherDate.date.getFullYear()) return true
+      if (date.getFullYear() < d.date.getFullYear()) return true
       if (
-        date.getFullYear() === otherDate.date.getFullYear() &&
-        date.getMonth() < otherDate.date.getMonth()
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() < d.date.getMonth()
       )
         return true
       return false
     } else if (unit === 'year') {
-      return date.getFullYear() < otherDate.date.getFullYear()
+      return date.getFullYear() < d.date.getFullYear()
+    } else if (unit === 'minute') {
+      if (date.getFullYear() < d.date.getFullYear()) return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() < d.date.getMonth()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() < d.date.getDate()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() === d.date.getDate() &&
+        date.getHours() < d.date.getHours()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() === d.date.getDate() &&
+        date.getHours() === d.date.getHours() &&
+        date.getMinutes() < d.date.getMinutes()
+      )
+        return true
+      return false
     }
     return false // Invalid unit
   }
 
-  function isAfter(otherDate, unit = 'day') {
+  function isAfter(d, unit = 'day') {
     if (unit === 'day') {
-      return date.getTime() > otherDate.date.getTime()
+      return date.getTime() > d.date.getTime()
     } else if (unit === 'month') {
-      if (date.getFullYear() > otherDate.date.getFullYear()) return true
+      if (date.getFullYear() > d.date.getFullYear()) return true
       if (
-        date.getFullYear() === otherDate.date.getFullYear() &&
-        date.getMonth() > otherDate.date.getMonth()
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() > d.date.getMonth()
       )
         return true
       return false
     } else if (unit === 'year') {
-      return date.getFullYear() > otherDate.date.getFullYear()
+      return date.getFullYear() > d.date.getFullYear()
+    } else if (unit === 'minute') {
+      if (date.getFullYear() > d.date.getFullYear()) return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() > d.date.getMonth()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() > d.date.getDate()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() === d.date.getDate() &&
+        date.getHours() > d.date.getHours()
+      )
+        return true
+      if (
+        date.getFullYear() === d.date.getFullYear() &&
+        date.getMonth() === d.date.getMonth() &&
+        date.getDate() === d.date.getDate() &&
+        date.getHours() === d.date.getHours() &&
+        date.getMinutes() > d.date.getMinutes()
+      )
+        return true
+      return false
     }
     return false // Invalid unit
   }
