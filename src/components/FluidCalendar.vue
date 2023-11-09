@@ -112,21 +112,24 @@
           class="t__fluid__calendar__bookings"
           :style="{ transform: `translateY(${positionY}px)` }"
         >
-          <FluidCalendarBooking
+          <FluidDraggable
             v-for="booking of visibleBookings"
             :key="booking.id"
-            :booking="booking"
-            :widthByMinute="widthByMinute"
-            :rowHeight="rowHeight"
-            :collisions="collisions"
-            :y="bookableToY(booking.bookableId)"
+            :y="bookableToY(booking.bookableId, booking.diff?.y)"
             :x="dateToX(booking.start_at)"
           >
-            <slot v-if="$slots.booking" name="booking" :booking="booking" />
-            <span class="t__fluid__calendar__booking__label" v-else>
-              {{ booking.id }} {{ booking.label }}
-            </span>
-          </FluidCalendarBooking>
+            <FluidCalendarBooking
+              :booking="booking"
+              :widthByMinute="widthByMinute"
+              :rowHeight="rowHeight"
+              :collisions="collisions"
+            >
+              <slot v-if="$slots.booking" name="booking" :booking="booking" />
+              <span class="t__fluid__calendar__booking__label" v-else>
+                {{ booking.id }} {{ booking.label }}
+              </span>
+            </FluidCalendarBooking>
+          </FluidDraggable>
         </div>
         <svg
           class="t__fluid__calendar__header__grid"
@@ -218,6 +221,7 @@ import gsap from 'gsap'
 import FluidCalendarBooking from './FluidCalendarBooking.vue'
 import FluidCalendarScroller from './FluidCalendarScroller.vue'
 import FluidCalendarNavigator from './FluidCalendarNavigator.vue'
+import FluidDraggable from './FluidDraggable.vue'
 
 import {
   generateBookables,
@@ -234,6 +238,7 @@ export default {
     FluidCalendarBooking,
     FluidCalendarScroller,
     FluidCalendarNavigator,
+    FluidDraggable,
   },
   props: {
     lang: {
@@ -260,6 +265,9 @@ export default {
   emits: ['updateDate', 'updateRange'],
   data() {
     return {
+      moveY: 0,
+      mouseMoveStartPoint: 0,
+      mouseMoveListener: null,
       locale: null,
       collisions: [],
       dragData: null,
@@ -456,6 +464,9 @@ export default {
     },
   },
   methods: {
+    dragStart(event) {
+      console.log('dragStart =< ', event)
+    },
     reset() {
       this.fixtures.bookables = []
       this.fixtures.bookings = []
@@ -481,7 +492,15 @@ export default {
         this.addCollision(data.collision.id)
         document.body.style.cursor = 'not-allowed'
       } else if (data.booking) {
-        console.log('Click booking ', data)
+        // console.log('Click booking ', event, data)
+        this.mouseMoveStartPoint = { x: event.clientX, y: event.clientY }
+        this.mouseMoveListener = (event) => {
+          this.move(event, data.booking)
+        }
+        document.addEventListener('mousemove', this.mouseMoveListener)
+        document.addEventListener('mouseup', this.endMove)
+        return
+        // document.addEventListener('mouseup', this.endDrag)
       } else {
         this.dragData = [data]
         document.body.style.cursor = 'ew-resize'
@@ -490,6 +509,36 @@ export default {
       document.body.style.userSelect = 'none'
       document.addEventListener('mousemove', this.drag)
       document.addEventListener('mouseup', this.endDrag)
+    },
+    move(event, booking) {
+      const x = event.clientX - this.mouseMoveStartPoint.x
+      const y = event.clientY - this.mouseMoveStartPoint.y
+      const m = x / this.widthByMinute
+      const diff = {
+        x: x,
+        y: y,
+        xInMinutes: m,
+      }
+      const newBooking = {
+        ...booking,
+        start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
+        end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
+        diff: diff,
+      }
+      const ghost = {
+        id: booking.id + '-ghost',
+        ...booking,
+        start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
+        end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
+        bookableId: this.yToBookable(event.clientY)?.id,
+      }
+
+      const i = this.fixtures.bookings.findIndex((f) => f.id === booking.id)
+      this.fixtures.bookings.splice(i, 1, newBooking)
+    },
+    endMove(event) {
+      document.removeEventListener('mousemove', this.mouseMoveListener)
+      document.removeEventListener('mouseup', this.endMove)
     },
     drag(event) {
       const first = this.dragData
@@ -605,11 +654,11 @@ export default {
     format(date) {
       return dayjs(date).format('DD MMMM')
     },
-    bookableToY(bookableId) {
+    bookableToY(bookableId, diffY = 0) {
       const bookableIndex = this.filteredBookables.findIndex(
         (f) => f.id === bookableId,
       )
-      return (bookableIndex + 1) * this.rowHeight
+      return (bookableIndex + 1) * this.rowHeight + diffY
     },
     pointToData({ x, y }) {
       const top =

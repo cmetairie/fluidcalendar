@@ -26,14 +26,6 @@ export default {
     booking: {
       type: Object,
     },
-    x: {
-      type: Number,
-      default: 0,
-    },
-    y: {
-      type: Number,
-      default: 0,
-    },
     widthByMinute: {
       type: Number,
       default: 0,
@@ -61,7 +53,6 @@ export default {
     },
     stl() {
       const stl = []
-      stl.push({ transform: `translate(${this.x}px, ${this.y}px)` })
       stl.push({ width: this.width + 'px' })
       stl.push({ height: this.rowHeight + 'px' })
       return stl
