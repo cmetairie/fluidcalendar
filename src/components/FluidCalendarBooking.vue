@@ -54,8 +54,8 @@ export default {
     },
     stl() {
       const stl = []
-      stl.push({ width: this.width + 'px' })
-      stl.push({ height: this.rowHeight + 'px' })
+      stl.push({ width: this.width - 4 + 'px' })
+      stl.push({ height: this.rowHeight - 4 + 'px' })
       return stl
     },
     width() {

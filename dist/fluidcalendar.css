@@ -45,6 +45,12 @@
   --color-focuslight-hover-dark: #bfe4ff;
 }
 
+[class^=t__fluid__],
+[class^=t__fluid__]::before,
+[class^=t__fluid__]::after {
+  box-sizing: border-box;
+}
+
 .t__frame__rate {
   color: white;
   position: fixed;
@@ -77,8 +83,6 @@
   display: grid;
   grid-template-columns: var(--bookables-width) calc(100% - var(--bookables-width));
   overflow: hidden;
-  color: var(--color-txt);
-  margin-top: var(--space);
   border-bottom: solid var(--color-border-m) 0.5px;
   border-left: solid var(--color-border-m) 0.5px;
 }
@@ -146,7 +150,6 @@
   position: relative;
   text-align: center;
   padding: 0 var(--space);
-  box-sizing: border-box;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -320,8 +323,7 @@
 
 .t__fluid__calendar__booking {
   display: flex;
-  padding: 3px;
-  box-sizing: border-box;
+  padding: 2px;
 }
 
 .t__fluid__calendar__booking.--collision .t__fluid__calendar__booking__inner {
@@ -338,7 +340,6 @@
   border: solid #b9dbff 2px;
   border-radius: var(--radius);
   padding: 0 calc(var(--space) * 0.75);
-  box-sizing: border-box;
   max-width: 100%;
   font-weight: 500;
 }
@@ -403,7 +404,7 @@
   left: 0;
   top: -2.2rem;
   height: 2.25rem;
-  width: 2.25rem;
+  width: 3.25rem;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   box-shadow: 0 0 1rem rgba(187, 194, 202, 0.25);
@@ -438,11 +439,6 @@
   width: var(--width-navigation-button);
 }
 
-.t__fluid__calendar__navigate__btn {
-  background: var(--color-title);
-  border-radius: var(--width-navigation-button);
-}
-
 .t__fluid__calendar__navigate__btn.--x {
   margin-top: 1px;
   height: calc(var(--width-navigation-button) - 2px);
@@ -469,7 +465,7 @@
   left: 0;
   top: -2.2rem;
   height: 2.25rem;
-  width: 2.25rem;
+  width: 3.25rem;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   box-shadow: 0 0 1rem rgba(187, 194, 202, 0.25);
@@ -492,6 +488,43 @@
   bottom: 0;
   cursor: ew-resize;
   width: 1rem;
+}
+
+.t__fluid__viewbar {
+  display: flex;
+  align-items: center;
+}
+
+.t__fluid__viewbar.--debug {
+  max-width: 80rem;
+  margin: var(--space) auto;
+}
+
+.t__fluid__viewbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--row-height);
+  border-top: solid var(--color-border-m) 0.5px;
+  border-right: solid var(--color-border-m) 0.5px;
+  border-left: solid var(--color-border-m) 0.5px;
+}
+
+.t__fluid__viewbar__date {
+  width: var(--bookables-width);
+  padding: 0 var(--space);
+  font-weight: 600;
+  color: var(--color-title);
+}
+.t__fluid__viewbar__date::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: var(--bookables-width);
+  bottom: 0;
+  width: 0.5px;
+  background: var(--color-border-m);
 }
 
 @keyframes shake {

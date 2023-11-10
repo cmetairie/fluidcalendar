@@ -1,37 +1,38 @@
 <template>
-  {{ dragData }}
-  <div v-if="displayFR" class="t__frame__rate">
-    <span v-if="_bookings">{{ _bookings.length }} rézas</span>
-    <br />
-    <span v-if="_bookables">{{ _bookables.length }} bookables</span>
-    <br />
-    {{ frameRate }} FPS
-  </div>
-  <!-- {{ collisions }} -->
-  <div v-if="debug" class="t__debugg">
-    <pre>{{
-      {
-        scroller,
-        zooming,
-        widthByMinute,
-        decalX,
-        height,
-        decalY,
-        positionX,
-        positionY,
-        translateX,
-        translateY,
-        width,
-        pointer,
-        pointerDate,
-        start: rangeX.start,
-        end: rangeX.end,
-        cellWidth,
-        // rangeY,
-      }
-    }}</pre>
-  </div>
-  <!-- <h2>{{ format(pointerDate) }}</h2>
+  <div class="t__fluid__calendar__wrapper">
+    <!-- {{ dragData }} -->
+    <div v-if="displayFR" class="t__frame__rate">
+      <span v-if="_bookings">{{ _bookings.length }} rézas</span>
+      <br />
+      <span v-if="_bookables">{{ _bookables.length }} bookables</span>
+      <br />
+      {{ frameRate }} FPS
+    </div>
+    <!-- {{ collisions }} -->
+    <div v-if="debug" class="t__debugg">
+      <pre>{{
+        {
+          scroller,
+          zooming,
+          widthByMinute,
+          decalX,
+          height,
+          decalY,
+          positionX,
+          positionY,
+          translateX,
+          translateY,
+          width,
+          pointer,
+          pointerDate,
+          start: rangeX.start,
+          end: rangeX.end,
+          cellWidth,
+          // rangeY,
+        }
+      }}</pre>
+    </div>
+    <!-- <h2>{{ format(pointerDate) }}</h2>
   <button @click="centerViewTo('2023-10-17')">2023-10-17</button>
   <button @click="generate">generate</button>
   <button @click="reset">reset</button>
@@ -45,146 +46,107 @@
     @mouseup="zooming = false"
   />
   <input type="range" min="20" max="100" v-model="rowHeight" step="1" /> -->
-  <!-- {{ dragData }} -->
-  <div
-    class="t__fluid__calendar"
-    :style="{ height: Math.min(fullHeight, height) + 'px' }"
-    ref="fluidCalendar"
-    :class="{ '--debug': debug }"
-  >
-    <div class="t__fluid__calendar__bookables" ref="bookables">
-      <div
-        class="t__fluid__calendar__bookables__header"
-        :style="{ height: rowHeight + 'px' }"
-      >
-        <span>bookables</span>
-      </div>
-      <div
-        class="t__fluid__calendar__bookables__inner"
-        :style="{
-          transform: `translateY(${positionY}px) translateY(${translateY}px)`,
-        }"
-      >
-        <div
-          v-for="bookable of rangeY.rows"
-          :key="bookable.id"
-          :style="{ height: rowHeight + 'px' }"
-          class="t__fluid__calendar__bookable"
-        >
-          <slot v-if="$slots.bookable" name="bookable" :bookable="bookable" />
-          <span v-else>{{ bookable.label }}</span>
-        </div>
-      </div>
-    </div>
-    <FluidCalendarNavigator :faking="fakeMove" @increment="navIncrement" x />
-    <FluidCalendarScroller
-      y
-      @position="navPosition"
-      :total="fullHeight - rowHeight"
-      :position="positionY"
-      :height="height - rowHeight"
-      :style="{ top: rowHeight + 'px' }"
+    <!-- {{ dragData }} -->
+    <FluidViewbar
+      :rangeX="rangeX"
+      :rangeY="rangeY"
+      :date="pointerDate"
+      :debug="debug"
     />
-
-    <!-- <button class="t__fluid__calendar__prev" @click="prev"></button> -->
-    <div class="t__fluid__calendar__content" @mousedown="mousedown">
-      <!-- <span class="t__fluid__calendar__pointer"></span> -->
-      <span
-        v-if="dragData"
-        :style="{
-          top: dragData[0].y + 'px',
-          left: dragData[0].x + 'px',
-          width: `${dragData.length * widthByMinute * 60 * 24}px`,
-          transform: `translateY(${positionY}px) translateX(${translateX}px)`,
-          height: `${rowHeight}px`,
-        }"
-        class="t__fluid__calendar__selection"
-      ></span>
-      <div
-        class="t__fluid__calendar__canva"
-        :style="{
-          transform: `translateX(${translateX}px)`,
-          width: width + 'px',
-        }"
-      >
-        <!-- <div class="t__fluid__calendar__content__translate"> -->
+    <div
+      class="t__fluid__calendar"
+      :style="{ height: Math.min(fullHeight, height) + 'px' }"
+      ref="fluidCalendar"
+      :class="{ '--debug': debug }"
+    >
+      <div class="t__fluid__calendar__bookables" ref="bookables">
         <div
-          class="t__fluid__calendar__bookings"
-          :style="{ transform: `translateY(${positionY}px)` }"
-        >
-          <FluidDraggable
-            v-for="booking of visibleBookings"
-            :key="booking.id"
-            :y="bookableToY(booking.bookableId, booking.diff?.y)"
-            :x="dateToX(booking.start_at)"
-            :ghost="booking.ghost"
-          >
-            <FluidCalendarBooking
-              :booking="booking"
-              :widthByMinute="widthByMinute"
-              :rowHeight="rowHeight"
-              :collisions="collisions"
-            >
-              <slot v-if="$slots.booking" name="booking" :booking="booking" />
-              <span class="t__fluid__calendar__booking__label" v-else>
-                {{ booking.id }} {{ booking.label }}
-              </span>
-            </FluidCalendarBooking>
-          </FluidDraggable>
-        </div>
-        <svg
-          class="t__fluid__calendar__header__grid"
-          xmlns="http://www.w3.org/2000/svg"
+          class="t__fluid__calendar__bookables__header"
           :style="{ height: rowHeight + 'px' }"
         >
-          <defs>
-            <pattern
-              id="header_grid"
-              :width="cellWidth"
-              :height="rowHeight"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                :d="`M ${cellWidth} 0 L 0 0 0 ${rowHeight}`"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#header_grid)" />
-        </svg>
+          <span>bookables</span>
+        </div>
         <div
-          class="t__fluid__calendar__header"
+          class="t__fluid__calendar__bookables__inner"
           :style="{
-            width: width + 'px',
-            height: rowHeight + 'px',
+            transform: `translateY(${positionY}px) translateY(${translateY}px)`,
           }"
         >
           <div
-            class="t__fluid__calendar__header__cell"
-            v-for="cell of rangeX.cells"
-            :key="cell.date"
-            :style="{ width: `${cellWidth}px` }"
+            v-for="bookable of rangeY.rows"
+            :key="bookable.id"
+            :style="{ height: rowHeight + 'px' }"
+            class="t__fluid__calendar__bookable"
           >
-            <slot v-if="$slots.date" name="date" :date="cell" />
-            <span v-else>{{ format(cell.date) }}</span>
+            <slot v-if="$slots.bookable" name="bookable" :bookable="bookable" />
+            <span v-else>{{ bookable.label }}</span>
           </div>
         </div>
-        <div
-          class="t__fluid__calendar__inner"
+      </div>
+      <FluidCalendarNavigator :faking="fakeMove" @increment="navIncrement" x />
+      <FluidCalendarScroller
+        y
+        @position="navPosition"
+        :total="fullHeight - rowHeight"
+        :position="positionY"
+        :height="height - rowHeight"
+        :style="{ top: rowHeight + 'px' }"
+      />
+
+      <!-- <button class="t__fluid__calendar__prev" @click="prev"></button> -->
+      <div class="t__fluid__calendar__content" @mousedown="mousedown">
+        <!-- <span class="t__fluid__calendar__pointer"></span> -->
+        <span
+          v-if="dragData"
           :style="{
+            top: dragData[0].y + 'px',
+            left: dragData[0].x + 'px',
+            width: `${dragData.length * widthByMinute * 60 * 24}px`,
+            transform: `translateY(${positionY}px) translateX(${translateX}px)`,
+            height: `${rowHeight}px`,
+          }"
+          class="t__fluid__calendar__selection"
+        ></span>
+        <div
+          class="t__fluid__calendar__canva"
+          :style="{
+            transform: `translateX(${translateX}px)`,
             width: width + 'px',
-            transform: `translateY(${positionY}px)`,
           }"
         >
+          <!-- <div class="t__fluid__calendar__content__translate"> -->
+          <div
+            class="t__fluid__calendar__bookings"
+            :style="{ transform: `translateY(${positionY}px)` }"
+          >
+            <FluidDraggable
+              v-for="booking of visibleBookings"
+              :key="booking.id"
+              :y="bookableToY(booking.bookableId, booking.diff?.y)"
+              :x="dateToX(booking.start_at)"
+              :ghost="booking.ghost"
+            >
+              <FluidCalendarBooking
+                :booking="booking"
+                :widthByMinute="widthByMinute"
+                :rowHeight="rowHeight"
+                :collisions="collisions"
+              >
+                <slot v-if="$slots.booking" name="booking" :booking="booking" />
+                <span class="t__fluid__calendar__booking__label" v-else>
+                  {{ booking.id }} {{ booking.label }}
+                </span>
+              </FluidCalendarBooking>
+            </FluidDraggable>
+          </div>
           <svg
-            class="t__fluid__calendar__grid"
+            class="t__fluid__calendar__header__grid"
             xmlns="http://www.w3.org/2000/svg"
+            :style="{ height: rowHeight + 'px' }"
           >
             <defs>
               <pattern
-                id="grid"
+                id="header_grid"
                 :width="cellWidth"
                 :height="rowHeight"
                 patternUnits="userSpaceOnUse"
@@ -197,18 +159,64 @@
                 />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
+            <rect width="100%" height="100%" fill="url(#header_grid)" />
           </svg>
+          <div
+            class="t__fluid__calendar__header"
+            :style="{
+              width: width + 'px',
+              height: rowHeight + 'px',
+            }"
+          >
+            <div
+              class="t__fluid__calendar__header__cell"
+              v-for="cell of rangeX.cells"
+              :key="cell.date"
+              :style="{ width: `${cellWidth}px` }"
+            >
+              <slot v-if="$slots.date" name="date" :date="cell" />
+              <span v-else>{{ format(cell.date) }}</span>
+            </div>
+          </div>
+          <div
+            class="t__fluid__calendar__inner"
+            :style="{
+              width: width + 'px',
+              transform: `translateY(${positionY}px)`,
+            }"
+          >
+            <svg
+              class="t__fluid__calendar__grid"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <pattern
+                  id="grid"
+                  :width="cellWidth"
+                  :height="rowHeight"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <path
+                    :d="`M ${cellWidth} 0 L 0 0 0 ${rowHeight}`"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1"
+                  />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+          </div>
+          <!-- </div> -->
         </div>
-        <!-- </div> -->
       </div>
-    </div>
-    <!-- <button class="t__fluid__calendar__next" @click="next"></button> -->
-    <!-- <div class="t__fluid__calendar__scrollbar">
+      <!-- <button class="t__fluid__calendar__next" @click="next"></button> -->
+      <!-- <div class="t__fluid__calendar__scrollbar">
       <div class="t__fluid__calendar__scroll__area" ref="scroll_area">
         <button class="t__fluid__calendar__scroller"></button>
       </div>
     </div> -->
+    </div>
   </div>
 </template>
 
@@ -223,6 +231,7 @@ import FluidCalendarBooking from './FluidCalendarBooking.vue'
 import FluidCalendarScroller from './FluidCalendarScroller.vue'
 import FluidCalendarNavigator from './FluidCalendarNavigator.vue'
 import FluidDraggable from './FluidDraggable.vue'
+import FluidViewbar from './FluidViewbar.vue'
 
 import {
   generateBookables,
@@ -240,6 +249,7 @@ export default {
     FluidCalendarScroller,
     FluidCalendarNavigator,
     FluidDraggable,
+    FluidViewbar,
   },
   props: {
     lang: {
@@ -275,8 +285,8 @@ export default {
       selection: {},
       displayFR: true,
       // debug: false,
-      rangeDays: 8,
-      threshold: 2,
+      // rangeDays: 4,
+      // threshold: 2,
       rowHeight: 40,
       moment: new Date(),
       pointer: 0,
@@ -297,6 +307,9 @@ export default {
   },
   async mounted() {
     // this.loadLocale(this.lang)
+    const root = document.documentElement
+    root.style.setProperty('--row-height', `${this.rowHeight}px`)
+
     if (this.displayFR) {
       this.updateFrameRate()
     }
@@ -360,6 +373,13 @@ export default {
     },
   },
   computed: {
+    threshold() {
+      return Math.floor(this.rangeDays / 6)
+    },
+    rangeDays() {
+      const width = screen.width
+      return Math.floor(width / 200)
+    },
     _bookings() {
       return this.bookings.concat(this.fixtures.bookings)
     },
@@ -407,7 +427,7 @@ export default {
     },
     decalX() {
       const d = this.positionX / this.widthByMinute / 60 / 24
-      return ((d - 4 + this.rangeDays) / this.threshold) | 0
+      return ((d + this.threshold) / this.threshold) | 0
     },
     width() {
       return this.cellWidth * (this.rangeDays * 2 + 1)
@@ -465,9 +485,6 @@ export default {
     },
   },
   methods: {
-    dragStart(event) {
-      console.log('dragStart =< ', event)
-    },
     reset() {
       this.fixtures.bookables = []
       this.fixtures.bookings = []
@@ -483,6 +500,7 @@ export default {
       this.positionY = 0
     },
     mousedown(event) {
+      if (event.button != 0) return
       this.dragData = null
       const point = {
         x: event.clientX,
@@ -493,6 +511,8 @@ export default {
         this.addCollision(data.collision.id)
         document.body.style.cursor = 'not-allowed'
       } else if (data.booking) {
+        document.removeEventListener('mousemove', this.mouseMoveListener)
+        document.removeEventListener('mouseup', this.endMove)
         // console.log('Click booking ', event, data)
         this.mouseMoveStartPoint = { x: event.clientX, y: event.clientY }
         this.mouseMoveListener = (event) => {
