@@ -45,7 +45,9 @@
       :date="pointerDate"
       :debug="debug"
     >
+      <!-- <button @click="zoom = zoom - 0.5">-</button>
       <input type="range" min="0.1" max="10" v-model="zoom" step="0.01" />
+      <button @click="zoom = zoom + 0.5">+</button> -->
     </FluidViewbar>
     <FluidPinch :zoom="zoom" @pinch="pinch">
       <div
@@ -289,6 +291,7 @@ export default {
       moveY: 0,
       mouseMoveStartPoint: 0,
       mouseMoveListener: null,
+      pincher: null,
       locale: null,
       collisions: [],
       dragData: null,
@@ -303,6 +306,7 @@ export default {
       positionX: 0,
       positionY: 0,
       zoom: 1,
+      decalZoom: 0,
       height: 0,
       frameRate: 0,
       lastFrameTime: performance.now(),
@@ -352,16 +356,20 @@ export default {
         // console.log('Range ?', this.rangeX)
       }, this.debounce)
     },
-    zoom(value, oldValue) {
-      // console.log('ZOOM ?', value)
-      // const width = (value / 10) * 60 * 24
-      // const oldWidth = (oldValue / 10) * 60 * 24
-      // const pointerX =
-      //   this.translate * -1 + this.decal * this.cellWidth * -1 + 125
-      // const p = (pointerX / width) * 100
-      // const diff = width - oldWidth
-      // const r = (diff / 100) * p
-      // this.position = this.position - r
+    zoom(v, o) {
+      const oldWidthByMinute = o / 10
+      const nextWidthByMinute = v / 10
+
+      const pincherX =
+        this.pincher.x -
+        this.$refs.fluidCalendar.getBoundingClientRect().left -
+        this.$refs.bookables.getBoundingClientRect().width
+
+      const oldDecal = (this.positionX - pincherX) / oldWidthByMinute
+
+      const nextDecal = (this.positionX - pincherX) / nextWidthByMinute
+
+      this.scroll({ x: (nextDecal - oldDecal) * nextWidthByMinute })
     },
     width: {
       immediate: true,
@@ -490,7 +498,8 @@ export default {
   },
   methods: {
     pinch(p) {
-      if (p.zoom > 0.05 && p.zoom < 10) {
+      if (p.zoom > 0.5 && p.zoom < 10) {
+        this.pincher = p
         this.zoom = p.zoom
       }
     },
