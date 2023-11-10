@@ -117,6 +117,7 @@
             :key="booking.id"
             :y="bookableToY(booking.bookableId, booking.diff?.y)"
             :x="dateToX(booking.start_at)"
+            :ghost="booking.ghost"
           >
             <FluidCalendarBooking
               :booking="booking"
@@ -524,20 +525,24 @@ export default {
         start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
         end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
         diff: diff,
+        ghosted: true,
       }
       const ghost = {
         ...booking,
-        id: booking.id + '-ghost',
+        id: booking.id + '--ghost',
         start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
         end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
-        bookableId: this.yToBookable(event.clientY)?.id,
+        bookableId: this.yToBookable(
+          event.clientY -
+            this.$refs.fluidCalendar.getBoundingClientRect().top +
+            this.positionY * -1,
+        )?.id,
         ghost: true,
       }
       const ghosti = this.fixtures.bookings.findIndex(
-        (f) => f.id === booking.id + '-ghost',
+        (f) => f.id === booking.id + '--ghost',
       )
       if (ghosti < 0) {
-        console.log('Push ?', ghosti)
         this.fixtures.bookings.push(ghost)
       } else {
         this.fixtures.bookings.splice(ghosti, 1, ghost)
@@ -546,6 +551,17 @@ export default {
       this.fixtures.bookings.splice(i, 1, newBooking)
     },
     endMove(event) {
+      let i = -1
+      const ghost = this.fixtures.bookings.find((f) => {
+        i++
+        return f.ghost
+      })
+      const ghostedIndex = this.fixtures.bookings.findIndex((f) => f.ghosted)
+      const id = ghost.id.split('--')[0]
+      const newBooking = { ...ghost, id: id }
+      delete newBooking.ghost
+      this.fixtures.bookings.splice(i, 1)
+      this.fixtures.bookings.splice(ghostedIndex, 1, newBooking)
       document.removeEventListener('mousemove', this.mouseMoveListener)
       document.removeEventListener('mouseup', this.endMove)
     },

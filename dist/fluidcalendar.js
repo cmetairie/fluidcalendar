@@ -6271,6 +6271,9 @@ var script$4 = {
       );
       return diff * this.widthByMinute + this.diff
     },
+    ghost() {
+      return this.booking.ghost
+    },
   },
   methods: {
     format(date) {
@@ -6305,7 +6308,9 @@ function render$4(_ctx, _cache, $props, $setup, $data, $options) {
     vue.createCommentVNode(" <button>m</button> "),
     vue.createElementVNode("div", _hoisted_1$2, [
       vue.createCommentVNode(" {{ $slots.bookable }} "),
-      vue.renderSlot(_ctx.$slots, "default"),
+      (!$options.ghost)
+        ? vue.renderSlot(_ctx.$slots, "default", { key: 0 })
+        : vue.createCommentVNode("v-if", true),
       vue.createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
     ]),
     vue.createElementVNode("button", {
@@ -6860,6 +6865,10 @@ var script$1 = {
       type: Number,
       default: 0,
     },
+    ghost: {
+      type: Boolean,
+      default: false,
+    },
   },
   //   emits: ['increment', 'position'],
   //   data() {},
@@ -6870,17 +6879,22 @@ var script$1 = {
       stl.push({ transform: `translate(${this.x}px, ${this.y}px)` });
       return stl
     },
+    clss() {
+      const clss = [];
+      if (this.ghost) clss.push('--ghost');
+      return clss
+    },
   },
   methods: {},
 };
 
 function render$1(_ctx, _cache, $props, $setup, $data, $options) {
   return (vue.openBlock(), vue.createElementBlock("div", {
-    class: "t__fluid__calendar__draggable",
+    class: vue.normalizeClass(["t__fluid__calendar__draggable", $options.clss]),
     style: vue.normalizeStyle($options.stl)
   }, [
     vue.renderSlot(_ctx.$slots, "default")
-  ], 4 /* STYLE */))
+  ], 6 /* CLASS, STYLE */))
 }
 
 script$1.render = render$1;
@@ -7172,20 +7186,24 @@ var script = {
         start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
         end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
         diff: diff,
+        ghosted: true,
       };
       const ghost = {
         ...booking,
-        id: booking.id + '-ghost',
+        id: booking.id + '--ghost',
         start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
         end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
-        bookableId: this.yToBookable(event.clientY)?.id,
+        bookableId: this.yToBookable(
+          event.clientY -
+            this.$refs.fluidCalendar.getBoundingClientRect().top +
+            this.positionY * -1,
+        )?.id,
         ghost: true,
       };
       const ghosti = this.fixtures.bookings.findIndex(
-        (f) => f.id === booking.id + '-ghost',
+        (f) => f.id === booking.id + '--ghost',
       );
       if (ghosti < 0) {
-        console.log('Push ?', ghosti);
         this.fixtures.bookings.push(ghost);
       } else {
         this.fixtures.bookings.splice(ghosti, 1, ghost);
@@ -7194,6 +7212,17 @@ var script = {
       this.fixtures.bookings.splice(i, 1, newBooking);
     },
     endMove(event) {
+      let i = -1;
+      const ghost = this.fixtures.bookings.find((f) => {
+        i++;
+        return f.ghost
+      });
+      const ghostedIndex = this.fixtures.bookings.findIndex((f) => f.ghosted);
+      const id = ghost.id.split('--')[0];
+      const newBooking = { ...ghost, id: id };
+      delete newBooking.ghost;
+      this.fixtures.bookings.splice(i, 1);
+      this.fixtures.bookings.splice(ghostedIndex, 1, newBooking);
       document.removeEventListener('mousemove', this.mouseMoveListener);
       document.removeEventListener('mouseup', this.endMove);
     },
@@ -7581,7 +7610,8 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
               return (vue.openBlock(), vue.createBlock(_component_FluidDraggable, {
                 key: booking.id,
                 y: $options.bookableToY(booking.bookableId, booking.diff?.y),
-                x: $options.dateToX(booking.start_at)
+                x: $options.dateToX(booking.start_at),
+                ghost: booking.ghost
               }, {
                 default: vue.withCtx(() => [
                   vue.createVNode(_component_FluidCalendarBooking, {
@@ -7602,7 +7632,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                   }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions"])
                 ]),
                 _: 2 /* DYNAMIC */
-              }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["y", "x"]))
+              }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["y", "x", "ghost"]))
             }), 128 /* KEYED_FRAGMENT */))
           ], 4 /* STYLE */),
           (vue.openBlock(), vue.createElementBlock("svg", {

@@ -3,7 +3,7 @@
     <!-- <button>m</button> -->
     <div class="t__fluid__calendar__booking__inner">
       <!-- {{ $slots.bookable }} -->
-      <slot />
+      <slot v-if="!ghost" />
       <!-- <span class="t__fluid__calendar__booking__label">
         <span>{{ format(booking.start_at) }}</span>
         <span>{{ format(booking.end_at) }}</span>
@@ -65,6 +65,9 @@ export default {
       )
       return diff * this.widthByMinute + this.diff
     },
+    ghost() {
+      return this.booking.ghost
+    },
   },
   methods: {
     format(date) {
@@ -89,4 +92,3 @@ export default {
   },
 }
 </script>
-
