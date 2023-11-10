@@ -320,7 +320,7 @@
 
 .t__fluid__calendar__booking {
   display: flex;
-  padding: 3px 0;
+  padding: 3px;
   box-sizing: border-box;
 }
 

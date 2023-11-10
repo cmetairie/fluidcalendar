@@ -7191,8 +7191,14 @@ var script = {
       const ghost = {
         ...booking,
         id: booking.id + '--ghost',
-        start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
-        end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
+        start_at: dayjs(booking.start_at)
+          .add(m, 'minute')
+          .startOf('day')
+          .format('iso'),
+        end_at: dayjs(booking.end_at)
+          .add(m, 'minute')
+          .startOf('day')
+          .format('iso'),
         bookableId: this.yToBookable(
           event.clientY -
             this.$refs.fluidCalendar.getBoundingClientRect().top +
