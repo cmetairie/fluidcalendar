@@ -377,7 +377,7 @@ export default {
       async handler(width, oldWidth) {
         const now = dayjs()
         if (!oldWidth) {
-          this.centerViewTo(now.date, false)
+          this.centerViewTo(now.date, 0.001)
         }
       },
     },
@@ -794,13 +794,13 @@ export default {
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute')
       return diff * this.widthByMinute
     },
-    centerViewTo(date, animate = true) {
-      return
+    centerViewTo(date, speed = 0.5) {
+      // return
       const d = dayjs(date)
       const r = dayjs(this.rangeX.start)
       const diff = r.diff(d.startOf('day'), 'minute')
       const t = this.positionX - this.translateX + diff * this.widthByMinute
-      if (!animate) {
+      if (!speed) {
         this.positionX = t
         return
       }
@@ -810,7 +810,7 @@ export default {
         onUpdate: () => {
           this.positionX = interpolation.value
         },
-        duration: 0.5,
+        duration: speed,
       })
     },
   },
