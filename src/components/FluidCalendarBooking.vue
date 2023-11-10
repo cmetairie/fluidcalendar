@@ -1,20 +1,27 @@
 <template>
   <div class="t__fluid__calendar__booking" :style="stl" :class="clss">
     <!-- <button>m</button> -->
-    <div class="t__fluid__calendar__booking__inner">
-      <!-- {{ $slots.bookable }} -->
-      <slot v-if="!ghost" />
-      <!-- <span class="t__fluid__calendar__booking__label">
+    <div ref="inner" class="t__fluid__calendar__booking__inner">
+      <div
+        ref="content"
+        class="t__fluid__calendar__booking__content"
+        :style="sltContent"
+      >
+        <!-- {{ $slots.bookable }} -->
+        <!-- {{ refX }} -->
+        <slot v-if="!ghost" />
+        <!-- <span class="t__fluid__calendar__booking__label">
         <span>{{ format(booking.start_at) }}</span>
         <span>{{ format(booking.end_at) }}</span>
       </span> -->
+      </div>
+      <button
+        class="t__fluid__calendar__booking__resize"
+        @mousedown.stop="startSize"
+      >
+        <!-- {{ diff }} -->
+      </button>
     </div>
-    <button
-      class="t__fluid__calendar__booking__resize"
-      @mousedown.stop="startSize"
-    >
-      <!-- {{ diff }} -->
-    </button>
   </div>
 </template>
 
@@ -38,11 +45,16 @@ export default {
       type: Array,
       default: () => [],
     },
+    refX: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
       baseX: 0,
       diff: 0,
+      lastDecal: 0,
     }
   },
   computed: {
@@ -50,12 +62,33 @@ export default {
       const clss = []
       if (this.collisions.includes(this.booking.id)) clss.push('--collision')
       if (this.booking.ghost) clss.push('--ghost')
+      if (this.booking.ghosted) clss.push('--ghosted')
       return clss
     },
     stl() {
       const stl = []
       stl.push({ width: this.width - 4 + 'px' })
       stl.push({ height: this.rowHeight - 4 + 'px' })
+      return stl
+    },
+    sltContent() {
+      const stl = []
+      if (this.refX && this.refX < 0) {
+        const inner = this.$refs.inner?.getBoundingClientRect()
+        const content = this.$refs.content?.getBoundingClientRect()
+        if (inner && content) {
+          const c = window.getComputedStyle(this.$refs.inner)
+          const pl = Number(c.paddingLeft.split('px')[0])
+          const pr = Number(c.paddingRight.split('px')[0])
+          let decal = this.refX * -1
+          const v = content.width + decal + pl + pr
+          if (v >= inner.width) {
+            decal = this.lastDecal
+          }
+          stl.push({ transform: `translateX(${decal}px)` })
+          this.lastDecal = decal
+        }
+      }
       return stl
     },
     width() {

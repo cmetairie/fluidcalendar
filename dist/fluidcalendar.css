@@ -292,6 +292,10 @@
   z-index: 0;
 }
 
+.t__fluid__calendar__booking.--ghosted {
+  transform: rotateZ(2deg);
+}
+
 .t__fluid__calendar__booking.--ghost .t__fluid__calendar__booking__inner {
   background: #f5f5f5;
   border-color: #ddd;
@@ -342,6 +346,7 @@
   padding: 0 calc(var(--space) * 0.75);
   max-width: 100%;
   font-weight: 500;
+  overflow: hidden;
 }
 
 .t__fluid__calendar__booking__label {

@@ -136,6 +136,7 @@
                   :widthByMinute="widthByMinute"
                   :rowHeight="rowHeight"
                   :collisions="collisions"
+                  :refX="translateX + dateToX(booking.start_at)"
                 >
                   <slot
                     v-if="$slots.booking"
@@ -498,7 +499,7 @@ export default {
   },
   methods: {
     pinch(p) {
-      if (p.zoom > 0.5 && p.zoom < 10) {
+      if (p.zoom > 0.25 && p.zoom < 10) {
         this.pincher = p
         this.zoom = p.zoom
       }
