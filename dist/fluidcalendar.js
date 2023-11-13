@@ -6276,12 +6276,11 @@ var script$6 = {
         const inner = this.$refs.inner?.getBoundingClientRect();
         const content = this.$refs.content?.getBoundingClientRect();
         if (inner && content) {
-          let decal = this.refX * -1;
           const c = window.getComputedStyle(this.$refs.inner);
           const pl = Number(c.paddingLeft.split('px')[0]);
           const pr = Number(c.paddingRight.split('px')[0]);
+          let decal = this.refX * -1;
           const v = content.width + decal + pl + pr;
-          console.log('VVVV => ', v, inner.width);
           if (v >= inner.width) {
             decal = this.lastDecal;
           }
@@ -7156,7 +7155,7 @@ var script = {
       async handler(width, oldWidth) {
         const now = dayjs();
         if (!oldWidth) {
-          this.centerViewTo(now.date, false);
+          this.centerViewTo(now.date, 0.001);
         }
       },
     },
@@ -7573,8 +7572,24 @@ var script = {
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute');
       return diff * this.widthByMinute
     },
-    centerViewTo(date, animate = true) {
-      return
+    centerViewTo(date, speed = 0.5) {
+      // return
+      const d = dayjs(date);
+      const r = dayjs(this.rangeX.start);
+      const diff = r.diff(d.startOf('day'), 'minute');
+      const t = this.positionX - this.translateX + diff * this.widthByMinute;
+      if (!speed) {
+        this.positionX = t;
+        return
+      }
+      const interpolation = { value: this.positionX };
+      gsapWithCSS.to(interpolation, {
+        value: t,
+        onUpdate: () => {
+          this.positionX = interpolation.value;
+        },
+        duration: speed,
+      });
     },
   },
 };

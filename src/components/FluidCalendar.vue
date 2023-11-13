@@ -601,6 +601,11 @@ export default {
         i++
         return f.ghost
       })
+      if (!ghost) {
+        document.removeEventListener('mousemove', this.mouseMoveListener)
+        document.removeEventListener('mouseup', this.endMove)
+        return
+      }
       const ghostedIndex = this.fixtures.bookings.findIndex((f) => f.ghosted)
       const id = ghost.id.split('--')[0]
       const newBooking = { ...ghost, id: id }
