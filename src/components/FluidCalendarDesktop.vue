@@ -1,22 +1,12 @@
 <template>
   <div class="t__fluid__calendar__wrapper">
-    <!-- {{ dragData }} -->
-    <!-- {{ rangeDays }} -->
-    <div v-if="displayFR" class="t__frame__rate">
-      <span v-if="_bookings">{{ _bookings.length }} rézas</span>
-      <br />
-      <span v-if="_bookables">{{ _bookables.length }} bookables</span>
-      <br />
-      {{ frameRate }} FPS
-    </div>
-    <!-- {{ collisions }} -->
     <div v-if="debug" class="t__debugg">
       <pre>{{
         {
           scroller,
           widthByMinute,
           decalX,
-          height,
+          h,
           decalY,
           positionX,
           positionY,
@@ -53,7 +43,7 @@
     <FluidPinch :zoom="zoom" @pinch="pinch">
       <div
         class="t__fluid__calendar"
-        :style="{ height: Math.min(fullHeight, height) + 'px' }"
+        :style="{ height: Math.min(fullHeight, h) + 'px' }"
         ref="fluidCalendar"
         :class="{ '--debug': debug }"
       >
@@ -95,7 +85,7 @@
           @position="navPosition"
           :total="fullHeight - rowHeight"
           :position="positionY"
-          :height="height - rowHeight"
+          :height="h - rowHeight"
           :style="{ top: rowHeight + 'px' }"
         />
 
@@ -289,6 +279,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    h: {
+      type: Number,
+      default: 0,
+    },
   },
   emits: ['updateDate', 'updateRange', 'clickBooking'],
   data() {
@@ -308,11 +302,6 @@ export default {
       positionX: 0,
       positionY: 0,
       zoom: 1,
-      decalZoom: 0,
-      height: 0,
-      frameRate: 0,
-      lastFrameTime: performance.now(),
-      frameCount: 0,
       fakeMove: 0,
       point: {},
       _bookings: [],
@@ -326,14 +315,11 @@ export default {
     const root = document.documentElement
     root.style.setProperty('--row-height', `${this.rowHeight}px`)
 
-    if (this.displayFR) {
-      this.updateFrameRate()
-    }
     this.$refs.fluidCalendar.addEventListener('wheel', (e) => {
       e.preventDefault()
 
       const speedX = e.deltaX * 0.75
-      const speedY = this.fullHeight > this.height ? e.deltaY * 0.75 : 0
+      const speedY = this.fullHeight > this.h ? e.deltaY * 0.75 : 0
 
       const scroller = {}
 
@@ -343,10 +329,6 @@ export default {
       this.scroll(scroller)
       return
     })
-
-    window.addEventListener('resize', this.manageSize)
-    this.manageSize()
-    // this.generate()
   },
   watch: {
     pointerDate(date) {
@@ -415,7 +397,7 @@ export default {
       return this._bookables //.filter((f) => this.test.includes(f.id))
     },
     nbBookablesDisplayed() {
-      return Math.ceil(this.height / this.rowHeight)
+      return Math.ceil(this.h / this.rowHeight)
     },
     visibleBookings() {
       if (!this._bookings) return []
@@ -668,7 +650,7 @@ export default {
       if (y != undefined) {
         const max =
           this.positionY -
-          this.height +
+          this.h +
           (this._bookables.length + 1) * this.rowHeight
         const nextY = this.positionY - y
         if (nextY > 0) {
@@ -677,7 +659,7 @@ export default {
         }
         if (max < 0) {
           this.positionY =
-            ((this._bookables.length + 1) * this.rowHeight - this.height) * -1
+            ((this._bookables.length + 1) * this.rowHeight - this.h) * -1
         }
 
         this.positionY = this.positionY - y
@@ -691,26 +673,7 @@ export default {
         this.positionY = y
       }
     },
-    updateFrameRate() {
-      const currentTime = performance.now()
-      const elapsedTime = currentTime - this.lastFrameTime
-      if (elapsedTime >= 500) {
-        this.frameRate = Math.round((this.frameCount / elapsedTime) * 1000)
-        this.frameCount = 0
-        this.lastFrameTime = currentTime
-      }
-      this.frameCount++
-      requestAnimationFrame(this.updateFrameRate)
-    },
-    manageSize() {
-      const documentHeight = window.innerHeight
-      const coords = this.$refs.fluidCalendar?.getBoundingClientRect()
-      if (!coords) return
 
-      this.height = this.debug
-        ? documentHeight - coords.y - 150
-        : documentHeight - coords.y
-    },
     prev() {
       const date = dayjs(this.pointerDate).add(-5, 'day').format()
       this.centerViewTo(date)

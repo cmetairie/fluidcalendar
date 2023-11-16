@@ -17,7 +17,20 @@ export function dayjs(s) {
       day: 'numeric',
     }
     if (s === 'iso') return date.toISOString()
+
     return date.toLocaleDateString(undefined, options)
+  }
+
+  function formatTime() {
+    // console.log('Format ', date)
+    const options = {
+      hour: 'numeric',
+      minute: 'numeric',
+      // second: 'numeric',
+    }
+    // if (s === 'iso') return date.toISOString()
+
+    return date.toLocaleTimeString(undefined, options)
   }
 
   function add(value, unit) {
@@ -192,6 +205,8 @@ export function dayjs(s) {
         return yearDiff
       }
       return yearDiff * 12 + monthDiff
+    } else if (unit === 'hour') {
+      return Math.round(timeDiff / (1000 * 60 * 60))
     } else if (unit === 'minute') {
       return Math.round(timeDiff / (1000 * 60))
     }
@@ -207,6 +222,7 @@ export function dayjs(s) {
     startOf,
     endOf,
     format,
+    formatTime,
     add,
     date,
   }

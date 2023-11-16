@@ -22,4 +22,8 @@
   color: var(--color-txt);
 }
 
+.t__fluid__calendar__mobile__header {
+  background: var(--color-bg2);
+}
+
 /*# sourceMappingURL=fluidcalendartheme.css.map */
