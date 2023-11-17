@@ -13,6 +13,8 @@
   --bookables-width: 16rem;
   --width-navigation-button: 0.75rem;
 
+  --width-hours-mobile: 5rem;
+
   --shadow-s: 1px 1px 3px rgba(187, 194, 202, 0.15);
   --shadow-m: 1px 1px 0.5rem rgba(187, 194, 202, 0.25);
   --shadow-xl: 0px 1px 4rem rgba(56, 60, 68, 0.05);
@@ -52,6 +54,22 @@
   box-sizing: border-box;
 }
 
+.t__fluid__calendar__wrapper.--debug {
+  .t__fluid__calendar__mobile {
+    position: relative;
+    max-height: 50vh;
+    margin-top: 25vh;
+  }
+  .t__fluid__calendar__mobile::before {
+    pointer-events: none;
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 0, 0, 0.05);
+    z-index: 9;
+  }
+}
 .t__frame__rate {
   color: white;
   position: fixed;
@@ -74,7 +92,7 @@
   text-overflow: ellipsis;
   font-weight: 500;
   color: white;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(0, 0, 0, 0.75);
   z-index: 10;
 }
 .t__fluid__calendar {
@@ -528,6 +546,12 @@
   gap: calc(var(--space) * 1.5);
   padding: 0 var(--space);
   border-bottom: solid var(--color-border) 1px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+.t__fluid__calendar__mobile__bookables::-webkit-scrollbar {
+  display: none;
 }
 .t__fluid__calendar__mobile__bookable {
   all: unset;
@@ -561,44 +585,56 @@
 .t__fluid__calendar__mobile__grid {
   position: absolute;
   top: 0;
-  left: 10rem;
+  left: var(--width-hours-mobile);
   height: 100%;
   right: 0;
-  width: calc(100% - 10rem);
+  width: calc(100% - var(--width-hours-mobile));
   color: var(--color-border-m);
 }
 .t__fluid__calendar__mobile__hours {
   position: absolute;
   top: 0;
   left: 0;
-  right: calc(100% - 10rem);
+  right: calc(100% - var(--width-hours-mobile));
   bottom: 0;
 }
 .t__fluid__calendar__mobile__hour {
+  pointer-events: none;
   position: relative;
-  // border-top: solid var(--color-border) 1px;
-}
-.t__fluid__calendar__mobile__hour::before {
-  content: '';
-  display: block;
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--color-border);
-}
-.t__fluid__calendar__mobile__hour > span {
-  position: relative;
-  display: inline-block;
-  transform: translateY(-0.9em);
-  background: var(--color-bg1);
-  padding-right: var(--space);
-  font-size: 12px;
-  // line-height: 1;
+  span {
+    position: relative;
+    display: inline-block;
+    transform: translateY(-0.9em);
+    background: var(--color-bg1);
+    padding: 0 calc(var(--space) * 1) 0 calc(var(--space) * 1);
+    font-size: 12px;
+  }
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--color-border);
+  }
 }
 
+.t__fluid__calendar__mobile__header {
+  position: relative;
+  z-index: 1;
+}
+
+.t__fluid__calendar__mobile__header__date {
+  color: var(--color-title);
+  font-size: 1rem;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: solid var(--color-border) 1px;
+  padding: calc(var(--space) * 0.5) 0;
+}
 // .t__fluid__calendar__mobile__hour > span::before {
 //   content: '';
 //   display: block;

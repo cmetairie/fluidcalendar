@@ -6823,7 +6823,7 @@ const _hoisted_4$3 = {
   class: "lucide lucide-chevron-right"
 };
 const _hoisted_5$3 = /*#__PURE__*/createElementVNode("path", { d: "m9 18 6-6-6-6" }, null, -1 /* HOISTED */);
-const _hoisted_6$3 = [
+const _hoisted_6$2 = [
   _hoisted_5$3
 ];
 
@@ -6845,7 +6845,7 @@ function render$6(_ctx, _cache, $props, $setup, $data, $options) {
             ? (openBlock(), createElementBlock("svg", _hoisted_1$4, [..._hoisted_3$3]))
             : createCommentVNode("v-if", true),
           (!$props.total)
-            ? (openBlock(), createElementBlock("svg", _hoisted_4$3, [..._hoisted_6$3]))
+            ? (openBlock(), createElementBlock("svg", _hoisted_4$3, [..._hoisted_6$2]))
             : createCommentVNode("v-if", true)
         ], 38 /* CLASS, STYLE, HYDRATE_EVENTS */))
       : createCommentVNode("v-if", true)
@@ -7545,7 +7545,7 @@ const _hoisted_4$2 = /*#__PURE__*/createElementVNode("span", null, "bookables", 
 const _hoisted_5$2 = [
   _hoisted_4$2
 ];
-const _hoisted_6$2 = { key: 1 };
+const _hoisted_6$1 = { key: 1 };
 const _hoisted_7$1 = {
   key: 1,
   class: "t__fluid__calendar__booking__label"
@@ -7557,7 +7557,7 @@ const _hoisted_10$1 = /*#__PURE__*/createElementVNode("rect", {
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_11 = { key: 1 };
+const _hoisted_11$1 = { key: 1 };
 const _hoisted_12 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
@@ -7646,7 +7646,7 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
                         key: 0,
                         bookable: bookable
                       })
-                    : (openBlock(), createElementBlock("span", _hoisted_6$2, toDisplayString(bookable.label), 1 /* TEXT */))
+                    : (openBlock(), createElementBlock("span", _hoisted_6$1, toDisplayString(bookable.label), 1 /* TEXT */))
                 ], 4 /* STYLE */))
               }), 128 /* KEYED_FRAGMENT */))
             ], 4 /* STYLE */)
@@ -7765,7 +7765,7 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
                           key: 0,
                           date: cell
                         })
-                      : (openBlock(), createElementBlock("span", _hoisted_11, toDisplayString($options.format(cell.date)), 1 /* TEXT */))
+                      : (openBlock(), createElementBlock("span", _hoisted_11$1, toDisplayString($options.format(cell.date)), 1 /* TEXT */))
                   ], 4 /* STYLE */))
                 }), 128 /* KEYED_FRAGMENT */))
               ], 4 /* STYLE */),
@@ -7849,22 +7849,15 @@ var script$1 = {
     this.selectedBookable = this._bookables[0];
     this.$refs.fluidCalendar.addEventListener('wheel', (e) => {
       e.preventDefault();
-
       const speedY = e.deltaY * 0.75;
-      //   const speedY = this.fullHeight > this.height ? e.deltaY * 0.75 : 0
-
       const scroller = {};
-
-      //   if (speedX) scroller.x = speedX
       if (speedY) scroller.y = speedY;
-
       this.scroll(scroller);
-      return
     });
   },
   computed: {
     rangeDays() {
-      return 10
+      return 1
     },
     heightByMinute() {
       return this.zoom
@@ -7873,30 +7866,38 @@ var script$1 = {
       return this.heightByMinute * 60
     },
     height() {
-      return this.cellHeight * 24
+      return this.cellHeight * this.rY.diffInHours
     },
     tY() {
-      return this.pY - this.dY * this.t * (this.heightByMinute * 60)
+      return this.pY - this.dY * this.t * (this.heightByMinute * 60 * 24)
     },
     dY() {
-      const d = this.pY / this.heightByMinute / 60;
+      const d = this.pY / this.heightByMinute / 60 / 24;
+      //   console.log('D => ', this.pY / this.heightByMinute)
       return ((d + this.t) / this.t) | 0
     },
     t() {
-      return 4
+      return 1
+    },
+    date() {
+      if (!this.rY) return
+      const start = dayjs(this.rY.start);
+      const dist = (this.tY * -1) / this.heightByMinute;
+
+      return start.add(dist, 'minute').format()
     },
     rY() {
       const start = dayjs(dayjs().startOf('day').date)
-        .add(-60 * (this.rangeDays + this.dY * this.t), 'minute')
+        .add(-60 * 24 * (this.rangeDays + this.dY * this.t), 'minute')
         .startOf('day')
         .format('iso');
       const end = dayjs(dayjs().startOf('day').date)
-        .add(60 * (this.rangeDays - this.dY * this.t), 'minute')
+        .add(60 * 24 * (this.rangeDays - this.dY * this.t), 'minute')
         .endOf('day')
         .format('iso');
-      const diffInDays = dayjs(end).diff(dayjs(start), 'hour');
+      const diffInHours = dayjs(end).diff(dayjs(start), 'hour');
       let cells = [];
-      for (let i = 0; i < diffInDays; i++) {
+      for (let i = 0; i < diffInHours; i++) {
         const date = dayjs(start).add(i, 'hour').format('iso');
         const cell = {
           date: date,
@@ -7909,6 +7910,7 @@ var script$1 = {
         start,
         end,
         cells: cells,
+        diffInHours: diffInHours,
       }
     },
   },
@@ -7926,17 +7928,18 @@ const _hoisted_1$1 = {
   class: "t__debugg"
 };
 const _hoisted_2$1 = { class: "t__fluid__calendar__mobile__header" };
-const _hoisted_3$1 = { class: "t__fluid__calendar__mobile__bookables" };
-const _hoisted_4$1 = ["onClick"];
-const _hoisted_5$1 = { class: "t__fluid__calendar__mobile__main" };
-const _hoisted_6$1 = { class: "t__fluid__calendar__mobile__hours" };
-const _hoisted_7 = {
+const _hoisted_3$1 = { class: "t__fluid__calendar__mobile__header__date" };
+const _hoisted_4$1 = { class: "t__fluid__calendar__mobile__bookables" };
+const _hoisted_5$1 = ["onClick"];
+const _hoisted_6 = { class: "t__fluid__calendar__mobile__main" };
+const _hoisted_7 = { class: "t__fluid__calendar__mobile__hours" };
+const _hoisted_8 = {
   class: "t__fluid__calendar__mobile__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_8 = ["width", "height"];
-const _hoisted_9 = ["d"];
-const _hoisted_10 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_9 = ["width", "height"];
+const _hoisted_10 = ["d"];
+const _hoisted_11 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#grid)"
@@ -7951,34 +7954,38 @@ function render$1(_ctx, _cache, $props, $setup, $data, $options) {
     ($props.debug)
       ? (openBlock(), createElementBlock("div", _hoisted_1$1, [
           createElementVNode("pre", null, toDisplayString({
+          date: $options.date,
           heightByMinute: $options.heightByMinute,
           pY: $data.pY,
           dY: $options.dY,
           tY: $options.tY,
           start: $options.rY.start,
           end: $options.rY.end,
+          diffInHours: $options.rY.diffInHours,
         }), 1 /* TEXT */)
         ]))
       : createCommentVNode("v-if", true),
     createElementVNode("header", _hoisted_2$1, [
-      createElementVNode("div", _hoisted_3$1, [
+      createElementVNode("div", _hoisted_3$1, toDisplayString($options.date), 1 /* TEXT */),
+      createElementVNode("div", _hoisted_4$1, [
         (openBlock(true), createElementBlock(Fragment, null, renderList($props.bookables, (bookable) => {
           return (openBlock(), createElementBlock("button", {
             class: normalizeClass(["t__fluid__calendar__mobile__bookable", { '--selected': bookable.id === $data.selectedBookable?.id }]),
             onClick: $event => ($data.selectedBookable = bookable)
-          }, toDisplayString(bookable.label), 11 /* TEXT, CLASS, PROPS */, _hoisted_4$1))
+          }, toDisplayString(bookable.label), 11 /* TEXT, CLASS, PROPS */, _hoisted_5$1))
         }), 256 /* UNKEYED_FRAGMENT */))
       ])
     ]),
-    createElementVNode("main", _hoisted_5$1, [
+    createElementVNode("main", _hoisted_6, [
       createElementVNode("div", {
         class: "t__fluid__calendar__mobile__inner",
         style: normalizeStyle({
           height: `${$options.height}px`,
-          transform: `translateY(${$data.pY}px) translateY(${$options.tY}px)`,
+          transform: `translateY(${$options.tY}px)`,
         })
       }, [
-        createElementVNode("div", _hoisted_6$1, [
+        createCommentVNode(" <div class=\"t__fluid__calendar__mobile__scroller\"> "),
+        createElementVNode("div", _hoisted_7, [
           (openBlock(true), createElementBlock(Fragment, null, renderList($options.rY.cells, (cell) => {
             return (openBlock(), createElementBlock("div", {
               class: "t__fluid__calendar__mobile__hour",
@@ -7988,7 +7995,7 @@ function render$1(_ctx, _cache, $props, $setup, $data, $options) {
             ], 4 /* STYLE */))
           }), 256 /* UNKEYED_FRAGMENT */))
         ]),
-        (openBlock(), createElementBlock("svg", _hoisted_7, [
+        (openBlock(), createElementBlock("svg", _hoisted_8, [
           createElementVNode("defs", null, [
             createElementVNode("pattern", {
               id: "grid",
@@ -8001,11 +8008,12 @@ function render$1(_ctx, _cache, $props, $setup, $data, $options) {
                 fill: "none",
                 stroke: "currentColor",
                 "stroke-width": "1"
-              }, null, 8 /* PROPS */, _hoisted_9)
-            ], 8 /* PROPS */, _hoisted_8)
+              }, null, 8 /* PROPS */, _hoisted_10)
+            ], 8 /* PROPS */, _hoisted_9)
           ]),
-          _hoisted_10
-        ]))
+          _hoisted_11
+        ])),
+        createCommentVNode(" </div> ")
       ], 4 /* STYLE */)
     ])
   ], 4 /* STYLE */))
@@ -8100,33 +8108,32 @@ var script = {
 };
 
 const _hoisted_1 = {
-  class: "t__fluid__calendar__wrapper",
-  ref: "wrapper"
-};
-const _hoisted_2 = {
   key: 0,
   class: "t__frame__rate"
 };
-const _hoisted_3 = { key: 0 };
-const _hoisted_4 = /*#__PURE__*/createElementVNode("br", null, null, -1 /* HOISTED */);
-const _hoisted_5 = { key: 1 };
-const _hoisted_6 = /*#__PURE__*/createElementVNode("br", null, null, -1 /* HOISTED */);
+const _hoisted_2 = { key: 0 };
+const _hoisted_3 = /*#__PURE__*/createElementVNode("br", null, null, -1 /* HOISTED */);
+const _hoisted_4 = { key: 1 };
+const _hoisted_5 = /*#__PURE__*/createElementVNode("br", null, null, -1 /* HOISTED */);
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_FluidCalendarDesktop = resolveComponent("FluidCalendarDesktop");
   const _component_FluidCalendarMobile = resolveComponent("FluidCalendarMobile");
 
-  return (openBlock(), createElementBlock("div", _hoisted_1, [
+  return (openBlock(), createElementBlock("div", {
+    class: normalizeClass(["t__fluid__calendar__wrapper", { '--debug': $props.debug }]),
+    ref: "wrapper"
+  }, [
     ($data.displayFR)
-      ? (openBlock(), createElementBlock("div", _hoisted_2, [
+      ? (openBlock(), createElementBlock("div", _hoisted_1, [
           ($props.bookings)
-            ? (openBlock(), createElementBlock("span", _hoisted_3, toDisplayString($props.bookings.length) + " rézas", 1 /* TEXT */))
+            ? (openBlock(), createElementBlock("span", _hoisted_2, toDisplayString($props.bookings.length) + " rézas", 1 /* TEXT */))
             : createCommentVNode("v-if", true),
-          _hoisted_4,
+          _hoisted_3,
           ($props.bookables)
-            ? (openBlock(), createElementBlock("span", _hoisted_5, toDisplayString($props.bookables.length) + " bookables", 1 /* TEXT */))
+            ? (openBlock(), createElementBlock("span", _hoisted_4, toDisplayString($props.bookables.length) + " bookables", 1 /* TEXT */))
             : createCommentVNode("v-if", true),
-          _hoisted_6,
+          _hoisted_5,
           createTextVNode(" " + toDisplayString($data.frameRate) + " FPS ", 1 /* TEXT */)
         ]))
       : createCommentVNode("v-if", true),
@@ -8148,7 +8155,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           onClickBooking: _cache[5] || (_cache[5] = (v) => _ctx.$emit('clickBooking', v))
         }), null, 16 /* FULL_PROPS */, ["h", "w"]))
       : createCommentVNode("v-if", true)
-  ], 512 /* NEED_PATCH */))
+  ], 2 /* CLASS */))
 }
 
 script.render = render;

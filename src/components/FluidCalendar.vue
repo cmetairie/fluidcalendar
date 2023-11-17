@@ -1,5 +1,9 @@
 <template>
-  <div class="t__fluid__calendar__wrapper" ref="wrapper">
+  <div
+    class="t__fluid__calendar__wrapper"
+    ref="wrapper"
+    :class="{ '--debug': debug }"
+  >
     <div v-if="displayFR" class="t__frame__rate">
       <span v-if="bookings">{{ bookings.length }} rézas</span>
       <br />
