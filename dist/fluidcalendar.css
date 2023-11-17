@@ -52,6 +52,10 @@
   box-sizing: border-box;
 }
 
+.t__fluid__calendar__wrapper {
+  overflow: hidden;
+}
+
 .t__fluid__calendar__wrapper.--debug .t__fluid__calendar__mobile {
   position: relative;
   max-height: 50vh;
@@ -337,7 +341,8 @@
 .t__fluid__calendar__bookables__inner,
 .t__fluid__calendar__bookings,
 .t__fluid__calendar__canva,
-.t__fluid__calendar__inner {
+.t__fluid__calendar__inner,
+.t__fluid__calendar__mobile__inner {
   will-change: transform;
 }
 
@@ -605,21 +610,11 @@
   opacity: 1;
 }
 
-.t__fluid__calendar__mobile__grid {
-  position: absolute;
-  top: 0;
-  left: var(--width-hours-mobile);
-  height: 100%;
-  right: 0;
-  width: calc(100% - var(--width-hours-mobile));
-  color: var(--color-border-m);
-}
-
 .t__fluid__calendar__mobile__hours {
   position: absolute;
   top: 0;
   left: 0;
-  right: calc(100% - var(--width-hours-mobile));
+  right: 0;
   bottom: 0;
 }
 
@@ -628,12 +623,21 @@
   position: relative;
 }
 .t__fluid__calendar__mobile__hour span {
+  user-select: none;
   position: relative;
   display: inline-block;
   transform: translateY(-0.9em);
   background: var(--color-bg1);
   padding: 0 calc(var(--space) * 1) 0 calc(var(--space) * 1);
   font-size: 12px;
+}
+.t__fluid__calendar__mobile__hour.--day {
+  text-align: center;
+  font-weight: 500;
+  color: var(--color-title);
+}
+.t__fluid__calendar__mobile__hour.--day::before {
+  content: none;
 }
 .t__fluid__calendar__mobile__hour::before {
   content: "";

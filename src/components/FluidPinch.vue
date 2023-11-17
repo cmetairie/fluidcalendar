@@ -21,6 +21,7 @@ export default {
   computed: {},
   methods: {
     handlePinch(event) {
+      event.preventDefault()
       if (event.ctrlKey) {
         const mouseX = event.clientX
         const mouseY = event.clientY

@@ -6961,6 +6961,7 @@ var script$3 = {
   computed: {},
   methods: {
     handlePinch(event) {
+      event.preventDefault();
       if (event.ctrlKey) {
         const mouseX = event.clientX;
         const mouseY = event.clientY;
@@ -7552,12 +7553,12 @@ const _hoisted_7$1 = {
 };
 const _hoisted_8$1 = ["width", "height"];
 const _hoisted_9$1 = ["d"];
-const _hoisted_10$1 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_10 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_11$1 = { key: 1 };
+const _hoisted_11 = { key: 1 };
 const _hoisted_12 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
@@ -7745,7 +7746,7 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
                     }, null, 8 /* PROPS */, _hoisted_9$1)
                   ], 8 /* PROPS */, _hoisted_8$1)
                 ]),
-                _hoisted_10$1
+                _hoisted_10
               ], 4 /* STYLE */)),
               createElementVNode("div", {
                 class: "t__fluid__calendar__header",
@@ -7765,7 +7766,7 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
                           key: 0,
                           date: cell
                         })
-                      : (openBlock(), createElementBlock("span", _hoisted_11$1, toDisplayString($options.format(cell.date)), 1 /* TEXT */))
+                      : (openBlock(), createElementBlock("span", _hoisted_11, toDisplayString($options.format(cell.date)), 1 /* TEXT */))
                   ], 4 /* STYLE */))
                 }), 128 /* KEYED_FRAGMENT */))
               ], 4 /* STYLE */),
@@ -7812,8 +7813,14 @@ script$2.__file = "src/components/FluidCalendarDesktop.vue";
 
 var script$1 = {
   name: 'FluidCalendarMobile',
+  components: { FluidPinch: script$3 },
   data() {
     return {
+      touchPoint: null,
+      touchListener: null,
+      touchDiff: 0,
+      touchScroll: null,
+      pincher: null,
       _bookings: [],
       _bookables: [],
       pY: 0,
@@ -7854,6 +7861,16 @@ var script$1 = {
       if (speedY) scroller.y = speedY;
       this.scroll(scroller);
     });
+  },
+  watch: {
+    zoom(v, o) {
+      const oldWidthByMinute = o / 10;
+      const nextWidthByMinute = v / 10;
+      const p = this.pincher.y - this.$refs.main.getBoundingClientRect().top;
+      const oldDecal = (this.pY - p) / oldWidthByMinute;
+      const nextDecal = (this.pY - p) / nextWidthByMinute;
+      this.scroll({ y: (nextDecal - oldDecal) * nextWidthByMinute });
+    },
   },
   computed: {
     rangeDays() {
@@ -7915,6 +7932,47 @@ var script$1 = {
     },
   },
   methods: {
+    touchStart(event) {
+      if (this.touchScroll) this.touchScroll.kill();
+
+      this.touchPoint = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
+      };
+
+      document.addEventListener('touchmove', this.touchMove);
+      document.addEventListener('touchend', this.touchEnd);
+      //   const data = this.pointToData(this.point)
+      //   this.point.data = data
+    },
+    touchMove(event) {
+      this.touchDiff = this.touchPoint.y - event.touches[0].clientY;
+      this.scroll({ y: this.touchDiff });
+      this.touchPoint = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
+      };
+    },
+    touchEnd(event) {
+      //   event.preventDefault()
+      const interpolation = { value: this.pY };
+      this.touchScroll = gsapWithCSS.to(interpolation, {
+        value: this.pY - this.touchDiff * 20,
+        onUpdate: () => {
+          this.pY = interpolation.value;
+        },
+        duration: 0.5 + Math.abs(this.touchDiff) / 50,
+      });
+      //   console.log('DIFF ?', this.touchDiff)
+      document.removeEventListener('touchmove', this.touchMove);
+      document.removeEventListener('touchend', this.touchEnd);
+    },
+    pinch(p) {
+      if (p.zoom > 0.25 && p.zoom < 10) {
+        this.pincher = p;
+        this.zoom = p.zoom;
+      }
+    },
     scroll({ y }) {
       if (y != undefined) {
         this.pY = this.pY - y;
@@ -7931,92 +7989,82 @@ const _hoisted_2$1 = { class: "t__fluid__calendar__mobile__header" };
 const _hoisted_3$1 = { class: "t__fluid__calendar__mobile__header__date" };
 const _hoisted_4$1 = { class: "t__fluid__calendar__mobile__bookables" };
 const _hoisted_5$1 = ["onClick"];
-const _hoisted_6 = { class: "t__fluid__calendar__mobile__main" };
-const _hoisted_7 = { class: "t__fluid__calendar__mobile__hours" };
-const _hoisted_8 = {
-  class: "t__fluid__calendar__mobile__grid",
-  xmlns: "http://www.w3.org/2000/svg"
+const _hoisted_6 = {
+  class: "t__fluid__calendar__mobile__main",
+  ref: "main"
 };
-const _hoisted_9 = ["width", "height"];
-const _hoisted_10 = ["d"];
-const _hoisted_11 = /*#__PURE__*/createElementVNode("rect", {
-  width: "100%",
-  height: "100%",
-  fill: "url(#grid)"
-}, null, -1 /* HOISTED */);
+const _hoisted_7 = { class: "t__fluid__calendar__mobile__hours" };
+const _hoisted_8 = { key: 0 };
+const _hoisted_9 = { key: 1 };
 
 function render$1(_ctx, _cache, $props, $setup, $data, $options) {
-  return (openBlock(), createElementBlock("div", {
-    class: "t__fluid__calendar__mobile",
-    ref: "fluidCalendar",
-    style: normalizeStyle({ height: $props.h + 'px' })
-  }, [
-    ($props.debug)
-      ? (openBlock(), createElementBlock("div", _hoisted_1$1, [
-          createElementVNode("pre", null, toDisplayString({
-          date: $options.date,
-          heightByMinute: $options.heightByMinute,
-          pY: $data.pY,
-          dY: $options.dY,
-          tY: $options.tY,
-          start: $options.rY.start,
-          end: $options.rY.end,
-          diffInHours: $options.rY.diffInHours,
-        }), 1 /* TEXT */)
-        ]))
-      : createCommentVNode("v-if", true),
-    createElementVNode("header", _hoisted_2$1, [
-      createElementVNode("div", _hoisted_3$1, toDisplayString($options.date), 1 /* TEXT */),
-      createElementVNode("div", _hoisted_4$1, [
-        (openBlock(true), createElementBlock(Fragment, null, renderList($props.bookables, (bookable) => {
-          return (openBlock(), createElementBlock("button", {
-            class: normalizeClass(["t__fluid__calendar__mobile__bookable", { '--selected': bookable.id === $data.selectedBookable?.id }]),
-            onClick: $event => ($data.selectedBookable = bookable)
-          }, toDisplayString(bookable.label), 11 /* TEXT, CLASS, PROPS */, _hoisted_5$1))
-        }), 256 /* UNKEYED_FRAGMENT */))
-      ])
-    ]),
-    createElementVNode("main", _hoisted_6, [
+  const _component_FluidPinch = resolveComponent("FluidPinch");
+
+  return (openBlock(), createBlock(_component_FluidPinch, {
+    zoom: $data.zoom,
+    onPinch: $options.pinch
+  }, {
+    default: withCtx(() => [
       createElementVNode("div", {
-        class: "t__fluid__calendar__mobile__inner",
-        style: normalizeStyle({
-          height: `${$options.height}px`,
-          transform: `translateY(${$options.tY}px)`,
-        })
+        class: "t__fluid__calendar__mobile",
+        ref: "fluidCalendar",
+        style: normalizeStyle({ height: $props.h + 'px' }),
+        onTouchstart: _cache[0] || (_cache[0] = withModifiers((...args) => ($options.touchStart && $options.touchStart(...args)), ["prevent"]))
       }, [
-        createCommentVNode(" <div class=\"t__fluid__calendar__mobile__scroller\"> "),
-        createElementVNode("div", _hoisted_7, [
-          (openBlock(true), createElementBlock(Fragment, null, renderList($options.rY.cells, (cell) => {
-            return (openBlock(), createElementBlock("div", {
-              class: "t__fluid__calendar__mobile__hour",
-              style: normalizeStyle({ height: `${$options.cellHeight}px` })
-            }, [
-              createElementVNode("span", null, toDisplayString(cell.time), 1 /* TEXT */)
-            ], 4 /* STYLE */))
-          }), 256 /* UNKEYED_FRAGMENT */))
+        ($props.debug)
+          ? (openBlock(), createElementBlock("div", _hoisted_1$1, [
+              createElementVNode("pre", null, toDisplayString({
+            date: $options.date,
+            heightByMinute: $options.heightByMinute,
+            pY: $data.pY,
+            dY: $options.dY,
+            tY: $options.tY,
+            start: $options.rY.start,
+            end: $options.rY.end,
+            diffInHours: $options.rY.diffInHours,
+          }), 1 /* TEXT */)
+            ]))
+          : createCommentVNode("v-if", true),
+        createElementVNode("header", _hoisted_2$1, [
+          createElementVNode("div", _hoisted_3$1, toDisplayString($options.date), 1 /* TEXT */),
+          createElementVNode("div", _hoisted_4$1, [
+            (openBlock(true), createElementBlock(Fragment, null, renderList($props.bookables, (bookable) => {
+              return (openBlock(), createElementBlock("button", {
+                class: normalizeClass(["t__fluid__calendar__mobile__bookable", { '--selected': bookable.id === $data.selectedBookable?.id }]),
+                onClick: $event => ($data.selectedBookable = bookable)
+              }, toDisplayString(bookable.label), 11 /* TEXT, CLASS, PROPS */, _hoisted_5$1))
+            }), 256 /* UNKEYED_FRAGMENT */))
+          ])
         ]),
-        (openBlock(), createElementBlock("svg", _hoisted_8, [
-          createElementVNode("defs", null, [
-            createElementVNode("pattern", {
-              id: "grid",
-              width: $props.w,
-              height: $options.cellHeight,
-              patternUnits: "userSpaceOnUse"
-            }, [
-              createElementVNode("path", {
-                d: `M ${$props.w} 0 L 0 0 0 ${$options.cellHeight}`,
-                fill: "none",
-                stroke: "currentColor",
-                "stroke-width": "1"
-              }, null, 8 /* PROPS */, _hoisted_10)
-            ], 8 /* PROPS */, _hoisted_9)
-          ]),
-          _hoisted_11
-        ])),
-        createCommentVNode(" </div> ")
-      ], 4 /* STYLE */)
-    ])
-  ], 4 /* STYLE */))
+        createElementVNode("main", _hoisted_6, [
+          createElementVNode("div", {
+            class: "t__fluid__calendar__mobile__inner",
+            style: normalizeStyle({
+            height: `${$options.height}px`,
+            transform: `translateY(${$options.tY}px)`,
+          })
+          }, [
+            createCommentVNode(" <div class=\"t__fluid__calendar__mobile__scroller\"> "),
+            createElementVNode("div", _hoisted_7, [
+              (openBlock(true), createElementBlock(Fragment, null, renderList($options.rY.cells, (cell) => {
+                return (openBlock(), createElementBlock("div", {
+                  class: normalizeClass(["t__fluid__calendar__mobile__hour", { '--day': cell.time === '00:00' }]),
+                  style: normalizeStyle({ height: `${$options.cellHeight}px` })
+                }, [
+                  (cell.time === '00:00')
+                    ? (openBlock(), createElementBlock("span", _hoisted_8, toDisplayString(cell.short), 1 /* TEXT */))
+                    : (openBlock(), createElementBlock("span", _hoisted_9, toDisplayString(cell.time), 1 /* TEXT */))
+                ], 6 /* CLASS, STYLE */))
+              }), 256 /* UNKEYED_FRAGMENT */))
+            ]),
+            createCommentVNode(" <svg\n            class=\"t__fluid__calendar__mobile__grid\"\n            xmlns=\"http://www.w3.org/2000/svg\"\n          >\n            <defs>\n              <pattern\n                id=\"grid\"\n                :width=\"w\"\n                :height=\"cellHeight\"\n                patternUnits=\"userSpaceOnUse\"\n              >\n                <path\n                  :d=\"`M ${w} 0 L 0 0 0 ${cellHeight}`\"\n                  fill=\"none\"\n                  stroke=\"currentColor\"\n                  stroke-width=\"1\"\n                />\n              </pattern>\n            </defs>\n            <rect width=\"100%\" height=\"100%\" fill=\"url(#grid)\" />\n          </svg> "),
+            createCommentVNode(" </div> ")
+          ], 4 /* STYLE */)
+        ], 512 /* NEED_PATCH */)
+      ], 36 /* STYLE, HYDRATE_EVENTS */)
+    ]),
+    _: 1 /* STABLE */
+  }, 8 /* PROPS */, ["zoom", "onPinch"]))
 }
 
 script$1.render = render$1;
