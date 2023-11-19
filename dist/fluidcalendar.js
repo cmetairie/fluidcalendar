@@ -6242,7 +6242,7 @@ var gsapWithCSS = gsap.registerPlugin(CSSPlugin) || gsap;
     // to protect from tree shaking
 gsapWithCSS.core.Tween;
 
-var script$8 = {
+var script$9 = {
   name: 'FluidCalendarBooking',
   props: {
     booking: {
@@ -6340,18 +6340,18 @@ var script$8 = {
   },
 };
 
-const _hoisted_1$5 = {
+const _hoisted_1$6 = {
   ref: "inner",
   class: "t__fluid__calendar__booking__inner"
 };
 
-function render$8(_ctx, _cache, $props, $setup, $data, $options) {
+function render$9(_ctx, _cache, $props, $setup, $data, $options) {
   return (vue.openBlock(), vue.createElementBlock("div", {
     class: vue.normalizeClass(["t__fluid__calendar__booking", $options.clss]),
     style: vue.normalizeStyle($options.stl)
   }, [
     vue.createCommentVNode(" <button>m</button> "),
-    vue.createElementVNode("div", _hoisted_1$5, [
+    vue.createElementVNode("div", _hoisted_1$6, [
       vue.createElementVNode("div", {
         ref: "content",
         class: "t__fluid__calendar__booking__content",
@@ -6374,8 +6374,8 @@ function render$8(_ctx, _cache, $props, $setup, $data, $options) {
   ], 6 /* CLASS, STYLE */))
 }
 
-script$8.render = render$8;
-script$8.__file = "src/components/FluidCalendarBooking.vue";
+script$9.render = render$9;
+script$9.__file = "src/components/FluidCalendarBooking.vue";
 
 let debounceId = null;
 function debounce(fn, delay = 500) {
@@ -6395,7 +6395,7 @@ function wait(secondes) {
   })
 }
 
-var script$7 = {
+var script$8 = {
   name: 'FluidCalendarScroller',
   props: {
     x: {
@@ -6552,7 +6552,7 @@ var script$7 = {
   },
 };
 
-function render$7(_ctx, _cache, $props, $setup, $data, $options) {
+function render$8(_ctx, _cache, $props, $setup, $data, $options) {
   return (vue.openBlock(), vue.createElementBlock("div", {
     class: vue.normalizeClass(["t__fluid__calendar__navigate", $options.clss]),
     ref: "scroller"
@@ -6569,10 +6569,10 @@ function render$7(_ctx, _cache, $props, $setup, $data, $options) {
   ], 2 /* CLASS */))
 }
 
-script$7.render = render$7;
-script$7.__file = "src/components/FluidCalendarScroller.vue";
+script$8.render = render$8;
+script$8.__file = "src/components/FluidCalendarScroller.vue";
 
-var script$6 = {
+var script$7 = {
   name: 'FluidCalendarNavigator',
   props: {
     x: {
@@ -6798,7 +6798,7 @@ var script$6 = {
   },
 };
 
-const _hoisted_1$4 = {
+const _hoisted_1$5 = {
   key: 0,
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24",
@@ -6829,7 +6829,7 @@ const _hoisted_6$2 = [
   _hoisted_5$3
 ];
 
-function render$6(_ctx, _cache, $props, $setup, $data, $options) {
+function render$7(_ctx, _cache, $props, $setup, $data, $options) {
   return (vue.openBlock(), vue.createElementBlock("div", {
     class: vue.normalizeClass(["t__fluid__calendar__navigate", $options.clss]),
     ref: "scroller"
@@ -6844,7 +6844,7 @@ function render$6(_ctx, _cache, $props, $setup, $data, $options) {
         }, [
           vue.createCommentVNode(" {{ faking }} "),
           (!$props.total)
-            ? (vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$4, [..._hoisted_3$3]))
+            ? (vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$5, [..._hoisted_3$3]))
             : vue.createCommentVNode("v-if", true),
           (!$props.total)
             ? (vue.openBlock(), vue.createElementBlock("svg", _hoisted_4$3, [..._hoisted_6$2]))
@@ -6854,10 +6854,10 @@ function render$6(_ctx, _cache, $props, $setup, $data, $options) {
   ], 2 /* CLASS */))
 }
 
-script$6.render = render$6;
-script$6.__file = "src/components/FluidCalendarNavigator.vue";
+script$7.render = render$7;
+script$7.__file = "src/components/FluidCalendarNavigator.vue";
 
-var script$5 = {
+var script$6 = {
   name: 'FluidDraggable',
   props: {
     x: {
@@ -6891,7 +6891,7 @@ var script$5 = {
   methods: {},
 };
 
-function render$5(_ctx, _cache, $props, $setup, $data, $options) {
+function render$6(_ctx, _cache, $props, $setup, $data, $options) {
   return (vue.openBlock(), vue.createElementBlock("div", {
     class: vue.normalizeClass(["t__fluid__calendar__draggable", $options.clss]),
     style: vue.normalizeStyle($options.stl)
@@ -6900,10 +6900,10 @@ function render$5(_ctx, _cache, $props, $setup, $data, $options) {
   ], 6 /* CLASS, STYLE */))
 }
 
-script$5.render = render$5;
-script$5.__file = "src/components/FluidDraggable.vue";
+script$6.render = render$6;
+script$6.__file = "src/components/FluidDraggable.vue";
 
-var script$4 = {
+var script$5 = {
   name: 'FluidViewbar',
   props: {
     date: {
@@ -6933,21 +6933,21 @@ var script$4 = {
   methods: {},
 };
 
-const _hoisted_1$3 = { class: "t__fluid__viewbar__date" };
+const _hoisted_1$4 = { class: "t__fluid__viewbar__date" };
 
-function render$4(_ctx, _cache, $props, $setup, $data, $options) {
+function render$5(_ctx, _cache, $props, $setup, $data, $options) {
   return (vue.openBlock(), vue.createElementBlock("div", {
     class: vue.normalizeClass(["t__fluid__viewbar", $options.clss])
   }, [
-    vue.createElementVNode("div", _hoisted_1$3, vue.toDisplayString($options.pointerDate), 1 /* TEXT */),
+    vue.createElementVNode("div", _hoisted_1$4, vue.toDisplayString($options.pointerDate), 1 /* TEXT */),
     vue.renderSlot(_ctx.$slots, "default")
   ], 2 /* CLASS */))
 }
 
-script$4.render = render$4;
-script$4.__file = "src/components/FluidViewbar.vue";
+script$5.render = render$5;
+script$5.__file = "src/components/FluidViewbar.vue";
 
-var script$3 = {
+var script$4 = {
   name: 'FluidPinch',
   emits: ['pinch'],
   data() {
@@ -6985,7 +6985,7 @@ var script$3 = {
   },
 };
 
-function render$3(_ctx, _cache, $props, $setup, $data, $options) {
+function render$4(_ctx, _cache, $props, $setup, $data, $options) {
   return (vue.openBlock(), vue.createElementBlock("div", {
     class: "t__fluid__pinch",
     ref: "pinchTarget",
@@ -6995,20 +6995,20 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
   ], 544 /* HYDRATE_EVENTS, NEED_PATCH */))
 }
 
-script$3.render = render$3;
-script$3.__file = "src/components/FluidPinch.vue";
+script$4.render = render$4;
+script$4.__file = "src/components/FluidPinch.vue";
 
 // import '../styles.css'
 
-var script$2 = {
+var script$3 = {
   name: 'FluidCalendarDesktop',
   components: {
-    FluidCalendarBooking: script$8,
-    FluidCalendarScroller: script$7,
-    FluidCalendarNavigator: script$6,
-    FluidDraggable: script$5,
-    FluidViewbar: script$4,
-    FluidPinch: script$3,
+    FluidCalendarBooking: script$9,
+    FluidCalendarScroller: script$8,
+    FluidCalendarNavigator: script$7,
+    FluidDraggable: script$6,
+    FluidViewbar: script$5,
+    FluidPinch: script$4,
   },
   props: {
     dayStart: {
@@ -7535,7 +7535,7 @@ var script$2 = {
   },
 };
 
-const _hoisted_1$2 = { class: "t__fluid__calendar__wrapper" };
+const _hoisted_1$3 = { class: "t__fluid__calendar__wrapper" };
 const _hoisted_2$2 = {
   key: 0,
   class: "t__debugg"
@@ -7555,17 +7555,17 @@ const _hoisted_7$1 = {
 };
 const _hoisted_8$1 = ["width", "height"];
 const _hoisted_9$1 = ["d"];
-const _hoisted_10 = /*#__PURE__*/vue.createElementVNode("rect", {
+const _hoisted_10$1 = /*#__PURE__*/vue.createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_11 = { key: 1 };
-const _hoisted_12 = {
+const _hoisted_11$1 = { key: 1 };
+const _hoisted_12$1 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_13 = ["width", "height"];
+const _hoisted_13$1 = ["width", "height"];
 const _hoisted_14 = ["d"];
 const _hoisted_15 = /*#__PURE__*/vue.createElementVNode("rect", {
   width: "100%",
@@ -7573,7 +7573,7 @@ const _hoisted_15 = /*#__PURE__*/vue.createElementVNode("rect", {
   fill: "url(#grid)"
 }, null, -1 /* HOISTED */);
 
-function render$2(_ctx, _cache, $props, $setup, $data, $options) {
+function render$3(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_FluidViewbar = vue.resolveComponent("FluidViewbar");
   const _component_FluidCalendarNavigator = vue.resolveComponent("FluidCalendarNavigator");
   const _component_FluidCalendarScroller = vue.resolveComponent("FluidCalendarScroller");
@@ -7581,7 +7581,7 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_FluidDraggable = vue.resolveComponent("FluidDraggable");
   const _component_FluidPinch = vue.resolveComponent("FluidPinch");
 
-  return (vue.openBlock(), vue.createElementBlock("div", _hoisted_1$2, [
+  return (vue.openBlock(), vue.createElementBlock("div", _hoisted_1$3, [
     ($props.debug)
       ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_2$2, [
           vue.createElementVNode("pre", null, vue.toDisplayString({
@@ -7748,7 +7748,7 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
                     }, null, 8 /* PROPS */, _hoisted_9$1)
                   ], 8 /* PROPS */, _hoisted_8$1)
                 ]),
-                _hoisted_10
+                _hoisted_10$1
               ], 4 /* STYLE */)),
               vue.createElementVNode("div", {
                 class: "t__fluid__calendar__header",
@@ -7768,7 +7768,7 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
                           key: 0,
                           date: cell
                         })
-                      : (vue.openBlock(), vue.createElementBlock("span", _hoisted_11, vue.toDisplayString($options.format(cell.date)), 1 /* TEXT */))
+                      : (vue.openBlock(), vue.createElementBlock("span", _hoisted_11$1, vue.toDisplayString($options.format(cell.date)), 1 /* TEXT */))
                   ], 4 /* STYLE */))
                 }), 128 /* KEYED_FRAGMENT */))
               ], 4 /* STYLE */),
@@ -7779,7 +7779,7 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
                 transform: `translateY(${$data.positionY}px)`,
               })
               }, [
-                (vue.openBlock(), vue.createElementBlock("svg", _hoisted_12, [
+                (vue.openBlock(), vue.createElementBlock("svg", _hoisted_12$1, [
                   vue.createElementVNode("defs", null, [
                     vue.createElementVNode("pattern", {
                       id: "grid",
@@ -7793,7 +7793,7 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
                         stroke: "currentColor",
                         "stroke-width": "1"
                       }, null, 8 /* PROPS */, _hoisted_14)
-                    ], 8 /* PROPS */, _hoisted_13)
+                    ], 8 /* PROPS */, _hoisted_13$1)
                   ]),
                   _hoisted_15
                 ]))
@@ -7810,12 +7810,147 @@ function render$2(_ctx, _cache, $props, $setup, $data, $options) {
   ]))
 }
 
+script$3.render = render$3;
+script$3.__file = "src/components/FluidCalendarDesktop.vue";
+
+var script$2 = {
+  name: 'FluidCalendarBooking',
+  props: {
+    booking: {
+      type: Object,
+    },
+    widthByMinute: {
+      type: Number,
+      default: 0,
+    },
+    rowHeight: {
+      type: Number,
+      default: 0,
+    },
+    collisions: {
+      type: Array,
+      default: () => [],
+    },
+    refX: {
+      type: Number,
+      default: 0,
+    },
+  },
+  data() {
+    return {
+      baseX: 0,
+      diff: 0,
+      lastDecal: 0,
+    }
+  },
+  computed: {
+    clss() {
+      const clss = [];
+      if (this.collisions.includes(this.booking.id)) clss.push('--collision');
+      if (this.booking.ghost) clss.push('--ghost');
+      if (this.booking.ghosted) clss.push('--ghosted');
+      return clss
+    },
+    stl() {
+      const stl = [];
+      stl.push({ width: this.width - 4 + 'px' });
+      stl.push({ height: this.rowHeight - 4 + 'px' });
+      return stl
+    },
+    sltContent() {
+      const stl = [];
+      if (this.refX && this.refX < 0) {
+        const inner = this.$refs.inner?.getBoundingClientRect();
+        const content = this.$refs.content?.getBoundingClientRect();
+        if (inner && content) {
+          const c = window.getComputedStyle(this.$refs.inner);
+          const pl = Number(c.paddingLeft.split('px')[0]);
+          const pr = Number(c.paddingRight.split('px')[0]);
+          let decal = this.refX * -1;
+          const v = content.width + decal + pl + pr;
+          if (v >= inner.width) {
+            decal = this.lastDecal;
+          }
+          stl.push({ transform: `translateX(${decal}px)` });
+          this.lastDecal = decal;
+        }
+      }
+      return stl
+    },
+    width() {
+      const diff = dayjs(this.booking.end_at).diff(
+        dayjs(this.booking.start_at),
+        'minute',
+      );
+      return diff * this.widthByMinute + this.diff
+    },
+    ghost() {
+      return this.booking.ghost
+    },
+  },
+  methods: {
+    format(date) {
+      return dayjs(date).format('DD MMM')
+    },
+    click() {
+      console.log('Click', this.booking);
+    },
+    startSize(event) {
+      this.baseX = event.clientX;
+      document.addEventListener('mousemove', this.size);
+      document.addEventListener('mouseup', this.endSize);
+    },
+    size(event) {
+      this.diff = event.clientX - this.baseX;
+    },
+    endSize(event) {
+      this.baseX = event.clientX;
+      document.removeEventListener('mousemove', this.size);
+      document.removeEventListener('mouseup', this.endSize);
+    },
+  },
+};
+
+const _hoisted_1$2 = {
+  ref: "inner",
+  class: "t__fluid__calendar__booking__inner"
+};
+
+function render$2(_ctx, _cache, $props, $setup, $data, $options) {
+  return (vue.openBlock(), vue.createElementBlock("div", {
+    class: vue.normalizeClass(["t__fluid__calendar__booking", $options.clss]),
+    style: vue.normalizeStyle($options.stl)
+  }, [
+    vue.createCommentVNode(" <button>m</button> "),
+    vue.createElementVNode("div", _hoisted_1$2, [
+      vue.createElementVNode("div", {
+        ref: "content",
+        class: "t__fluid__calendar__booking__content",
+        style: vue.normalizeStyle($options.sltContent)
+      }, [
+        vue.createCommentVNode(" {{ $slots.bookable }} "),
+        vue.createCommentVNode(" {{ refX }} "),
+        (!$options.ghost)
+          ? vue.renderSlot(_ctx.$slots, "default", { key: 0 })
+          : vue.createCommentVNode("v-if", true),
+        vue.createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
+      ], 4 /* STYLE */),
+      vue.createElementVNode("button", {
+        class: "t__fluid__calendar__booking__resize",
+        onMousedown: _cache[0] || (_cache[0] = vue.withModifiers((...args) => ($options.startSize && $options.startSize(...args)), ["stop"]))
+      }, [
+        vue.createCommentVNode(" {{ diff }} ")
+      ], 32 /* HYDRATE_EVENTS */)
+    ], 512 /* NEED_PATCH */)
+  ], 6 /* CLASS, STYLE */))
+}
+
 script$2.render = render$2;
-script$2.__file = "src/components/FluidCalendarDesktop.vue";
+script$2.__file = "src/components/FluidCalendarMobileBooking.vue";
 
 var script$1 = {
   name: 'FluidCalendarMobile',
-  components: { FluidPinch: script$3 },
+  components: { FluidCalendarMobileBooking: script$2 },
   data() {
     return {
       touchPoint: null,
@@ -7826,7 +7961,7 @@ var script$1 = {
       _bookings: [],
       _bookables: [],
       pY: 0,
-      zoom: 1,
+      zoom: 0.75,
       selectedBookable: null,
     }
   },
@@ -7875,6 +8010,16 @@ var script$1 = {
     },
   },
   computed: {
+    visibleBookings() {
+      if (!this._bookings) return []
+      return this._bookings.filter((f) => {
+        if (dayjs(f.start_at).isAfter(dayjs(this.rY.end))) return false
+        if (dayjs(f.end_at).isBefore(dayjs(this.rY.start))) return false
+        return f.bookableId === this.selectedBookable.id
+        // const visibleBookables = this.rY.rows.map((m) => m.id)
+        // return visibleBookables.includes(f.bookableId)
+      })
+    },
     rangeDays() {
       return 1
     },
@@ -7892,7 +8037,6 @@ var script$1 = {
     },
     dY() {
       const d = this.pY / this.heightByMinute / 60 / 24;
-      //   console.log('D => ', this.pY / this.heightByMinute)
       return ((d + this.t) / this.t) | 0
     },
     t() {
@@ -7934,6 +8078,28 @@ var script$1 = {
     },
   },
   methods: {
+    prev() {
+      const value = this.heightByMinute * 60 * 24;
+      const interpolation = { value: this.pY };
+      this.touchScroll = gsapWithCSS.to(interpolation, {
+        value: this.pY + value,
+        onUpdate: () => {
+          this.pY = interpolation.value;
+        },
+        duration: 0.5,
+      });
+    },
+    next() {
+      const value = this.heightByMinute * 60 * 24;
+      const interpolation = { value: this.pY };
+      this.touchScroll = gsapWithCSS.to(interpolation, {
+        value: this.pY - value,
+        onUpdate: () => {
+          this.pY = interpolation.value;
+        },
+        duration: 0.5,
+      });
+    },
     touchStart(event) {
       if (this.touchScroll) this.touchScroll.kill();
 
@@ -7956,7 +8122,6 @@ var script$1 = {
       };
     },
     touchEnd(event) {
-      //   event.preventDefault()
       const interpolation = { value: this.pY };
       this.touchScroll = gsapWithCSS.to(interpolation, {
         value: this.pY - this.touchDiff * 20,
@@ -7965,7 +8130,6 @@ var script$1 = {
         },
         duration: 0.5 + Math.abs(this.touchDiff) / 50,
       });
-      //   console.log('DIFF ?', this.touchDiff)
       document.removeEventListener('touchmove', this.touchMove);
       document.removeEventListener('touchend', this.touchEnd);
     },
@@ -7989,84 +8153,133 @@ const _hoisted_1$1 = {
 };
 const _hoisted_2$1 = { class: "t__fluid__calendar__mobile__header" };
 const _hoisted_3$1 = { class: "t__fluid__calendar__mobile__header__date" };
-const _hoisted_4$1 = { class: "t__fluid__calendar__mobile__bookables" };
-const _hoisted_5$1 = ["onClick"];
-const _hoisted_6 = {
-  class: "t__fluid__calendar__mobile__main",
-  ref: "main"
+const _hoisted_4$1 = /*#__PURE__*/vue.createElementVNode("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  "stroke-width": "2",
+  "stroke-linecap": "round",
+  "stroke-linejoin": "round",
+  class: "lucide lucide-chevron-left"
+}, [
+  /*#__PURE__*/vue.createElementVNode("path", { d: "m15 18-6-6 6-6" })
+], -1 /* HOISTED */);
+const _hoisted_5$1 = [
+  _hoisted_4$1
+];
+const _hoisted_6 = /*#__PURE__*/vue.createElementVNode("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  "stroke-width": "2",
+  "stroke-linecap": "round",
+  "stroke-linejoin": "round",
+  class: "lucide lucide-chevron-right"
+}, [
+  /*#__PURE__*/vue.createElementVNode("path", { d: "m9 18 6-6-6-6" })
+], -1 /* HOISTED */);
+const _hoisted_7 = [
+  _hoisted_6
+];
+const _hoisted_8 = { class: "t__fluid__calendar__mobile__bookables" };
+const _hoisted_9 = ["onClick"];
+const _hoisted_10 = {
+  key: 1,
+  class: "t__fluid__calendar__booking__label"
 };
-const _hoisted_7 = { class: "t__fluid__calendar__mobile__hours" };
-const _hoisted_8 = { key: 0 };
-const _hoisted_9 = { key: 1 };
+const _hoisted_11 = { class: "t__fluid__calendar__mobile__hours" };
+const _hoisted_12 = { key: 0 };
+const _hoisted_13 = { key: 1 };
 
 function render$1(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_FluidPinch = vue.resolveComponent("FluidPinch");
+  const _component_FluidCalendarMobileBooking = vue.resolveComponent("FluidCalendarMobileBooking");
 
-  return (vue.openBlock(), vue.createBlock(_component_FluidPinch, {
-    zoom: $data.zoom,
-    onPinch: $options.pinch
-  }, {
-    default: vue.withCtx(() => [
-      vue.createElementVNode("div", {
-        class: "t__fluid__calendar__mobile",
-        ref: "fluidCalendar",
-        style: vue.normalizeStyle({ height: $props.h + 'px' }),
-        onTouchstart: _cache[0] || (_cache[0] = vue.withModifiers((...args) => ($options.touchStart && $options.touchStart(...args)), ["prevent"]))
-      }, [
-        ($props.debug)
-          ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_1$1, [
-              vue.createElementVNode("pre", null, vue.toDisplayString({
-            date: $options.date,
-            heightByMinute: $options.heightByMinute,
-            pY: $data.pY,
-            dY: $options.dY,
-            tY: $options.tY,
-            start: $options.rY.start,
-            end: $options.rY.end,
-            diffInHours: $options.rY.diffInHours,
-          }), 1 /* TEXT */)
-            ]))
-          : vue.createCommentVNode("v-if", true),
-        vue.createElementVNode("header", _hoisted_2$1, [
-          vue.createElementVNode("div", _hoisted_3$1, vue.toDisplayString($options.date), 1 /* TEXT */),
-          vue.createElementVNode("div", _hoisted_4$1, [
-            (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($props.bookables, (bookable) => {
-              return (vue.openBlock(), vue.createElementBlock("button", {
-                class: vue.normalizeClass(["t__fluid__calendar__mobile__bookable", { '--selected': bookable.id === $data.selectedBookable?.id }]),
-                onClick: $event => ($data.selectedBookable = bookable)
-              }, vue.toDisplayString(bookable.label), 11 /* TEXT, CLASS, PROPS */, _hoisted_5$1))
-            }), 256 /* UNKEYED_FRAGMENT */))
-          ])
-        ]),
-        vue.createElementVNode("main", _hoisted_6, [
-          vue.createElementVNode("div", {
-            class: "t__fluid__calendar__mobile__inner",
-            style: vue.normalizeStyle({
-            height: `${$options.height}px`,
-            transform: `translateY(${$options.tY}px)`,
-          })
-          }, [
-            vue.createCommentVNode(" <div class=\"t__fluid__calendar__mobile__scroller\"> "),
-            vue.createElementVNode("div", _hoisted_7, [
-              (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.rY.cells, (cell) => {
-                return (vue.openBlock(), vue.createElementBlock("div", {
-                  class: vue.normalizeClass(["t__fluid__calendar__mobile__hour", { '--day': cell.time === '00:00' }]),
-                  style: vue.normalizeStyle({ height: `${$options.cellHeight}px` })
-                }, [
-                  (cell.time === '00:00')
-                    ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_8, vue.toDisplayString(cell.short), 1 /* TEXT */))
-                    : (vue.openBlock(), vue.createElementBlock("span", _hoisted_9, vue.toDisplayString(cell.time), 1 /* TEXT */))
-                ], 6 /* CLASS, STYLE */))
-              }), 256 /* UNKEYED_FRAGMENT */))
-            ]),
-            vue.createCommentVNode(" <svg\n            class=\"t__fluid__calendar__mobile__grid\"\n            xmlns=\"http://www.w3.org/2000/svg\"\n          >\n            <defs>\n              <pattern\n                id=\"grid\"\n                :width=\"w\"\n                :height=\"cellHeight\"\n                patternUnits=\"userSpaceOnUse\"\n              >\n                <path\n                  :d=\"`M ${w} 0 L 0 0 0 ${cellHeight}`\"\n                  fill=\"none\"\n                  stroke=\"currentColor\"\n                  stroke-width=\"1\"\n                />\n              </pattern>\n            </defs>\n            <rect width=\"100%\" height=\"100%\" fill=\"url(#grid)\" />\n          </svg> "),
-            vue.createCommentVNode(" </div> ")
-          ], 4 /* STYLE */)
-        ], 512 /* NEED_PATCH */)
-      ], 36 /* STYLE, HYDRATE_EVENTS */)
+  return (vue.openBlock(), vue.createElementBlock("div", {
+    class: "t__fluid__calendar__mobile",
+    ref: "fluidCalendar",
+    style: vue.normalizeStyle({ height: $props.h + 'px' })
+  }, [
+    ($props.debug)
+      ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_1$1, [
+          vue.createElementVNode("pre", null, vue.toDisplayString({
+          date: $options.date,
+          heightByMinute: $options.heightByMinute,
+          pY: $data.pY,
+          dY: $options.dY,
+          tY: $options.tY,
+          start: $options.rY.start,
+          end: $options.rY.end,
+          diffInHours: $options.rY.diffInHours,
+        }), 1 /* TEXT */)
+        ]))
+      : vue.createCommentVNode("v-if", true),
+    vue.createElementVNode("header", _hoisted_2$1, [
+      vue.createElementVNode("div", _hoisted_3$1, [
+        vue.createElementVNode("button", {
+          onClick: _cache[0] || (_cache[0] = (...args) => ($options.prev && $options.prev(...args))),
+          class: "t__fluid__calendar__mobile__header__nav --prev"
+        }, [..._hoisted_5$1]),
+        vue.createElementVNode("span", null, vue.toDisplayString($options.date), 1 /* TEXT */),
+        vue.createElementVNode("button", {
+          onClick: _cache[1] || (_cache[1] = (...args) => ($options.next && $options.next(...args))),
+          class: "t__fluid__calendar__mobile__header__nav --next"
+        }, [..._hoisted_7])
+      ]),
+      vue.createElementVNode("div", _hoisted_8, [
+        (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($props.bookables, (bookable) => {
+          return (vue.openBlock(), vue.createElementBlock("button", {
+            class: vue.normalizeClass(["t__fluid__calendar__mobile__bookable", { '--selected': bookable.id === $data.selectedBookable?.id }]),
+            onClick: $event => ($data.selectedBookable = bookable)
+          }, vue.toDisplayString(bookable.label), 11 /* TEXT, CLASS, PROPS */, _hoisted_9))
+        }), 256 /* UNKEYED_FRAGMENT */))
+      ])
     ]),
-    _: 1 /* STABLE */
-  }, 8 /* PROPS */, ["zoom", "onPinch"]))
+    vue.createElementVNode("main", {
+      class: "t__fluid__calendar__mobile__main",
+      ref: "main",
+      onTouchstart: _cache[2] || (_cache[2] = vue.withModifiers((...args) => ($options.touchStart && $options.touchStart(...args)), ["prevent"]))
+    }, [
+      (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.visibleBookings, (booking) => {
+        return (vue.openBlock(), vue.createBlock(_component_FluidCalendarMobileBooking, {
+          booking: booking,
+          heightByMinute: $options.heightByMinute
+        }, {
+          default: vue.withCtx(() => [
+            (_ctx.$slots.booking)
+              ? vue.renderSlot(_ctx.$slots, "booking", {
+                  key: 0,
+                  booking: booking
+                })
+              : (vue.openBlock(), vue.createElementBlock("span", _hoisted_10, vue.toDisplayString(booking.id) + " " + vue.toDisplayString(booking.label), 1 /* TEXT */))
+          ]),
+          _: 2 /* DYNAMIC */
+        }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "heightByMinute"]))
+      }), 256 /* UNKEYED_FRAGMENT */)),
+      vue.createElementVNode("div", {
+        class: "t__fluid__calendar__mobile__inner",
+        style: vue.normalizeStyle({
+          height: `${$options.height}px`,
+          transform: `translateY(${$options.tY}px)`,
+        })
+      }, [
+        vue.createCommentVNode(" <div class=\"t__fluid__calendar__mobile__scroller\"> "),
+        vue.createElementVNode("div", _hoisted_11, [
+          (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.rY.cells, (cell) => {
+            return (vue.openBlock(), vue.createElementBlock("div", {
+              class: vue.normalizeClass(["t__fluid__calendar__mobile__hour", { '--day': cell.time === '00:00' }]),
+              style: vue.normalizeStyle({ height: `${$options.cellHeight}px` })
+            }, [
+              (cell.time === '00:00')
+                ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_12, vue.toDisplayString(cell.short), 1 /* TEXT */))
+                : (vue.openBlock(), vue.createElementBlock("span", _hoisted_13, vue.toDisplayString(cell.time), 1 /* TEXT */))
+            ], 6 /* CLASS, STYLE */))
+          }), 256 /* UNKEYED_FRAGMENT */))
+        ])
+      ], 4 /* STYLE */)
+    ], 544 /* HYDRATE_EVENTS, NEED_PATCH */)
+  ], 4 /* STYLE */))
 }
 
 script$1.render = render$1;
@@ -8074,7 +8287,7 @@ script$1.__file = "src/components/FluidCalendarMobile.vue";
 
 var script = {
   name: 'FluidCalendar',
-  components: { FluidCalendarDesktop: script$2, FluidCalendarMobile: script$1 },
+  components: { FluidCalendarDesktop: script$3, FluidCalendarMobile: script$1 },
   emits: ['updateDate', 'updateRange', 'clickBooking'],
   props: {
     lang: {

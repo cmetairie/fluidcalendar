@@ -1,93 +1,118 @@
 <template>
-  <FluidPinch :zoom="zoom" @pinch="pinch">
-    <div
-      class="t__fluid__calendar__mobile"
-      ref="fluidCalendar"
-      :style="{ height: h + 'px' }"
+  <div
+    class="t__fluid__calendar__mobile"
+    ref="fluidCalendar"
+    :style="{ height: h + 'px' }"
+  >
+    <div v-if="debug" class="t__debugg">
+      <pre>{{
+        {
+          date,
+          heightByMinute,
+          pY,
+          dY,
+          tY,
+          start: rY.start,
+          end: rY.end,
+          diffInHours: rY.diffInHours,
+        }
+      }}</pre>
+    </div>
+    <header class="t__fluid__calendar__mobile__header">
+      <div class="t__fluid__calendar__mobile__header__date">
+        <button
+          @click="prev"
+          class="t__fluid__calendar__mobile__header__nav --prev"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-chevron-left"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </button>
+        <span>{{ date }}</span>
+        <button
+          @click="next"
+          class="t__fluid__calendar__mobile__header__nav --next"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-chevron-right"
+          >
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </button>
+      </div>
+      <div class="t__fluid__calendar__mobile__bookables">
+        <button
+          v-for="bookable of bookables"
+          class="t__fluid__calendar__mobile__bookable"
+          :class="{ '--selected': bookable.id === selectedBookable?.id }"
+          @click="selectedBookable = bookable"
+        >
+          {{ bookable.label }}
+        </button>
+      </div>
+    </header>
+    <main
+      class="t__fluid__calendar__mobile__main"
+      ref="main"
       @touchstart.prevent="touchStart"
     >
-      <div v-if="debug" class="t__debugg">
-        <pre>{{
-          {
-            date,
-            heightByMinute,
-            pY,
-            dY,
-            tY,
-            start: rY.start,
-            end: rY.end,
-            diffInHours: rY.diffInHours,
-          }
-        }}</pre>
-      </div>
-      <header class="t__fluid__calendar__mobile__header">
-        <div class="t__fluid__calendar__mobile__header__date">{{ date }}</div>
-        <div class="t__fluid__calendar__mobile__bookables">
-          <button
-            v-for="bookable of bookables"
-            class="t__fluid__calendar__mobile__bookable"
-            :class="{ '--selected': bookable.id === selectedBookable?.id }"
-            @click="selectedBookable = bookable"
+      <FluidCalendarMobileBooking
+        v-for="booking of visibleBookings"
+        :booking="booking"
+        :heightByMinute="heightByMinute"
+      >
+        <slot v-if="$slots.booking" name="booking" :booking="booking" />
+        <span class="t__fluid__calendar__booking__label" v-else>
+          {{ booking.id }} {{ booking.label }}
+        </span>
+      </FluidCalendarMobileBooking>
+      <div
+        class="t__fluid__calendar__mobile__inner"
+        :style="{
+          height: `${height}px`,
+          transform: `translateY(${tY}px)`,
+        }"
+      >
+        <!-- <div class="t__fluid__calendar__mobile__scroller"> -->
+        <div class="t__fluid__calendar__mobile__hours">
+          <div
+            v-for="cell of rY.cells"
+            class="t__fluid__calendar__mobile__hour"
+            :style="{ height: `${cellHeight}px` }"
+            :class="{ '--day': cell.time === '00:00' }"
           >
-            {{ bookable.label }}
-          </button>
-        </div>
-      </header>
-      <main class="t__fluid__calendar__mobile__main" ref="main">
-        <div
-          class="t__fluid__calendar__mobile__inner"
-          :style="{
-            height: `${height}px`,
-            transform: `translateY(${tY}px)`,
-          }"
-        >
-          <!-- <div class="t__fluid__calendar__mobile__scroller"> -->
-          <div class="t__fluid__calendar__mobile__hours">
-            <div
-              v-for="cell of rY.cells"
-              class="t__fluid__calendar__mobile__hour"
-              :style="{ height: `${cellHeight}px` }"
-              :class="{ '--day': cell.time === '00:00' }"
-            >
-              <span v-if="cell.time === '00:00'">{{ cell.short }}</span>
-              <span v-else>{{ cell.time }}</span>
-            </div>
+            <span v-if="cell.time === '00:00'">{{ cell.short }}</span>
+            <span v-else>{{ cell.time }}</span>
           </div>
-          <!-- <svg
-            class="t__fluid__calendar__mobile__grid"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <pattern
-                id="grid"
-                :width="w"
-                :height="cellHeight"
-                patternUnits="userSpaceOnUse"
-              >
-                <path
-                  :d="`M ${w} 0 L 0 0 0 ${cellHeight}`"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1"
-                />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg> -->
-          <!-- </div> -->
         </div>
-      </main>
-    </div>
-  </FluidPinch>
+      </div>
+    </main>
+  </div>
 </template>
 
 <script>
 import { dayjs } from '../dayjs.js'
 import gsap from 'gsap'
-import FluidPinch from './FluidPinch.vue'
+import FluidCalendarMobileBooking from './FluidCalendarMobileBooking.vue'
 export default {
   name: 'FluidCalendarMobile',
-  components: { FluidPinch },
+  components: { FluidCalendarMobileBooking },
   data() {
     return {
       touchPoint: null,
@@ -98,7 +123,7 @@ export default {
       _bookings: [],
       _bookables: [],
       pY: 0,
-      zoom: 1,
+      zoom: 0.75,
       selectedBookable: null,
     }
   },
@@ -147,6 +172,16 @@ export default {
     },
   },
   computed: {
+    visibleBookings() {
+      if (!this._bookings) return []
+      return this._bookings.filter((f) => {
+        if (dayjs(f.start_at).isAfter(dayjs(this.rY.end))) return false
+        if (dayjs(f.end_at).isBefore(dayjs(this.rY.start))) return false
+        return f.bookableId === this.selectedBookable.id
+        // const visibleBookables = this.rY.rows.map((m) => m.id)
+        // return visibleBookables.includes(f.bookableId)
+      })
+    },
     rangeDays() {
       return 1
     },
@@ -205,6 +240,28 @@ export default {
     },
   },
   methods: {
+    prev() {
+      const value = this.heightByMinute * 60 * 24
+      const interpolation = { value: this.pY }
+      this.touchScroll = gsap.to(interpolation, {
+        value: this.pY + value,
+        onUpdate: () => {
+          this.pY = interpolation.value
+        },
+        duration: 0.5,
+      })
+    },
+    next() {
+      const value = this.heightByMinute * 60 * 24
+      const interpolation = { value: this.pY }
+      this.touchScroll = gsap.to(interpolation, {
+        value: this.pY - value,
+        onUpdate: () => {
+          this.pY = interpolation.value
+        },
+        duration: 0.5,
+      })
+    },
     touchStart(event) {
       if (this.touchScroll) this.touchScroll.kill()
 
@@ -227,7 +284,6 @@ export default {
       }
     },
     touchEnd(event) {
-      //   event.preventDefault()
       const interpolation = { value: this.pY }
       this.touchScroll = gsap.to(interpolation, {
         value: this.pY - this.touchDiff * 20,
@@ -236,7 +292,6 @@ export default {
         },
         duration: 0.5 + Math.abs(this.touchDiff) / 50,
       })
-      //   console.log('DIFF ?', this.touchDiff)
       document.removeEventListener('touchmove', this.touchMove)
       document.removeEventListener('touchend', this.touchEnd)
     },
