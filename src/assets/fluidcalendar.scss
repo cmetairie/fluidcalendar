@@ -172,14 +172,16 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: transform 0.2s;
 }
 
 .t__fluid__calendar__header__cell__date {
   display: block;
+  font-weight: 500;
+  color: var(--color-title);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: transform 0.2s;
 }
 .t__fluid__calendar__header__time__cells {
   position: absolute;

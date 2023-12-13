@@ -214,7 +214,7 @@
                   class="t__fluid__calendar__header__cell__date"
                   :style="{
                     display: 'block',
-                    transform: `translateY(${displayHours ? 8 : 12}px)`,
+                    transform: `translateY(${displayHours ? 0 : 12}px)`,
                   }"
                 >
                   {{ format(cell.date) }}
@@ -450,6 +450,7 @@ export default {
       return this.zoom > 10
     },
     headerHeight() {
+      return 40
       return this.displayHours ? this.rowHeight * 1.35 : this.rowHeight
     },
     ratio() {
@@ -480,7 +481,7 @@ export default {
     // },
     fullHeight() {
       if (!this.filteredBookables || !this.filteredBookables.length) return 0
-      return (this.filteredBookables.length + 1) * this.rowHeight
+      return this.filteredBookables.length * this.rowHeight + this.headerHeight
     },
     filteredBookables() {
       return this._bookables //.filter((f) => this.test.includes(f.id))
@@ -617,7 +618,7 @@ export default {
   },
   methods: {
     pinch(p) {
-      if (p.zoom > 2 && p.zoom < 20) {
+      if (p.zoom > 2 && p.zoom < 40) {
         this.pincher = p
         this.zoom = p.zoom
       }

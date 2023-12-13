@@ -7338,7 +7338,7 @@ var script$3 = {
       return this.zoom > 10
     },
     headerHeight() {
-      return this.displayHours ? this.rowHeight * 1.35 : this.rowHeight
+      return 40
     },
     ratio() {
       return 1440 / this.minutesByCell
@@ -7360,7 +7360,7 @@ var script$3 = {
     // },
     fullHeight() {
       if (!this.filteredBookables || !this.filteredBookables.length) return 0
-      return (this.filteredBookables.length + 1) * this.rowHeight
+      return this.filteredBookables.length * this.rowHeight + this.headerHeight
     },
     filteredBookables() {
       return this._bookables //.filter((f) => this.test.includes(f.id))
@@ -7492,7 +7492,7 @@ var script$3 = {
   },
   methods: {
     pinch(p) {
-      if (p.zoom > 2 && p.zoom < 20) {
+      if (p.zoom > 2 && p.zoom < 40) {
         this.pincher = p;
         this.zoom = p.zoom;
       }
@@ -8054,7 +8054,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                       class: "t__fluid__calendar__header__cell__date",
                       style: normalizeStyle({
                     display: 'block',
-                    transform: `translateY(${$options.displayHours ? 8 : 12}px)`,
+                    transform: `translateY(${$options.displayHours ? 0 : 12}px)`,
                   })
                     }, toDisplayString($options.format(cell.date)), 5 /* TEXT, STYLE */),
                     ($options.displayHours)
