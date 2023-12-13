@@ -82,7 +82,6 @@
 }
 
 .t__debugg {
-  pointer-events: none;
   font-size: 13px;
   line-height: 1.5;
   width: 20rem;
@@ -165,20 +164,40 @@
 .t__fluid__calendar__header__cell {
   font-size: 0.75rem;
   display: flex;
-  align-items: center;
   justify-content: center;
   position: relative;
-  text-align: center;
   padding: 0 var(--space);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform 0.2s;
+}
+
+.t__fluid__calendar__header__cell__date {
+  display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.t__fluid__calendar__header__cell > span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.t__fluid__calendar__header__time__cells {
+  position: absolute;
+  right: 0;
+  bottom: 0.35rem;
+  left: 0;
+  animation: slideFromBottomSoft 0.2s;
+  opacity: 0.75;
+}
+
+.t__fluid__calendar__header__time__cell {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+.t__fluid__calendar__header__time__cell > span {
+  font-size: 11px;
+  display: block;
+  transform: translateX(-50%);
 }
 
 .t__fluid__calendar__pointer {
@@ -191,11 +210,16 @@
   z-index: 9;
 }
 
-.t__fluid__calendar__header__grid {
+.t__fluid__calendar__header__grid,
+.t__fluid__calendar__header__time__grid {
   color: var(--color-border-m);
   position: absolute;
   width: 100%;
   z-index: 6;
+}
+
+.t__fluid__calendar__header__time__grid {
+  width: calc(100% - 1px);
 }
 
 .t__fluid__calendar__grid {
@@ -687,6 +711,10 @@
   width: 50%;
 }
 
+.t__fluid__calendar__booking__content {
+  line-height: 1;
+}
+
 @keyframes shake {
   10%, 90% {
     transform: translate3d(-1px, 0, 0);
@@ -713,6 +741,16 @@
   }
   40%, 60% {
     transform: translate3d(2px, 0, 0);
+  }
+}
+@keyframes slideFromBottomSoft {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

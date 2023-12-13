@@ -49,6 +49,9 @@ export default {
       type: Number,
       default: 0,
     },
+    ratio: {
+      type: Number,
+    },
   },
   data() {
     return {
@@ -67,7 +70,7 @@ export default {
     },
     stl() {
       const stl = []
-      stl.push({ width: this.width - 4 + 'px' })
+      stl.push({ width: this.width / this.ratio - 4 + 'px' })
       stl.push({ height: this.rowHeight - 4 + 'px' })
       return stl
     },

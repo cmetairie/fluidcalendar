@@ -3,6 +3,9 @@
     <div v-if="debug" class="t__debugg">
       <pre>{{
         {
+          rangeDays,
+          threshold,
+          minutesByCell,
           scroller,
           widthByMinute,
           decalX,
@@ -29,6 +32,7 @@
 
   <input type="range" min="20" max="100" v-model="rowHeight" step="1" /> -->
     <!-- {{ dragData }} -->
+    <!-- {{ dragData }} -->
 
     <FluidViewbar
       :rangeX="rangeX"
@@ -50,7 +54,7 @@
         <div class="t__fluid__calendar__bookables" ref="bookables">
           <div
             class="t__fluid__calendar__bookables__header"
-            :style="{ height: rowHeight + 'px' }"
+            :style="{ height: headerHeight + 'px' }"
           >
             <span>bookables</span>
           </div>
@@ -97,7 +101,7 @@
             :style="{
               top: dragData[0].y + 'px',
               left: dragData[0].x + 'px',
-              width: `${dragData.length * widthByMinute * 60 * 24}px`,
+              width: `${dragData.length * widthByMinute * minutesByCell}px`,
               transform: `translateY(${positionY}px) translateX(${translateX}px)`,
               height: `${rowHeight}px`,
             }"
@@ -127,6 +131,7 @@
                   :widthByMinute="widthByMinute"
                   :rowHeight="rowHeight"
                   :collisions="collisions"
+                  :ratio="ratio"
                   :refX="translateX + dateToX(booking.start_at)"
                 >
                   <slot
@@ -143,17 +148,17 @@
             <svg
               class="t__fluid__calendar__header__grid"
               xmlns="http://www.w3.org/2000/svg"
-              :style="{ height: rowHeight + 'px' }"
+              :style="{ height: headerHeight + 'px' }"
             >
               <defs>
                 <pattern
                   id="header_grid"
                   :width="cellWidth"
-                  :height="rowHeight"
+                  :height="headerHeight"
                   patternUnits="userSpaceOnUse"
                 >
                   <path
-                    :d="`M ${cellWidth} 0 L 0 0 0 ${rowHeight}`"
+                    :d="`M ${cellWidth} 0 L 0 0 0 ${headerHeight}`"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="1"
@@ -162,21 +167,72 @@
               </defs>
               <rect width="100%" height="100%" fill="url(#header_grid)" />
             </svg>
+            <svg
+              class="t__fluid__calendar__header__time__grid"
+              xmlns="http://www.w3.org/2000/svg"
+              v-if="displayHours"
+              :style="{ height: headerHeight + 'px' }"
+            >
+              <defs>
+                <pattern
+                  id="header_time_grid"
+                  :width="(cellWidth / minutesByCell) * 60"
+                  :height="headerHeight"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <path
+                    :d="`M ${
+                      (cellWidth / minutesByCell) * 60
+                    } ${headerHeight} L ${(cellWidth / minutesByCell) * 60} ${
+                      headerHeight - 6
+                    }`"
+                    fill="none"
+                    stroke="#aaa"
+                    stroke-width="1"
+                  />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#header_time_grid)" />
+            </svg>
             <div
               class="t__fluid__calendar__header"
               :style="{
                 width: width + 'px',
-                height: rowHeight + 'px',
+                height: headerHeight + 'px',
               }"
             >
               <div
                 class="t__fluid__calendar__header__cell"
                 v-for="cell of rangeX.cells"
                 :key="cell.date"
-                :style="{ width: `${cellWidth}px` }"
+                :style="{
+                  width: `${cellWidth}px`,
+                }"
               >
-                <slot v-if="$slots.date" name="date" :date="cell" />
-                <span v-else>{{ format(cell.date) }}</span>
+                <!-- <slot v-if="$slots.date" name="date" :date="cell" /> -->
+                <span
+                  class="t__fluid__calendar__header__cell__date"
+                  :style="{
+                    display: 'block',
+                    transform: `translateY(${displayHours ? 8 : 12}px)`,
+                  }"
+                >
+                  {{ format(cell.date) }}
+                </span>
+                <div
+                  v-if="displayHours"
+                  class="t__fluid__calendar__header__time__cells"
+                >
+                  <div
+                    v-for="hour of hours"
+                    class="t__fluid__calendar__header__time__cell"
+                    :style="{
+                      transform: `translateX(${hour.x}px)`,
+                    }"
+                  >
+                    <span>{{ hour.label }}</span>
+                  </div>
+                </div>
               </div>
             </div>
             <div
@@ -251,14 +307,6 @@ export default {
     FluidPinch,
   },
   props: {
-    dayStart: {
-      type: String,
-      default: '00:00',
-    },
-    dayEnd: {
-      type: String,
-      default: '24:00',
-    },
     lang: {
       type: String,
       default: 'fr',
@@ -274,6 +322,18 @@ export default {
     debounce: {
       type: Number,
       default: 0,
+    },
+    slotDuration: {
+      type: String,
+      default: '01:00',
+    },
+    slotMinTime: {
+      type: String,
+      default: '00:00:00',
+    },
+    slotMaxTime: {
+      type: String,
+      default: '23:59:00',
     },
     debug: {
       type: Boolean,
@@ -301,7 +361,7 @@ export default {
       pointer: 0,
       positionX: 0,
       positionY: 0,
-      zoom: 1,
+      zoom: 3,
       fakeMove: 0,
       point: {},
       _bookings: [],
@@ -367,14 +427,43 @@ export default {
     },
   },
   computed: {
+    slots() {
+      const [hours, minutes, seconds] = this.slotDuration.split(':').map(Number)
+      return [hours, minutes, seconds]
+      // slotDuration , slotMinTime, slotMaxTime
+    },
+    hours() {
+      // const [hours, minutes, seconds] = this.slotDuration.split(':').map(Number)
+      const hours = []
+      const [minHours, minMinutes] = this.slotMinTime.split(':').map(Number)
+      const [maxHours] = this.slotMaxTime.split(':').map(Number)
+      const h = maxHours - minHours
+      let startX = 0
+      for (let i = 0; i < h - 1; i++) {
+        const restMinutes = 60 - minMinutes
+        startX = startX + this.widthByMinute * restMinutes
+        hours.push({ index: i, x: startX, label: `${minHours + i + 1}:00` })
+      }
+      return hours
+    },
+    displayHours() {
+      return this.zoom > 10
+    },
+    headerHeight() {
+      return this.displayHours ? this.rowHeight * 1.35 : this.rowHeight
+    },
+    ratio() {
+      return 1440 / this.minutesByCell
+    },
     // diffCenter(){
 
     // },
     threshold() {
-      return Math.floor(this.rangeDays / 6)
+      return 2
+      return Math.floor(this.rangeDays / 8)
     },
     rangeDays() {
-      return 20
+      return 6
       const width = screen.width
       const nbDays = this.widthByMinute * 60 * 24
       console.log('NB DAYS ?', width / nbDays)
@@ -413,9 +502,38 @@ export default {
     },
     pointerDate() {
       if (!this.rangeX) return
+
+      // const days =
+      //   -this.positionX / this.widthByMinute / this.minutesByCell -
+      //   this.rangeDays
+
+      // const minutes =
+      //   -this.positionX / this.widthByMinute -
+      //   this.rangeDays * this.minutesByCell * this.widthByMinute
+
+      const minutes =
+        Math.floor(
+          this.positionX / this.widthByMinute +
+            this.rangeDays * this.minutesByCell,
+        ) * -1
+
+      // console.log('Add ', minutes)
+
+      // console.log(
+      //   'Minutes = >',
+      //   dayjs().startOf('day', this.slotMinTime).date,
+      //   minutes,
+      // )
+
+      // console.log(dayjs().startOf('day', this.slotMinTime).date)
+
+      return dayjs()
+        .startOf('day', this.slotMinTime)
+        .gptAdd(minutes, 'minute', this.slotMinTime, this.slotMaxTime)
+        .format('iso')
       const start = dayjs(this.rangeX.start)
       const dist =
-        (this.translateX * -1) / this.widthByMinute + 125 / this.widthByMinute
+        (this.translateX * -1) / this.widthByMinute / this.widthByMinute
 
       return start.add(dist, 'minute').format('iso')
     },
@@ -423,13 +541,22 @@ export default {
       return this.zoom / 10
     },
     cellWidth() {
-      return this.widthByMinute * 60 * 24
+      return this.widthByMinute * this.minutesByCell
+    },
+    minutesByCell() {
+      return dayjs().duration(this.slotMinTime, this.slotMaxTime)
     },
     decalY() {
       return (this.positionY / this.rowHeight) | 0
     },
     decalX() {
-      const d = this.positionX / this.widthByMinute / 60 / 24
+      const d = this.positionX / this.widthByMinute / this.minutesByCell
+      // console.log('d => ', d)
+      // console.log(
+      //   'd => ',
+      //   d,
+      //   (this.positionX / this.widthByMinute) / this.minutesByCell,
+      // )
       return ((d + this.threshold) / this.threshold) | 0
     },
     width() {
@@ -438,7 +565,7 @@ export default {
     translateX() {
       return (
         this.positionX -
-        this.decalX * this.threshold * (this.widthByMinute * 60 * 24)
+        this.decalX * this.threshold * (this.widthByMinute * this.minutesByCell)
       )
     },
     translateY() {
@@ -453,23 +580,24 @@ export default {
       }
     },
     rangeX() {
-      const start = dayjs(dayjs().startOf('day').date)
-        .add(
-          -60 * 24 * (this.rangeDays + this.decalX * this.threshold),
-          'minute',
-        )
-        .startOf('day')
+      const s = -this.rangeDays * 1440 - this.decalX * this.threshold * 1440
+      const e = this.rangeDays * 1440 - this.decalX * this.threshold * 1440
+
+      const start = dayjs(dayjs().startOf('day', this.slotMinTime).date)
+        .add(s, 'minute')
+        .startOf('day', this.slotMinTime)
         .format('iso')
 
-      const end = dayjs(dayjs().startOf('day').date)
-        .add(
-          60 * 24 * (this.rangeDays - this.decalX * this.threshold),
-          'minute',
-        )
-        .endOf('day')
+      const end = dayjs(dayjs().startOf('day', this.slotMinTime).date)
+        .add(e, 'minute')
+        .endOf('day', this.slotMaxTime)
         .format('iso')
 
-      const diffInDays = dayjs(end).diff(dayjs(start), 'day')
+      const diffInDays = dayjs(end).diff(dayjs(start)) + 1
+
+      // let slots = []
+
+      console.log('Slots => ', dayjs().startOf('day', this.slotMinTime).date)
 
       let cells = []
       for (let i = 0; i < diffInDays; i++) {
@@ -489,7 +617,7 @@ export default {
   },
   methods: {
     pinch(p) {
-      if (p.zoom > 0.25 && p.zoom < 10) {
+      if (p.zoom > 2 && p.zoom < 20) {
         this.pincher = p
         this.zoom = p.zoom
       }
@@ -502,6 +630,7 @@ export default {
         y: event.clientY,
       }
       const data = this.pointToData(this.point)
+      // console.log('DATA => ', data)
       this.point.data = data
       if (data.collision) {
         this.addCollision(data.collision.id)
@@ -521,7 +650,7 @@ export default {
         // document.addEventListener('mouseup', this.endDrag)
       } else {
         this.dragData = [data]
-        document.body.style.cursor = 'ew-resize'
+        // document.body.style.cursor = 'ew-resize'
       }
 
       document.body.style.userSelect = 'none'
@@ -689,17 +818,17 @@ export default {
       const bookableIndex = this.filteredBookables.findIndex(
         (f) => f.id === bookableId,
       )
-      return (bookableIndex + 1) * this.rowHeight + diffY
+      return bookableIndex * this.rowHeight + diffY + this.headerHeight
     },
     pointToData({ x, y }) {
       const top =
         y -
         this.$refs.fluidCalendar.getBoundingClientRect().top +
         this.positionY * -1
-      const date = this.xToDate(x)
-      const bookable = this.yToBookable(top)
+      const date = this.xToDate(x, this.slotDuration)
 
-      // console.log('Date ', date)
+      // console.log('Date ', date, dayjs(date).snapToTime())
+      const bookable = this.yToBookable(top)
 
       if (!bookable) {
         return {
@@ -747,21 +876,30 @@ export default {
     yToBookable(top) {
       return this.filteredBookables[((top / this.rowHeight) | 0) - 1]
     },
-    xToDate(x) {
+    xToDate(x, snap = false) {
+      let v = x
+      if (snap) {
+        // v = dayjs().snapToTime(x, this.slotDuration)
+        // console.log('Snap ', x, v)
+      }
+      // const value =
       const zero =
-        x -
+        v -
         this.$refs.fluidCalendar.getBoundingClientRect().left -
         this.$refs.bookables.getBoundingClientRect().width
       const p = zero + this.translateX * -1
       const days = p / this.widthByMinute
-      return dayjs(this.rangeX.start).add(days, 'minute').date
+
+      let value = days * this.ratio
+      // console.log('Snap ', this.slotDuration, value)
+      return dayjs(this.rangeX.start).add(value, 'minute').date
     },
     dateToX(date) {
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute')
-      return diff * this.widthByMinute
+      return (diff / this.ratio) * this.widthByMinute
     },
     centerViewTo(date, speed = 0.5) {
-      // return
+      return
       const d = dayjs(date)
       const r = dayjs(this.rangeX.start)
       const diff = r.diff(d.startOf('day'), 'minute')

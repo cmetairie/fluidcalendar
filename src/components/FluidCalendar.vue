@@ -19,7 +19,17 @@
       @updateDate="(v) => $emit('updateDate', v)"
       @updateRange="(v) => $emit('updateRange', v)"
       @clickBooking="(v) => $emit('clickBooking', v)"
-    />
+    >
+      <template #date="{date}">
+        <slot name="date" :date="date" />
+      </template>
+      <template #booking="{booking}">
+        <slot name="booking" :booking="booking" />
+      </template>
+      <template #bookable="{bookable}">
+        <slot name="bookable" :bookable="bookable" />
+      </template>
+    </FluidCalendarDesktop>
     <FluidCalendarMobile
       v-if="mobile"
       v-bind="$props"
@@ -28,7 +38,17 @@
       @updateDate="(v) => $emit('updateDate', v)"
       @updateRange="(v) => $emit('updateRange', v)"
       @clickBooking="(v) => $emit('clickBooking', v)"
-    />
+    >
+      <template #date="{date}">
+        <slot name="date" :date="date" />
+      </template>
+      <template #booking="{booking}">
+        <slot name="booking" :booking="booking" />
+      </template>
+      <template #bookable="{bookable}">
+        <slot name="bookable" :bookable="bookable" />
+      </template>
+    </FluidCalendarMobile>
   </div>
 </template>
 
@@ -56,6 +76,18 @@ export default {
     debounce: {
       type: Number,
       default: 0,
+    },
+    slotDuration: {
+      type: String,
+      default: '01:00',
+    },
+    slotMinTime: {
+      type: String,
+      default: '00:00',
+    },
+    slotMaxTime: {
+      type: String,
+      default: '23:59',
     },
     debug: {
       type: Boolean,

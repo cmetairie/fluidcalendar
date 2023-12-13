@@ -2,6 +2,11 @@
 
 var vue = require('vue');
 
+function parseTime(timeString) {
+  const [hours, minutes, seconds] = timeString.split(':').map(Number);
+  return hours + minutes / 60 + (seconds || 0) / 3600
+}
+
 function dayjs(s) {
   let date;
   if (!s) {
@@ -37,7 +42,124 @@ function dayjs(s) {
     return date.toLocaleTimeString(undefined, options)
   }
 
-  function add(value, unit) {
+  function get(value, unit = 'day') {
+    const d = value || this.date;
+    switch (unit) {
+      case 'year':
+        return d.getFullYear()
+      case 'month':
+        return d.getMonth() + 1 // getMonth() returns 0-11, so add 1 for a 1-12 range
+      case 'day':
+        return d.getDate() // Returns the day of the month
+      case 'hour':
+        return d.getHours() // Returns the hour
+      case 'minute':
+        return d.getMinutes() // Returns the minutes
+      case 'second':
+        return d.getSeconds() // Returns the seconds
+      default:
+        throw new Error(
+          'Invalid unit: must be "year", "month", "day", "hour", "minute", or "second"',
+        )
+    }
+  }
+
+  function gptAdd(
+    value,
+    unit = 'hour',
+    startDay = '00:00:00',
+    endDay = '23:59:59',
+  ) {
+    // console.log('ADD ', value)
+    const startTime = parseTime(startDay);
+    const endTime = parseTime(endDay);
+    const workingHours = endTime - startTime;
+    const workingMinutes = (endTime - startTime) * 60;
+
+    if (unit === 'minute') {
+      let remainingMinutes = Math.abs(value);
+      let isNegative = value < 0;
+
+      while (remainingMinutes > 0) {
+        let currentHour = date.getHours() + date.getMinutes() / 60;
+        if (isNegative) {
+          // Handle negative values (moving time backwards)
+          if (currentHour >= endTime) {
+            // If current time is after the end of the day, move to the end
+            let minutesUntilEnd = (endTime - currentHour) * 60;
+            date.setMinutes(date.getMinutes() + minutesUntilEnd);
+            remainingMinutes -= minutesUntilEnd;
+          }
+
+          let availableMinutesToday = Math.max(
+            0,
+            (date.getHours() - startTime) * 60 + date.getMinutes(),
+          );
+
+          if (remainingMinutes > availableMinutesToday) {
+            // Move to the end of the previous day
+            date.setHours(endTime, 0, 0, 0);
+            date.setDate(date.getDate() - 1);
+            remainingMinutes -= availableMinutesToday;
+          } else {
+            // Subtract remaining minutes from the current day
+            date.setMinutes(date.getMinutes() - remainingMinutes);
+            break
+          }
+        } else {
+          // If the current time is before the start of the day, move to the start
+          if (currentHour < startTime) {
+            let minutesUntilStart = (startTime - currentHour) * 60;
+            date.setMinutes(date.getMinutes() + minutesUntilStart);
+            remainingMinutes -= minutesUntilStart;
+          }
+
+          // Calculate available minutes in the current day
+          let availableMinutesToday = Math.max(
+            0,
+            workingMinutes -
+              (date.getHours() - startTime) * 60 -
+              date.getMinutes(),
+          );
+
+          if (remainingMinutes > availableMinutesToday) {
+            // Move to the start of the next day
+            date.setHours(startTime, 0, 0, 0);
+            date.setDate(date.getDate() + 1);
+            remainingMinutes -= availableMinutesToday;
+          } else {
+            // Add remaining minutes to the current day
+            date.setMinutes(date.getMinutes() + remainingMinutes);
+            break
+          }
+        }
+      }
+      // addTime(value * 60000) // Convert minutes to milliseconds
+    } else if (unit === 'hour') {
+      addTime(value * 3600000); // Convert hours to milliseconds
+    } else if (unit === 'day') {
+      for (let i = 0; i < value; i++) {
+        addTime(workingHours); // Add one working day at a time
+      }
+    } else {
+      throw new Error(`Unsupported unit: ${unit}`)
+    }
+    return this
+
+    function addTime(milliseconds) {
+      let newDate = new Date(date.getTime() + milliseconds);
+      // console.log('Add time => ', milliseconds)
+      if (newDate.getHours() >= endTime || newDate.getHours() < startTime) {
+        // console.log('???')
+        // If outside working hours, adjust to next working day
+        newDate = new Date(newDate.setHours(startTime, 0, 0, 0));
+        newDate.setDate(newDate.getDate() + 1);
+      }
+      date.setTime(newDate.getTime());
+    }
+  }
+
+  function add(value, unit = 'hour') {
     if (unit === 'minute') {
       date.setMinutes(date.getMinutes() + value);
     } else if (unit === 'hour') {
@@ -168,33 +290,81 @@ function dayjs(s) {
     return false // Invalid unit
   }
 
-  function startOf(unit) {
+  function startOf(unit, time = '00:00:00') {
+    const [hours, minutes, seconds] = time.split(':').map(Number);
     if (unit === 'day') {
-      date.setHours(0, 0, 0, 0);
+      date.setHours(hours, minutes, seconds, 0);
     } else if (unit === 'month') {
       date.setDate(1);
-      date.setHours(0, 0, 0, 0);
+      date.setHours(hours, minutes, seconds, 0);
     } else if (unit === 'year') {
       date.setMonth(0, 1);
-      date.setHours(0, 0, 0, 0);
+      date.setHours(hours, minutes, seconds, 0);
     }
     return this
   }
 
-  function endOf(unit) {
+  function endOf(unit, time = '23:59:59') {
+    const [hours, minutes, seconds] = time.split(':').map(Number);
     if (unit === 'day') {
-      date.setHours(23, 59, 59, 999);
+      date.setHours(hours, minutes, seconds, 999);
     } else if (unit === 'month') {
-      date.setMonth(date.getMonth() + 1, 0);
-      date.setHours(23, 59, 59, 999);
+      date.setMonth(date.getMonth() + 1, 0); // Sets the date to the last day of the current month
+      date.setHours(hours, minutes, seconds, 999);
     } else if (unit === 'year') {
-      date.setFullYear(date.getFullYear() + 1, 0, 0);
-      date.setHours(23, 59, 59, 999);
+      date.setFullYear(date.getFullYear() + 1, 0, 0); // Sets the date to the last day of the current year
+      date.setHours(hours, minutes, seconds, 999);
     }
     return this
   }
 
-  function diff(otherDate, unit = 'day') {
+  function duration(start_time, end_time, unit = 'minutes') {
+    // Parse the start and end times into hours, minutes, and seconds
+    const [startHours, startMinutes, startSeconds] = start_time
+      .split(':')
+      .map(Number);
+    const [endHours, endMinutes, endSeconds] = end_time.split(':').map(Number);
+
+    // Convert start and end times to seconds
+    const startTimeInSeconds =
+      startHours * 3600 + startMinutes * 60 + startSeconds;
+    const endTimeInSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
+
+    // Calculate the duration in seconds
+    let durationInSeconds = endTimeInSeconds - startTimeInSeconds;
+
+    // Check for negative duration (end time before start time)
+    if (durationInSeconds < 0) {
+      durationInSeconds += 24 * 3600; // Add a full day (24 hours) if end time is on the next day
+    }
+
+    // Convert the duration into the requested unit
+    switch (unit) {
+      case 'hours':
+        return durationInSeconds / 3600
+      case 'minutes':
+        return durationInSeconds / 60
+      case 'seconds':
+        return durationInSeconds
+      default:
+        throw new Error(
+          'Invalid unit: must be "hours", "minutes", or "seconds"',
+        )
+    }
+  }
+
+  function snapToTime(value, duration) {
+    const [hours, mins] = duration.split(':').map(Number);
+    const intervalInMinutes = hours * 60 + mins;
+    return Math.round(value / intervalInMinutes) * intervalInMinutes
+  }
+
+  function diff(
+    otherDate,
+    unit = 'day',
+    startDay = '00:00:00',
+    endDay = '23:59:59',
+  ) {
     const timeDiff = date - otherDate.date;
     if (unit === 'day') {
       return Math.round(timeDiff / (1000 * 60 * 60 * 24))
@@ -229,6 +399,10 @@ function dayjs(s) {
     formatTime,
     add,
     date,
+    duration,
+    get,
+    gptAdd,
+    snapToTime,
   }
 }
 
@@ -6264,6 +6438,9 @@ var script$9 = {
       type: Number,
       default: 0,
     },
+    ratio: {
+      type: Number,
+    },
   },
   data() {
     return {
@@ -6282,7 +6459,7 @@ var script$9 = {
     },
     stl() {
       const stl = [];
-      stl.push({ width: this.width - 4 + 'px' });
+      stl.push({ width: this.width / this.ratio - 4 + 'px' });
       stl.push({ height: this.rowHeight - 4 + 'px' });
       return stl
     },
@@ -6922,7 +7099,7 @@ var script$5 = {
   },
   computed: {
     pointerDate() {
-      return dayjs(this.date).format()
+      return this.date
     },
     clss() {
       const clss = [];
@@ -6959,14 +7136,22 @@ var script$4 = {
     zoom: {
       type: Number,
     },
+    min: {
+      type: Number,
+      default: 0.5,
+    },
+    max: {
+      type: Number,
+      default: 10,
+    },
   },
-  computed: {},
   methods: {
     handlePinch(event) {
       event.preventDefault();
       if (event.ctrlKey) {
         const mouseX = event.clientX;
         const mouseY = event.clientY;
+        this.inc = this.zoom / 15;
         if (event.deltaY > 0) {
           this.$emit('pinch', {
             zoom: this.zoom - this.inc,
@@ -6991,6 +7176,7 @@ function render$4(_ctx, _cache, $props, $setup, $data, $options) {
     ref: "pinchTarget",
     onWheel: _cache[0] || (_cache[0] = (...args) => ($options.handlePinch && $options.handlePinch(...args)))
   }, [
+    vue.createCommentVNode(" {{ zoom }} "),
     vue.renderSlot(_ctx.$slots, "default")
   ], 544 /* HYDRATE_EVENTS, NEED_PATCH */))
 }
@@ -7011,14 +7197,6 @@ var script$3 = {
     FluidPinch: script$4,
   },
   props: {
-    dayStart: {
-      type: String,
-      default: '00:00',
-    },
-    dayEnd: {
-      type: String,
-      default: '24:00',
-    },
     lang: {
       type: String,
       default: 'fr',
@@ -7034,6 +7212,18 @@ var script$3 = {
     debounce: {
       type: Number,
       default: 0,
+    },
+    slotDuration: {
+      type: String,
+      default: '01:00',
+    },
+    slotMinTime: {
+      type: String,
+      default: '00:00:00',
+    },
+    slotMaxTime: {
+      type: String,
+      default: '23:59:00',
     },
     debug: {
       type: Boolean,
@@ -7061,7 +7251,7 @@ var script$3 = {
       pointer: 0,
       positionX: 0,
       positionY: 0,
-      zoom: 1,
+      zoom: 3,
       fakeMove: 0,
       point: {},
       _bookings: [],
@@ -7127,14 +7317,42 @@ var script$3 = {
     },
   },
   computed: {
+    slots() {
+      const [hours, minutes, seconds] = this.slotDuration.split(':').map(Number);
+      return [hours, minutes, seconds]
+      // slotDuration , slotMinTime, slotMaxTime
+    },
+    hours() {
+      // const [hours, minutes, seconds] = this.slotDuration.split(':').map(Number)
+      const hours = [];
+      const [minHours, minMinutes] = this.slotMinTime.split(':').map(Number);
+      const [maxHours] = this.slotMaxTime.split(':').map(Number);
+      const h = maxHours - minHours;
+      let startX = 0;
+      for (let i = 0; i < h - 1; i++) {
+        const restMinutes = 60 - minMinutes;
+        startX = startX + this.widthByMinute * restMinutes;
+        hours.push({ index: i, x: startX, label: `${minHours + i + 1}:00` });
+      }
+      return hours
+    },
+    displayHours() {
+      return this.zoom > 10
+    },
+    headerHeight() {
+      return this.displayHours ? this.rowHeight * 1.35 : this.rowHeight
+    },
+    ratio() {
+      return 1440 / this.minutesByCell
+    },
     // diffCenter(){
 
     // },
     threshold() {
-      return Math.floor(this.rangeDays / 6)
+      return 2
     },
     rangeDays() {
-      return 20
+      return 6
     },
     // _bookings() {
     //   return [...this.bookings] //this.bookings.concat(this.cal.bookings)
@@ -7166,23 +7384,56 @@ var script$3 = {
     },
     pointerDate() {
       if (!this.rangeX) return
-      const start = dayjs(this.rangeX.start);
-      const dist =
-        (this.translateX * -1) / this.widthByMinute + 125 / this.widthByMinute;
 
-      return start.add(dist, 'minute').format('iso')
+      // const days =
+      //   -this.positionX / this.widthByMinute / this.minutesByCell -
+      //   this.rangeDays
+
+      // const minutes =
+      //   -this.positionX / this.widthByMinute -
+      //   this.rangeDays * this.minutesByCell * this.widthByMinute
+
+      const minutes =
+        Math.floor(
+          this.positionX / this.widthByMinute +
+            this.rangeDays * this.minutesByCell,
+        ) * -1;
+
+      // console.log('Add ', minutes)
+
+      // console.log(
+      //   'Minutes = >',
+      //   dayjs().startOf('day', this.slotMinTime).date,
+      //   minutes,
+      // )
+
+      // console.log(dayjs().startOf('day', this.slotMinTime).date)
+
+      return dayjs()
+        .startOf('day', this.slotMinTime)
+        .gptAdd(minutes, 'minute', this.slotMinTime, this.slotMaxTime)
+        .format('iso')
     },
     widthByMinute() {
       return this.zoom / 10
     },
     cellWidth() {
-      return this.widthByMinute * 60 * 24
+      return this.widthByMinute * this.minutesByCell
+    },
+    minutesByCell() {
+      return dayjs().duration(this.slotMinTime, this.slotMaxTime)
     },
     decalY() {
       return (this.positionY / this.rowHeight) | 0
     },
     decalX() {
-      const d = this.positionX / this.widthByMinute / 60 / 24;
+      const d = this.positionX / this.widthByMinute / this.minutesByCell;
+      // console.log('d => ', d)
+      // console.log(
+      //   'd => ',
+      //   d,
+      //   (this.positionX / this.widthByMinute) / this.minutesByCell,
+      // )
       return ((d + this.threshold) / this.threshold) | 0
     },
     width() {
@@ -7191,7 +7442,7 @@ var script$3 = {
     translateX() {
       return (
         this.positionX -
-        this.decalX * this.threshold * (this.widthByMinute * 60 * 24)
+        this.decalX * this.threshold * (this.widthByMinute * this.minutesByCell)
       )
     },
     translateY() {
@@ -7206,23 +7457,24 @@ var script$3 = {
       }
     },
     rangeX() {
-      const start = dayjs(dayjs().startOf('day').date)
-        .add(
-          -60 * 24 * (this.rangeDays + this.decalX * this.threshold),
-          'minute',
-        )
-        .startOf('day')
+      const s = -this.rangeDays * 1440 - this.decalX * this.threshold * 1440;
+      const e = this.rangeDays * 1440 - this.decalX * this.threshold * 1440;
+
+      const start = dayjs(dayjs().startOf('day', this.slotMinTime).date)
+        .add(s, 'minute')
+        .startOf('day', this.slotMinTime)
         .format('iso');
 
-      const end = dayjs(dayjs().startOf('day').date)
-        .add(
-          60 * 24 * (this.rangeDays - this.decalX * this.threshold),
-          'minute',
-        )
-        .endOf('day')
+      const end = dayjs(dayjs().startOf('day', this.slotMinTime).date)
+        .add(e, 'minute')
+        .endOf('day', this.slotMaxTime)
         .format('iso');
 
-      const diffInDays = dayjs(end).diff(dayjs(start), 'day');
+      const diffInDays = dayjs(end).diff(dayjs(start)) + 1;
+
+      // let slots = []
+
+      console.log('Slots => ', dayjs().startOf('day', this.slotMinTime).date);
 
       let cells = [];
       for (let i = 0; i < diffInDays; i++) {
@@ -7242,7 +7494,7 @@ var script$3 = {
   },
   methods: {
     pinch(p) {
-      if (p.zoom > 0.25 && p.zoom < 10) {
+      if (p.zoom > 2 && p.zoom < 20) {
         this.pincher = p;
         this.zoom = p.zoom;
       }
@@ -7255,6 +7507,7 @@ var script$3 = {
         y: event.clientY,
       };
       const data = this.pointToData(this.point);
+      // console.log('DATA => ', data)
       this.point.data = data;
       if (data.collision) {
         this.addCollision(data.collision.id);
@@ -7274,7 +7527,7 @@ var script$3 = {
         // document.addEventListener('mouseup', this.endDrag)
       } else {
         this.dragData = [data];
-        document.body.style.cursor = 'ew-resize';
+        // document.body.style.cursor = 'ew-resize'
       }
 
       document.body.style.userSelect = 'none';
@@ -7442,17 +7695,17 @@ var script$3 = {
       const bookableIndex = this.filteredBookables.findIndex(
         (f) => f.id === bookableId,
       );
-      return (bookableIndex + 1) * this.rowHeight + diffY
+      return bookableIndex * this.rowHeight + diffY + this.headerHeight
     },
     pointToData({ x, y }) {
       const top =
         y -
         this.$refs.fluidCalendar.getBoundingClientRect().top +
         this.positionY * -1;
-      const date = this.xToDate(x);
-      const bookable = this.yToBookable(top);
+      const date = this.xToDate(x, this.slotDuration);
 
-      // console.log('Date ', date)
+      // console.log('Date ', date, dayjs(date).snapToTime())
+      const bookable = this.yToBookable(top);
 
       if (!bookable) {
         return {
@@ -7500,37 +7753,26 @@ var script$3 = {
     yToBookable(top) {
       return this.filteredBookables[((top / this.rowHeight) | 0) - 1]
     },
-    xToDate(x) {
+    xToDate(x, snap = false) {
+      let v = x;
+      // const value =
       const zero =
-        x -
+        v -
         this.$refs.fluidCalendar.getBoundingClientRect().left -
         this.$refs.bookables.getBoundingClientRect().width;
       const p = zero + this.translateX * -1;
       const days = p / this.widthByMinute;
-      return dayjs(this.rangeX.start).add(days, 'minute').date
+
+      let value = days * this.ratio;
+      // console.log('Snap ', this.slotDuration, value)
+      return dayjs(this.rangeX.start).add(value, 'minute').date
     },
     dateToX(date) {
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute');
-      return diff * this.widthByMinute
+      return (diff / this.ratio) * this.widthByMinute
     },
     centerViewTo(date, speed = 0.5) {
-      // return
-      const d = dayjs(date);
-      const r = dayjs(this.rangeX.start);
-      const diff = r.diff(d.startOf('day'), 'minute');
-      const t = this.positionX - this.translateX + diff * this.widthByMinute;
-      if (!speed) {
-        this.positionX = t;
-        return
-      }
-      const interpolation = { value: this.positionX };
-      gsapWithCSS.to(interpolation, {
-        value: t,
-        onUpdate: () => {
-          this.positionX = interpolation.value;
-        },
-        duration: speed,
-      });
+      return
     },
   },
 };
@@ -7560,14 +7802,24 @@ const _hoisted_10$1 = /*#__PURE__*/vue.createElementVNode("rect", {
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_11$1 = { key: 1 };
-const _hoisted_12$1 = {
+const _hoisted_11$1 = ["width", "height"];
+const _hoisted_12$1 = ["d"];
+const _hoisted_13$1 = /*#__PURE__*/vue.createElementVNode("rect", {
+  width: "100%",
+  height: "100%",
+  fill: "url(#header_time_grid)"
+}, null, -1 /* HOISTED */);
+const _hoisted_14 = {
+  key: 0,
+  class: "t__fluid__calendar__header__time__cells"
+};
+const _hoisted_15 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_13$1 = ["width", "height"];
-const _hoisted_14 = ["d"];
-const _hoisted_15 = /*#__PURE__*/vue.createElementVNode("rect", {
+const _hoisted_16 = ["width", "height"];
+const _hoisted_17 = ["d"];
+const _hoisted_18 = /*#__PURE__*/vue.createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#grid)"
@@ -7585,6 +7837,9 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
     ($props.debug)
       ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_2$2, [
           vue.createElementVNode("pre", null, vue.toDisplayString({
+          rangeDays: $options.rangeDays,
+          threshold: $options.threshold,
+          minutesByCell: $options.minutesByCell,
           scroller: $options.scroller,
           widthByMinute: $options.widthByMinute,
           decalX: $options.decalX,
@@ -7605,6 +7860,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
         ]))
       : vue.createCommentVNode("v-if", true),
     vue.createCommentVNode(" <h2>{{ format(pointerDate) }}</h2>\n  <button @click=\"centerViewTo('2023-10-17')\">2023-10-17</button>\n  <button @click=\"generate\">generate</button>\n  <button @click=\"reset\">reset</button>\n\n  <input type=\"range\" min=\"20\" max=\"100\" v-model=\"rowHeight\" step=\"1\" /> "),
+    vue.createCommentVNode(" {{ dragData }} "),
     vue.createCommentVNode(" {{ dragData }} "),
     vue.createVNode(_component_FluidViewbar, {
       rangeX: $options.rangeX,
@@ -7630,7 +7886,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
           vue.createElementVNode("div", _hoisted_3$2, [
             vue.createElementVNode("div", {
               class: "t__fluid__calendar__bookables__header",
-              style: vue.normalizeStyle({ height: $data.rowHeight + 'px' })
+              style: vue.normalizeStyle({ height: $options.headerHeight + 'px' })
             }, [..._hoisted_5$2], 4 /* STYLE */),
             vue.createElementVNode("div", {
               class: "t__fluid__calendar__bookables__inner",
@@ -7679,7 +7935,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   style: vue.normalizeStyle({
               top: $data.dragData[0].y + 'px',
               left: $data.dragData[0].x + 'px',
-              width: `${$data.dragData.length * $options.widthByMinute * 60 * 24}px`,
+              width: `${$data.dragData.length * $options.widthByMinute * $options.minutesByCell}px`,
               transform: `translateY(${$data.positionY}px) translateX(${$options.translateX}px)`,
               height: `${$data.rowHeight}px`,
             }),
@@ -7711,6 +7967,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         widthByMinute: $options.widthByMinute,
                         rowHeight: $data.rowHeight,
                         collisions: $data.collisions,
+                        ratio: $options.ratio,
                         refX: $options.translateX + $options.dateToX(booking.start_at)
                       }, {
                         default: vue.withCtx(() => [
@@ -7722,7 +7979,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                             : (vue.openBlock(), vue.createElementBlock("span", _hoisted_7$1, vue.toDisplayString(booking.id) + " " + vue.toDisplayString(booking.label), 1 /* TEXT */))
                         ]),
                         _: 2 /* DYNAMIC */
-                      }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "refX"])
+                      }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "ratio", "refX"])
                     ]),
                     _: 2 /* DYNAMIC */
                   }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["y", "x", "ghost"]))
@@ -7731,17 +7988,17 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
               (vue.openBlock(), vue.createElementBlock("svg", {
                 class: "t__fluid__calendar__header__grid",
                 xmlns: "http://www.w3.org/2000/svg",
-                style: vue.normalizeStyle({ height: $data.rowHeight + 'px' })
+                style: vue.normalizeStyle({ height: $options.headerHeight + 'px' })
               }, [
                 vue.createElementVNode("defs", null, [
                   vue.createElementVNode("pattern", {
                     id: "header_grid",
                     width: $options.cellWidth,
-                    height: $data.rowHeight,
+                    height: $options.headerHeight,
                     patternUnits: "userSpaceOnUse"
                   }, [
                     vue.createElementVNode("path", {
-                      d: `M ${$options.cellWidth} 0 L 0 0 0 ${$data.rowHeight}`,
+                      d: `M ${$options.cellWidth} 0 L 0 0 0 ${$options.headerHeight}`,
                       fill: "none",
                       stroke: "currentColor",
                       "stroke-width": "1"
@@ -7750,25 +8007,72 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 ]),
                 _hoisted_10$1
               ], 4 /* STYLE */)),
+              ($options.displayHours)
+                ? (vue.openBlock(), vue.createElementBlock("svg", {
+                    key: 0,
+                    class: "t__fluid__calendar__header__time__grid",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    style: vue.normalizeStyle({ height: $options.headerHeight + 'px' })
+                  }, [
+                    vue.createElementVNode("defs", null, [
+                      vue.createElementVNode("pattern", {
+                        id: "header_time_grid",
+                        width: ($options.cellWidth / $options.minutesByCell) * 60,
+                        height: $options.headerHeight,
+                        patternUnits: "userSpaceOnUse"
+                      }, [
+                        vue.createElementVNode("path", {
+                          d: `M ${
+                      ($options.cellWidth / $options.minutesByCell) * 60
+                    } ${$options.headerHeight} L ${($options.cellWidth / $options.minutesByCell) * 60} ${
+                      $options.headerHeight - 6
+                    }`,
+                          fill: "none",
+                          stroke: "#aaa",
+                          "stroke-width": "1"
+                        }, null, 8 /* PROPS */, _hoisted_12$1)
+                      ], 8 /* PROPS */, _hoisted_11$1)
+                    ]),
+                    _hoisted_13$1
+                  ], 4 /* STYLE */))
+                : vue.createCommentVNode("v-if", true),
               vue.createElementVNode("div", {
                 class: "t__fluid__calendar__header",
                 style: vue.normalizeStyle({
                 width: $options.width + 'px',
-                height: $data.rowHeight + 'px',
+                height: $options.headerHeight + 'px',
               })
               }, [
                 (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.rangeX.cells, (cell) => {
                   return (vue.openBlock(), vue.createElementBlock("div", {
                     class: "t__fluid__calendar__header__cell",
                     key: cell.date,
-                    style: vue.normalizeStyle({ width: `${$options.cellWidth}px` })
+                    style: vue.normalizeStyle({
+                  width: `${$options.cellWidth}px`,
+                })
                   }, [
-                    (_ctx.$slots.date)
-                      ? vue.renderSlot(_ctx.$slots, "date", {
-                          key: 0,
-                          date: cell
-                        })
-                      : (vue.openBlock(), vue.createElementBlock("span", _hoisted_11$1, vue.toDisplayString($options.format(cell.date)), 1 /* TEXT */))
+                    vue.createCommentVNode(" <slot v-if=\"$slots.date\" name=\"date\" :date=\"cell\" /> "),
+                    vue.createElementVNode("span", {
+                      class: "t__fluid__calendar__header__cell__date",
+                      style: vue.normalizeStyle({
+                    display: 'block',
+                    transform: `translateY(${$options.displayHours ? 8 : 12}px)`,
+                  })
+                    }, vue.toDisplayString($options.format(cell.date)), 5 /* TEXT, STYLE */),
+                    ($options.displayHours)
+                      ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_14, [
+                          (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.hours, (hour) => {
+                            return (vue.openBlock(), vue.createElementBlock("div", {
+                              class: "t__fluid__calendar__header__time__cell",
+                              style: vue.normalizeStyle({
+                      transform: `translateX(${hour.x}px)`,
+                    })
+                            }, [
+                              vue.createElementVNode("span", null, vue.toDisplayString(hour.label), 1 /* TEXT */)
+                            ], 4 /* STYLE */))
+                          }), 256 /* UNKEYED_FRAGMENT */))
+                        ]))
+                      : vue.createCommentVNode("v-if", true)
                   ], 4 /* STYLE */))
                 }), 128 /* KEYED_FRAGMENT */))
               ], 4 /* STYLE */),
@@ -7779,7 +8083,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 transform: `translateY(${$data.positionY}px)`,
               })
               }, [
-                (vue.openBlock(), vue.createElementBlock("svg", _hoisted_12$1, [
+                (vue.openBlock(), vue.createElementBlock("svg", _hoisted_15, [
                   vue.createElementVNode("defs", null, [
                     vue.createElementVNode("pattern", {
                       id: "grid",
@@ -7792,10 +8096,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         fill: "none",
                         stroke: "currentColor",
                         "stroke-width": "1"
-                      }, null, 8 /* PROPS */, _hoisted_14)
-                    ], 8 /* PROPS */, _hoisted_13$1)
+                      }, null, 8 /* PROPS */, _hoisted_17)
+                    ], 8 /* PROPS */, _hoisted_16)
                   ]),
-                  _hoisted_15
+                  _hoisted_18
                 ]))
               ], 4 /* STYLE */),
               vue.createCommentVNode(" </div> ")
@@ -8306,6 +8610,18 @@ var script = {
       type: Number,
       default: 0,
     },
+    slotDuration: {
+      type: String,
+      default: '01:00',
+    },
+    slotMinTime: {
+      type: String,
+      default: '00:00',
+    },
+    slotMaxTime: {
+      type: String,
+      default: '23:59',
+    },
     debug: {
       type: Boolean,
       default: false,
@@ -8407,7 +8723,18 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           onUpdateDate: _cache[0] || (_cache[0] = (v) => _ctx.$emit('updateDate', v)),
           onUpdateRange: _cache[1] || (_cache[1] = (v) => _ctx.$emit('updateRange', v)),
           onClickBooking: _cache[2] || (_cache[2] = (v) => _ctx.$emit('clickBooking', v))
-        }), null, 16 /* FULL_PROPS */, ["h", "w"]))
+        }), {
+          date: vue.withCtx(({date}) => [
+            vue.renderSlot(_ctx.$slots, "date", { date: date })
+          ]),
+          booking: vue.withCtx(({booking}) => [
+            vue.renderSlot(_ctx.$slots, "booking", { booking: booking })
+          ]),
+          bookable: vue.withCtx(({bookable}) => [
+            vue.renderSlot(_ctx.$slots, "bookable", { bookable: bookable })
+          ]),
+          _: 3 /* FORWARDED */
+        }, 16 /* FULL_PROPS */, ["h", "w"]))
       : vue.createCommentVNode("v-if", true),
     ($data.mobile)
       ? (vue.openBlock(), vue.createBlock(_component_FluidCalendarMobile, vue.mergeProps({ key: 2 }, _ctx.$props, {
@@ -8416,7 +8743,18 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           onUpdateDate: _cache[3] || (_cache[3] = (v) => _ctx.$emit('updateDate', v)),
           onUpdateRange: _cache[4] || (_cache[4] = (v) => _ctx.$emit('updateRange', v)),
           onClickBooking: _cache[5] || (_cache[5] = (v) => _ctx.$emit('clickBooking', v))
-        }), null, 16 /* FULL_PROPS */, ["h", "w"]))
+        }), {
+          date: vue.withCtx(({date}) => [
+            vue.renderSlot(_ctx.$slots, "date", { date: date })
+          ]),
+          booking: vue.withCtx(({booking}) => [
+            vue.renderSlot(_ctx.$slots, "booking", { booking: booking })
+          ]),
+          bookable: vue.withCtx(({bookable}) => [
+            vue.renderSlot(_ctx.$slots, "bookable", { bookable: bookable })
+          ]),
+          _: 3 /* FORWARDED */
+        }, 16 /* FULL_PROPS */, ["h", "w"]))
       : vue.createCommentVNode("v-if", true)
   ], 2 /* CLASS */))
 }
