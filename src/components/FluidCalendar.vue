@@ -73,6 +73,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    unavailabilities: {
+      type: Array,
+      default: () => [],
+    },
     debounce: {
       type: Number,
       default: 0,

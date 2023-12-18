@@ -6414,7 +6414,7 @@ var gsapWithCSS = gsap.registerPlugin(CSSPlugin) || gsap;
     // to protect from tree shaking
 gsapWithCSS.core.Tween;
 
-var script$9 = {
+var script$a = {
   name: 'FluidCalendarBooking',
   props: {
     booking: {
@@ -6515,18 +6515,18 @@ var script$9 = {
   },
 };
 
-const _hoisted_1$6 = {
+const _hoisted_1$7 = {
   ref: "inner",
   class: "t__fluid__calendar__booking__inner"
 };
 
-function render$9(_ctx, _cache, $props, $setup, $data, $options) {
+function render$a(_ctx, _cache, $props, $setup, $data, $options) {
   return (openBlock(), createElementBlock("div", {
     class: normalizeClass(["t__fluid__calendar__booking", $options.clss]),
     style: normalizeStyle($options.stl)
   }, [
     createCommentVNode(" <button>m</button> "),
-    createElementVNode("div", _hoisted_1$6, [
+    createElementVNode("div", _hoisted_1$7, [
       createElementVNode("div", {
         ref: "content",
         class: "t__fluid__calendar__booking__content",
@@ -6549,8 +6549,176 @@ function render$9(_ctx, _cache, $props, $setup, $data, $options) {
   ], 6 /* CLASS, STYLE */))
 }
 
+script$a.render = render$a;
+script$a.__file = "src/components/FluidCalendarBooking.vue";
+
+var script$9 = {
+  name: 'FluidCalendarUnavail',
+  props: {
+    unavail: {
+      type: Object,
+      default: () => {},
+    },
+    widthByMinute: {
+      type: Number,
+      default: 0,
+    },
+    rowHeight: {
+      type: Number,
+      default: 0,
+    },
+    collisions: {
+      type: Array,
+      default: () => [],
+    },
+    refX: {
+      type: Number,
+      default: 0,
+    },
+    ratio: {
+      type: Number,
+    },
+  },
+  data() {
+    return {
+      baseX: 0,
+      diff: 0,
+      lastDecal: 0,
+    }
+  },
+  computed: {
+    clss() {
+      const clss = [];
+      //   if (this.collisions.includes(this.booking.id)) clss.push('--collision')
+      //   if (this.booking.ghost) clss.push('--ghost')
+      //   if (this.booking.ghosted) clss.push('--ghosted')
+      return clss
+    },
+    stl() {
+      const stl = [];
+      stl.push({ width: this.width / this.ratio - 4 + 'px' });
+      stl.push({ height: this.height + 'px' });
+      return stl
+    },
+    sltContent() {
+      const stl = [];
+      if (this.refX && this.refX < 0) {
+        const inner = this.$refs.inner?.getBoundingClientRect();
+        const content = this.$refs.content?.getBoundingClientRect();
+        if (inner && content) {
+          const c = window.getComputedStyle(this.$refs.inner);
+          const pl = Number(c.paddingLeft.split('px')[0]);
+          const pr = Number(c.paddingRight.split('px')[0]);
+          let decal = this.refX * -1;
+          const v = content.width + decal + pl + pr;
+          if (v >= inner.width) {
+            decal = this.lastDecal;
+          }
+          stl.push({ transform: `translateX(${decal}px)` });
+          this.lastDecal = decal;
+        }
+      }
+      return stl
+    },
+    width() {
+      const diff = dayjs(this.unavail.end_at).diff(
+        dayjs(this.unavail.start_at),
+        'minute',
+      );
+      return diff * this.widthByMinute + this.diff
+    },
+    height() {
+      return this.rowHeight - 1
+    },
+    ghost() {
+      return this.unavail.ghost
+    },
+  },
+  methods: {
+    format(date) {
+      return dayjs(date).format('DD MMM')
+    },
+    click() {
+      console.log('Click', this.unavail);
+    },
+    startSize(event) {
+      this.baseX = event.clientX;
+      document.addEventListener('mousemove', this.size);
+      document.addEventListener('mouseup', this.endSize);
+    },
+    size(event) {
+      this.diff = event.clientX - this.baseX;
+    },
+    endSize(event) {
+      this.baseX = event.clientX;
+      document.removeEventListener('mousemove', this.size);
+      document.removeEventListener('mouseup', this.endSize);
+    },
+  },
+};
+
+const _hoisted_1$6 = {
+  ref: "inner",
+  class: "t__fluid__calendar__booking__inner"
+};
+const _hoisted_2$4 = /*#__PURE__*/createElementVNode("svg", {
+  x: "0",
+  y: "0"
+}, [
+  /*#__PURE__*/createElementVNode("defs", null, [
+    /*#__PURE__*/createElementVNode("pattern", {
+      id: "diagonalHatch",
+      patternUnits: "userSpaceOnUse",
+      width: "4",
+      height: "8",
+      patternTransform: "rotate(-45 2 2)"
+    }, [
+      /*#__PURE__*/createElementVNode("path", {
+        d: "M -1,2 l 6,0",
+        stroke: "#D0D6E3",
+        "stroke-width": ".5"
+      })
+    ])
+  ]),
+  /*#__PURE__*/createElementVNode("rect", {
+    x: "1",
+    y: "1",
+    fill: "url(#diagonalHatch)"
+  })
+], -1 /* HOISTED */);
+
+function render$9(_ctx, _cache, $props, $setup, $data, $options) {
+  return (openBlock(), createElementBlock("div", {
+    class: normalizeClass(["t__fluid__calendar__booking --unavailability", $options.clss]),
+    style: normalizeStyle($options.stl)
+  }, [
+    createCommentVNode(" <button>m</button> "),
+    createElementVNode("div", _hoisted_1$6, [
+      createElementVNode("div", {
+        ref: "content",
+        class: "t__fluid__calendar__booking__content",
+        style: normalizeStyle($options.sltContent)
+      }, [
+        createCommentVNode(" {{ $slots.bookable }} "),
+        createCommentVNode(" {{ refX }} "),
+        (!$options.ghost)
+          ? renderSlot(_ctx.$slots, "default", { key: 0 })
+          : createCommentVNode("v-if", true),
+        createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
+      ], 4 /* STYLE */),
+      _hoisted_2$4,
+      createElementVNode("button", {
+        class: "t__fluid__calendar__booking__resize",
+        onMousedown: _cache[0] || (_cache[0] = withModifiers((...args) => ($options.startSize && $options.startSize(...args)), ["stop"]))
+      }, [
+        createCommentVNode(" {{ diff }} ")
+      ], 32 /* HYDRATE_EVENTS */)
+    ], 512 /* NEED_PATCH */)
+  ], 6 /* CLASS, STYLE */))
+}
+
 script$9.render = render$9;
-script$9.__file = "src/components/FluidCalendarBooking.vue";
+script$9.__file = "src/components/FluidCalendarUnavail.vue";
 
 let debounceId = null;
 function debounce(fn, delay = 500) {
@@ -7187,12 +7355,13 @@ script$4.__file = "src/components/FluidPinch.vue";
 var script$3 = {
   name: 'FluidCalendarDesktop',
   components: {
-    FluidCalendarBooking: script$9,
+    FluidCalendarBooking: script$a,
     FluidCalendarScroller: script$8,
     FluidCalendarNavigator: script$7,
     FluidDraggable: script$6,
     FluidViewbar: script$5,
     FluidPinch: script$4,
+    FluidCalendarUnavail: script$9,
   },
   props: {
     lang: {
@@ -7204,6 +7373,10 @@ var script$3 = {
       default: () => [],
     },
     bookables: {
+      type: Array,
+      default: () => [],
+    },
+    unavailabilities: {
       type: Array,
       default: () => [],
     },
@@ -7789,35 +7962,37 @@ const _hoisted_5$2 = [
   _hoisted_4$2
 ];
 const _hoisted_6$1 = { key: 1 };
-const _hoisted_7$1 = {
+const _hoisted_7$1 = { class: "t__fluid__calendar__unavailabilities" };
+const _hoisted_8$1 = { class: "t__fluid__calendar__booking__label" };
+const _hoisted_9$1 = {
   key: 1,
   class: "t__fluid__calendar__booking__label"
 };
-const _hoisted_8$1 = ["width", "height"];
-const _hoisted_9$1 = ["d"];
-const _hoisted_10$1 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_10$1 = ["width", "height"];
+const _hoisted_11$1 = ["d"];
+const _hoisted_12$1 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_11$1 = ["width", "height"];
-const _hoisted_12$1 = ["d"];
-const _hoisted_13$1 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_13$1 = ["width", "height"];
+const _hoisted_14 = ["d"];
+const _hoisted_15 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#header_time_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_14 = {
+const _hoisted_16 = {
   key: 0,
   class: "t__fluid__calendar__header__time__cells"
 };
-const _hoisted_15 = {
+const _hoisted_17 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_16 = ["width", "height"];
-const _hoisted_17 = ["d"];
-const _hoisted_18 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_18 = ["width", "height"];
+const _hoisted_19 = ["d"];
+const _hoisted_20 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#grid)"
@@ -7827,8 +8002,9 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_FluidViewbar = resolveComponent("FluidViewbar");
   const _component_FluidCalendarNavigator = resolveComponent("FluidCalendarNavigator");
   const _component_FluidCalendarScroller = resolveComponent("FluidCalendarScroller");
-  const _component_FluidCalendarBooking = resolveComponent("FluidCalendarBooking");
+  const _component_FluidCalendarUnavail = resolveComponent("FluidCalendarUnavail");
   const _component_FluidDraggable = resolveComponent("FluidDraggable");
+  const _component_FluidCalendarBooking = resolveComponent("FluidCalendarBooking");
   const _component_FluidPinch = resolveComponent("FluidPinch");
 
   return (openBlock(), createElementBlock("div", _hoisted_1$3, [
@@ -7948,6 +8124,33 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
             })
             }, [
               createCommentVNode(" <div class=\"t__fluid__calendar__content__translate\"> "),
+              createElementVNode("div", _hoisted_7$1, [
+                (openBlock(true), createElementBlock(Fragment, null, renderList($props.unavailabilities, (unavail) => {
+                  return (openBlock(), createBlock(_component_FluidDraggable, {
+                    key: unavail.id,
+                    y: $options.bookableToY(unavail.bookableId, unavail.diff?.y),
+                    x: $options.dateToX(unavail.start_at),
+                    ghost: unavail.ghost
+                  }, {
+                    default: withCtx(() => [
+                      (openBlock(), createBlock(_component_FluidCalendarUnavail, {
+                        key: 'unavailability-' + unavail.id,
+                        unavail: unavail,
+                        widthByMinute: $options.widthByMinute,
+                        rowHeight: $data.rowHeight,
+                        ratio: $options.ratio,
+                        refX: $options.translateX + $options.dateToX(unavail.start_at)
+                      }, {
+                        default: withCtx(() => [
+                          createElementVNode("span", _hoisted_8$1, toDisplayString(unavail.id) + " " + toDisplayString(unavail.label), 1 /* TEXT */)
+                        ]),
+                        _: 2 /* DYNAMIC */
+                      }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["unavail", "widthByMinute", "rowHeight", "ratio", "refX"]))
+                    ]),
+                    _: 2 /* DYNAMIC */
+                  }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["y", "x", "ghost"]))
+                }), 128 /* KEYED_FRAGMENT */))
+              ]),
               createElementVNode("div", {
                 class: "t__fluid__calendar__bookings",
                 style: normalizeStyle({ transform: `translateY(${$data.positionY}px)` })
@@ -7974,7 +8177,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                                 key: 0,
                                 booking: booking
                               })
-                            : (openBlock(), createElementBlock("span", _hoisted_7$1, toDisplayString(booking.id) + " " + toDisplayString(booking.label), 1 /* TEXT */))
+                            : (openBlock(), createElementBlock("span", _hoisted_9$1, toDisplayString(booking.id) + " " + toDisplayString(booking.label), 1 /* TEXT */))
                         ]),
                         _: 2 /* DYNAMIC */
                       }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "ratio", "refX"])
@@ -8000,10 +8203,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                       fill: "none",
                       stroke: "currentColor",
                       "stroke-width": "1"
-                    }, null, 8 /* PROPS */, _hoisted_9$1)
-                  ], 8 /* PROPS */, _hoisted_8$1)
+                    }, null, 8 /* PROPS */, _hoisted_11$1)
+                  ], 8 /* PROPS */, _hoisted_10$1)
                 ]),
-                _hoisted_10$1
+                _hoisted_12$1
               ], 4 /* STYLE */)),
               ($options.displayHours)
                 ? (openBlock(), createElementBlock("svg", {
@@ -8028,10 +8231,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                           fill: "none",
                           stroke: "#aaa",
                           "stroke-width": "1"
-                        }, null, 8 /* PROPS */, _hoisted_12$1)
-                      ], 8 /* PROPS */, _hoisted_11$1)
+                        }, null, 8 /* PROPS */, _hoisted_14)
+                      ], 8 /* PROPS */, _hoisted_13$1)
                     ]),
-                    _hoisted_13$1
+                    _hoisted_15
                   ], 4 /* STYLE */))
                 : createCommentVNode("v-if", true),
               createElementVNode("div", {
@@ -8054,11 +8257,11 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                       class: "t__fluid__calendar__header__cell__date",
                       style: normalizeStyle({
                     display: 'block',
-                    transform: `translateY(${$options.displayHours ? 0 : 12}px)`,
+                    transform: `translateY(${12}px)`,
                   })
                     }, toDisplayString($options.format(cell.date)), 5 /* TEXT, STYLE */),
                     ($options.displayHours)
-                      ? (openBlock(), createElementBlock("div", _hoisted_14, [
+                      ? (openBlock(), createElementBlock("div", _hoisted_16, [
                           (openBlock(true), createElementBlock(Fragment, null, renderList($options.hours, (hour) => {
                             return (openBlock(), createElementBlock("div", {
                               class: "t__fluid__calendar__header__time__cell",
@@ -8081,7 +8284,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 transform: `translateY(${$data.positionY}px)`,
               })
               }, [
-                (openBlock(), createElementBlock("svg", _hoisted_15, [
+                (openBlock(), createElementBlock("svg", _hoisted_17, [
                   createElementVNode("defs", null, [
                     createElementVNode("pattern", {
                       id: "grid",
@@ -8094,10 +8297,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         fill: "none",
                         stroke: "currentColor",
                         "stroke-width": "1"
-                      }, null, 8 /* PROPS */, _hoisted_17)
-                    ], 8 /* PROPS */, _hoisted_16)
+                      }, null, 8 /* PROPS */, _hoisted_19)
+                    ], 8 /* PROPS */, _hoisted_18)
                   ]),
-                  _hoisted_18
+                  _hoisted_20
                 ]))
               ], 4 /* STYLE */),
               createCommentVNode(" </div> ")
@@ -8601,6 +8804,10 @@ var script = {
       default: () => [],
     },
     bookables: {
+      type: Array,
+      default: () => [],
+    },
+    unavailabilities: {
       type: Array,
       default: () => [],
     },

@@ -115,6 +115,28 @@
             }"
           >
             <!-- <div class="t__fluid__calendar__content__translate"> -->
+            <div class="t__fluid__calendar__unavailabilities">
+              <FluidDraggable
+                v-for="unavail of unavailabilities"
+                :key="unavail.id"
+                :y="bookableToY(unavail.bookableId, unavail.diff?.y)"
+                :x="dateToX(unavail.start_at)"
+                :ghost="unavail.ghost"
+              >
+                <FluidCalendarUnavail
+                  :key="'unavailability-' + unavail.id"
+                  :unavail="unavail"
+                  :widthByMinute="widthByMinute"
+                  :rowHeight="rowHeight"
+                  :ratio="ratio"
+                  :refX="translateX + dateToX(unavail.start_at)"
+                >
+                  <span class="t__fluid__calendar__booking__label">
+                    {{ unavail.id }} {{ unavail.label }}
+                  </span>
+                </FluidCalendarUnavail>
+              </FluidDraggable>
+            </div>
             <div
               class="t__fluid__calendar__bookings"
               :style="{ transform: `translateY(${positionY}px)` }"
@@ -214,7 +236,7 @@
                   class="t__fluid__calendar__header__cell__date"
                   :style="{
                     display: 'block',
-                    transform: `translateY(${displayHours ? 0 : 12}px)`,
+                    transform: `translateY(${12}px)`,
                   }"
                 >
                   {{ format(cell.date) }}
@@ -286,6 +308,7 @@ import { dayjs } from '../dayjs.js'
 import gsap from 'gsap'
 
 import FluidCalendarBooking from './FluidCalendarBooking.vue'
+import FluidCalendarUnavail from './FluidCalendarUnavail.vue'
 import FluidCalendarScroller from './FluidCalendarScroller.vue'
 import FluidCalendarNavigator from './FluidCalendarNavigator.vue'
 import FluidDraggable from './FluidDraggable.vue'
@@ -305,6 +328,7 @@ export default {
     FluidDraggable,
     FluidViewbar,
     FluidPinch,
+    FluidCalendarUnavail,
   },
   props: {
     lang: {
@@ -316,6 +340,10 @@ export default {
       default: () => [],
     },
     bookables: {
+      type: Array,
+      default: () => [],
+    },
+    unavailabilities: {
       type: Array,
       default: () => [],
     },

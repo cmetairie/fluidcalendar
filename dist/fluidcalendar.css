@@ -175,11 +175,13 @@
 .t__fluid__calendar__header__cell__date {
   display: block;
   font-weight: 500;
-  color: var(--color-title);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: transform 0.2s;
+  background: var(--color-bg2);
+  padding: 0 1rem;
+  z-index: 1;
 }
 
 .t__fluid__calendar__header__time__cells {
@@ -214,6 +216,7 @@
 
 .t__fluid__calendar__header__grid,
 .t__fluid__calendar__header__time__grid {
+  pointer-events: none;
   color: var(--color-border-m);
   position: absolute;
   width: 100%;
@@ -330,6 +333,41 @@
   position: absolute;
   width: 4rem;
   z-index: 2;
+}
+.t__fluid__calendar__booking.--unavailability {
+  padding: 1px 0;
+  border-left: solid var(--color-border-m) 0.5px;
+  border-right: solid var(--color-border-m) 0.5px;
+}
+.t__fluid__calendar__booking.--unavailability .t__fluid__calendar__booking__inner {
+  position: relative;
+  border-radius: 0;
+  border: none;
+  background: var(--color-bg2);
+  padding: 0;
+}
+.t__fluid__calendar__booking.--unavailability .t__fluid__calendar__booking__label {
+  position: relative;
+  z-index: 1;
+  padding: 0 var(--space);
+}
+.t__fluid__calendar__booking.--unavailability .t__fluid__calendar__booking__content {
+  position: relative;
+  z-index: 1;
+}
+.t__fluid__calendar__booking.--unavailability svg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  height: 100%;
+  width: 100%;
+}
+.t__fluid__calendar__booking.--unavailability svg rect {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  height: 100%;
+  width: 100%;
 }
 
 .t__fluid__calendar__booking.--ghost {
