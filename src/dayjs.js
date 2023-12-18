@@ -16,12 +16,21 @@ export function dayjs(s) {
   // Public methods
   function format(s) {
     // console.log('Format ', date)
-    const options = {
+    let options = {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     }
     if (s === 'iso') return date.toISOString()
+
+    if (s === 'time') {
+      options = {
+        ...options,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }
+    }
 
     return date.toLocaleDateString(undefined, options)
   }
@@ -368,6 +377,16 @@ export function dayjs(s) {
     return date
   }
 
+  function diffHours(time1, time2) {
+    const timeToSeconds = (time) => {
+      const [hours, minutes, seconds] = time.split(':').map(Number)
+      return hours * 3600 + minutes * 60 + seconds
+    }
+    const seconds1 = timeToSeconds(time1)
+    const seconds2 = timeToSeconds(time2)
+    return Math.abs(seconds1 - seconds2)
+  }
+
   function diff(
     otherDate,
     unit = 'day',
@@ -413,5 +432,6 @@ export function dayjs(s) {
     gptAdd,
     snapToTime,
     setTime,
+    diffHours,
   }
 }

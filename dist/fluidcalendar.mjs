@@ -1,4 +1,4 @@
-import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createCommentVNode, createElementVNode, renderSlot, withModifiers, toDisplayString, resolveComponent, createVNode, withCtx, Fragment, renderList, createBlock, createTextVNode, mergeProps } from 'vue';
+import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createCommentVNode, createElementVNode, renderSlot, withModifiers, toDisplayString, resolveComponent, createTextVNode, createVNode, withCtx, Fragment, renderList, createBlock, mergeProps } from 'vue';
 
 function parseTime(timeString) {
   const [hours, minutes, seconds] = timeString.split(':').map(Number);
@@ -357,10 +357,17 @@ function dayjs(s) {
     }
   }
 
-  function snapToTime(value, duration) {
+  function snapToTime(duration) {
     const [hours, mins] = duration.split(':').map(Number);
     const intervalInMinutes = hours * 60 + mins;
-    return Math.round(value / intervalInMinutes) * intervalInMinutes
+
+    const minutes = date.getHours() * 60 + date.getMinutes();
+    const round = Math.round(minutes / intervalInMinutes) * intervalInMinutes;
+
+    date.setHours(0, round, 0, 0);
+    // console.log('Snap ', duration, date, date.getTime())
+    // return date
+    return date
   }
 
   function diff(
@@ -7687,9 +7694,10 @@ var script$3 = {
       this.point = {
         x: event.clientX,
         y: event.clientY,
+        // snap: true
       };
       const data = this.pointToData(this.point);
-      // console.log('DATA => ', data)
+      // console.log('POINT ', data)
       this.point.data = data;
       if (data.collision) {
         this.addCollision(data.collision.id);
@@ -7708,7 +7716,8 @@ var script$3 = {
         return
         // document.addEventListener('mouseup', this.endDrag)
       } else {
-        this.dragData = [data];
+        console.log('DAAAATA => ', data);
+        this.dragData = data;
         // document.body.style.cursor = 'ew-resize'
       }
 
@@ -7785,7 +7794,6 @@ var script$3 = {
       document.removeEventListener('mouseup', this.endMove);
     },
     drag(event) {
-      this.dragData;
       const point = {
         x: event.clientX,
         y: event.clientY,
@@ -7797,19 +7805,19 @@ var script$3 = {
         this.addCollision(current.collision.id);
         return
       }
-      if (current.bookable.id != this.dragData[0].bookable.id) return
+      if (current.bookable.id != this.dragData.bookable.id) return
 
-      const exist = this.dragData.find((f) =>
-        dayjs(f.date).isSame(dayjs(current.date), 'day'),
-      );
+      console.log('Drag ', current);
 
-      if (exist) return
+      this.dragData = {
+        ...this.dragData,
+        snapEnd: current.snapStart,
+        snapStartX: this.dateToX(this.dragData.snapStart),
+        snapEndX: this.dateToX(current.snapStart),
+        // width: current.x - this.dragData.x,
+      };
 
-      // const isBefore =
-
-      this.dragData.push(current);
-
-      console.log('ok to add ', current);
+      return
       // if (data.collision) return // Collision
       // const data = event.dataTransfer.getData('application/json')
       // console.log('Drag ', event, this.dragData)
@@ -7828,7 +7836,7 @@ var script$3 = {
       this.collisions.push(id);
     },
     scroll({ x, y }) {
-      this.dragData = null;
+      // this.dragData = null
       if (x != undefined) {
         this.fakeMove = x;
         this.positionX = this.positionX - x;
@@ -7861,7 +7869,6 @@ var script$3 = {
         this.positionY = y;
       }
     },
-
     prev() {
       const date = dayjs(this.pointerDate).add(-5, 'day').date;
       this.centerViewTo(date);
@@ -7879,18 +7886,18 @@ var script$3 = {
       );
       return bookableIndex * this.rowHeight + diffY + this.headerHeight
     },
-    pointToData({ x, y }) {
+    pointToData({ x, y, snap = false }) {
       const top =
         y -
         this.$refs.fluidCalendar.getBoundingClientRect().top +
         this.positionY * -1;
-      const date = this.xToDate(x, this.slotDuration);
-
-      // console.log('Date ', date, dayjs(date).snapToTime())
+      const date = this.xToDate(x);
+      const snapStart = this.xToDate(x, true);
       const bookable = this.yToBookable(top);
 
       if (!bookable) {
         return {
+          snapStart: snapStart,
           date: date,
           x: this.dateToX(date),
           // y: this.bookableToY(this.yToBookable(top).id),
@@ -7909,6 +7916,7 @@ var script$3 = {
 
       if (clickOnBooking) {
         return {
+          snapStart: snapStart,
           date: date,
           bookable: bookable,
           x: this.dateToX(date),
@@ -7925,6 +7933,7 @@ var script$3 = {
         )
       });
       return {
+        snapStart: snapStart,
         date: date,
         bookable: bookable,
         x: this.dateToX(date),
@@ -7937,7 +7946,6 @@ var script$3 = {
     },
     xToDate(x, snap = false) {
       let v = x;
-      // const value =
       const zero =
         v -
         this.$refs.fluidCalendar.getBoundingClientRect().left -
@@ -7945,9 +7953,15 @@ var script$3 = {
       const p = zero + this.translateX * -1;
       const days = p / this.widthByMinute;
 
-      let value = days * this.ratio;
-      // console.log('Snap ', this.slotDuration, value)
-      return dayjs(this.rangeX.start).add(value, 'minute').date
+      let date = dayjs(this.rangeX.start).gptAdd(
+        days,
+        'minute',
+        this.slotMinTime,
+        this.slotMaxTime,
+      ).date;
+      if (snap) dayjs(date).snapToTime(this.slotDuration);
+
+      return date
     },
     dateToX(date) {
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute');
@@ -8073,6 +8087,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
     createElementVNode("button", {
       onClick: _cache[3] || (_cache[3] = $event => ($options.next()))
     }, "next"),
+    createTextVNode(" " + toDisplayString($data.dragData) + " ", 1 /* TEXT */),
     createCommentVNode(" <h2>{{ format(pointerDate) }}</h2>\n  <button @click=\"centerViewTo('2023-10-17')\">2023-10-17</button>\n  <button @click=\"generate\">generate</button>\n  <button @click=\"reset\">reset</button>\n\n  <input type=\"range\" min=\"20\" max=\"100\" v-model=\"rowHeight\" step=\"1\" /> "),
     createCommentVNode(" {{ dragData }} "),
     createCommentVNode(" {{ dragData }} "),
@@ -8143,19 +8158,6 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
             onMousedown: _cache[4] || (_cache[4] = (...args) => ($options.mousedown && $options.mousedown(...args)))
           }, [
             createCommentVNode(" <span class=\"t__fluid__calendar__pointer\"></span> "),
-            ($data.dragData)
-              ? (openBlock(), createElementBlock("span", {
-                  key: 0,
-                  style: normalizeStyle({
-              top: $data.dragData[0].y + 'px',
-              left: $data.dragData[0].x + 'px',
-              width: `${$data.dragData.length * $options.widthByMinute * $options.minutesByCell}px`,
-              transform: `translateY(${$data.positionY}px) translateX(${$options.translateX}px)`,
-              height: `${$data.rowHeight}px`,
-            }),
-                  class: "t__fluid__calendar__selection"
-                }, null, 4 /* STYLE */))
-              : createCommentVNode("v-if", true),
             createElementVNode("div", {
               class: "t__fluid__calendar__canva",
               style: normalizeStyle({
@@ -8163,6 +8165,19 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
               width: $options.width + 'px',
             })
             }, [
+              ($data.dragData)
+                ? (openBlock(), createElementBlock("span", {
+                    key: 0,
+                    style: normalizeStyle({
+                top: $data.dragData.y + 'px',
+                left: $data.dragData.snapStartX + 'px',
+                width: `${$data.dragData.snapEndX - $data.dragData.snapStartX}px`,
+                height: `${$data.rowHeight}px`,
+                transform: `translateY(${$data.positionY}px)`,
+              }),
+                    class: "t__fluid__calendar__selection"
+                  }, null, 4 /* STYLE */))
+                : createCommentVNode("v-if", true),
               createCommentVNode(" <div class=\"t__fluid__calendar__content__translate\"> "),
               createElementVNode("div", _hoisted_7$1, [
                 (openBlock(true), createElementBlock(Fragment, null, renderList($props.unavailabilities, (unavail) => {
@@ -8250,7 +8265,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
               ], 4 /* STYLE */)),
               ($options.displayHours)
                 ? (openBlock(), createElementBlock("svg", {
-                    key: 0,
+                    key: 1,
                     class: "t__fluid__calendar__header__time__grid",
                     xmlns: "http://www.w3.org/2000/svg",
                     style: normalizeStyle({ height: $options.headerHeight + 'px' })

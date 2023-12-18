@@ -28,7 +28,7 @@ export default {
   },
   computed: {
     pointerDate() {
-      return this.date
+      return dayjs(this.date).format('time')
       return dayjs(this.date).format()
     },
     clss() {

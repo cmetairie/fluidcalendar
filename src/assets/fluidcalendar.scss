@@ -405,6 +405,7 @@
 }
 
 .t__fluid__calendar__selection {
+  pointer-events: none;
   position: absolute;
   background: var(--color-focuslight);
   z-index: 3;

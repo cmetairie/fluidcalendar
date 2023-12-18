@@ -101,17 +101,7 @@
         <!-- <button class="t__fluid__calendar__prev" @click="prev"></button> -->
         <div class="t__fluid__calendar__content" @mousedown="mousedown">
           <!-- <span class="t__fluid__calendar__pointer"></span> -->
-          <!-- <span
-            v-if="dragData"
-            :style="{
-              top: dragData[0].y + 'px',
-              left: dragData[0].x + 'px',
-              width: `${dragData.length * widthByMinute * minutesByCell}px`,
-              transform: `translateY(${positionY}px) translateX(${translateX}px)`,
-              height: `${rowHeight}px`,
-            }"
-            class="t__fluid__calendar__selection"
-          ></span> -->
+
           <div
             class="t__fluid__calendar__canva"
             :style="{
@@ -119,6 +109,17 @@
               width: width + 'px',
             }"
           >
+            <span
+              v-if="dragData"
+              :style="{
+                top: dragData.y + 'px',
+                left: dragData.snapStartX + 'px',
+                width: `${dragData.snapEndX - dragData.snapStartX}px`,
+                height: `${rowHeight}px`,
+                transform: `translateY(${positionY}px)`,
+              }"
+              class="t__fluid__calendar__selection"
+            ></span>
             <!-- <div class="t__fluid__calendar__content__translate"> -->
             <div class="t__fluid__calendar__unavailabilities">
               <FluidDraggable
@@ -158,16 +159,20 @@
                   :widthByMinute="widthByMinute"
                   :rowHeight="rowHeight"
                   :collisions="collisions"
+                  :width="
+                    getWidth({ start: booking.start_at, end: booking.end_at })
+                  "
                   :ratio="ratio"
                   :refX="translateX + dateToX(booking.start_at)"
                 >
-                  <slot
+                  <!-- <slot
                     v-if="$slots.booking"
                     name="booking"
                     :booking="booking"
-                  />
-                  <span class="t__fluid__calendar__booking__label" v-else>
-                    {{ booking.id }} {{ booking.label }}
+                  /> -->
+                  <span class="t__fluid__calendar__booking__label">
+                    {{ format(booking.start_at, 'time') }} {{ booking.label }},
+                    {{ format(booking.end_at, 'time') }}
                   </span>
                 </FluidCalendarBooking>
               </FluidDraggable>
@@ -460,6 +465,12 @@ export default {
     },
   },
   computed: {
+    offsetStart() {
+      return dayjs().diffHours('00:00:00', this.slotMinTime)
+    },
+    offsetEnd() {
+      return dayjs().diffHours('24:00:00', this.slotMaxTime)
+    },
     slots() {
       const [hours, minutes, seconds] = this.slotDuration.split(':').map(Number)
       return [hours, minutes, seconds]
@@ -650,6 +661,16 @@ export default {
     },
   },
   methods: {
+    getWidth({ start, end }) {
+      // const
+      const diffInDays = dayjs(end).diff(dayjs(start))
+      // console.log('DIFF IN DAY ', diffInDays)
+      const diff = dayjs(end).diff(dayjs(start), 'minute')
+      console.log('DIFF => ', this.dateToX(end), this.dateToX(start))
+      // const offset = ((this.offsetStart + this.offsetEnd) * diffInDays) / 60
+      // return diff * this.widthByMinute
+      return this.dateToX(end) - this.dateToX(start)
+    },
     pinch(p) {
       if (p.zoom > 2 && p.zoom < 40) {
         this.pincher = p
@@ -662,6 +683,7 @@ export default {
       this.point = {
         x: event.clientX,
         y: event.clientY,
+        // snap: true
       }
       const data = this.pointToData(this.point)
       // console.log('POINT ', data)
@@ -684,7 +706,7 @@ export default {
         // document.addEventListener('mouseup', this.endDrag)
       } else {
         console.log('DAAAATA => ', data)
-        this.dragData = [data]
+        this.dragData = data
         // document.body.style.cursor = 'ew-resize'
       }
 
@@ -761,18 +783,30 @@ export default {
       document.removeEventListener('mouseup', this.endMove)
     },
     drag(event) {
-      const first = this.dragData
       const point = {
         x: event.clientX,
         y: event.clientY,
       }
       const current = this.pointToData(point)
+
       if (current.collision) {
         document.body.style.cursor = 'not-allowed'
         this.addCollision(current.collision.id)
         return
       }
-      if (current.bookable.id != this.dragData[0].bookable.id) return
+      if (current.bookable.id != this.dragData.bookable.id) return
+
+      console.log('Drag ', current)
+
+      this.dragData = {
+        ...this.dragData,
+        snapEnd: current.snapStart,
+        snapStartX: this.dateToX(this.dragData.snapStart),
+        snapEndX: this.dateToX(current.snapStart),
+        // width: current.x - this.dragData.x,
+      }
+
+      return
 
       const exist = this.dragData.find((f) =>
         dayjs(f.date).isSame(dayjs(current.date), 'day'),
@@ -803,7 +837,7 @@ export default {
       this.collisions.push(id)
     },
     scroll({ x, y }) {
-      this.dragData = null
+      // this.dragData = null
       if (x != undefined) {
         this.fakeMove = x
         this.positionX = this.positionX - x
@@ -844,8 +878,8 @@ export default {
       const date = dayjs(this.pointerDate).add(5, 'day').date
       this.centerViewTo(date)
     },
-    format(date) {
-      return dayjs(date).format('DD MMMM')
+    format(date, f = 'DD MMMM') {
+      return dayjs(date).format(f)
     },
     bookableToY(bookableId, diffY = 0) {
       const bookableIndex = this.filteredBookables.findIndex(
@@ -858,13 +892,13 @@ export default {
         y -
         this.$refs.fluidCalendar.getBoundingClientRect().top +
         this.positionY * -1
-      const date = this.xToDate(x, this.slotDuration, snap)
-
-      // console.log('Date ', date, dayjs(date).snapToTime())
+      const date = this.xToDate(x)
+      const snapStart = this.xToDate(x, true)
       const bookable = this.yToBookable(top)
 
       if (!bookable) {
         return {
+          snapStart: snapStart,
           date: date,
           x: this.dateToX(date),
           // y: this.bookableToY(this.yToBookable(top).id),
@@ -883,6 +917,7 @@ export default {
 
       if (clickOnBooking) {
         return {
+          snapStart: snapStart,
           date: date,
           bookable: bookable,
           x: this.dateToX(date),
@@ -899,6 +934,7 @@ export default {
         )
       })
       return {
+        snapStart: snapStart,
         date: date,
         bookable: bookable,
         x: this.dateToX(date),
@@ -918,25 +954,22 @@ export default {
       const p = zero + this.translateX * -1
       const days = p / this.widthByMinute
 
-      const date = dayjs(this.rangeX.start).gptAdd(
+      let date = dayjs(this.rangeX.start).gptAdd(
         days,
         'minute',
         this.slotMinTime,
         this.slotMaxTime,
       ).date
-      if (snap) {
-        const test = dayjs(date).snapToTime(this.slotDuration)
-        console.log('SNap', test)
-        // v = dayjs().snapToTime(x, this.slotDuration)
-        // console.log('Snap ', x, v)
-      }
-      // const value =
+      if (snap) dayjs(date).snapToTime(this.slotDuration)
 
       return date
     },
     dateToX(date) {
+      const diffInDays = dayjs(date).diff(dayjs(this.rangeX.start))
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute')
-      return (diff / this.ratio) * this.widthByMinute
+      const offset = ((this.offsetStart + this.offsetEnd) * diffInDays) / 60
+      // console.log('OFFSET ', diffInDays)
+      return (diff - offset) * this.widthByMinute
     },
     centerViewTo(unTimedDate, speed = 0.5) {
       console.log('Center => ', unTimedDate)

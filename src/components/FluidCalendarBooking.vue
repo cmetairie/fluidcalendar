@@ -52,6 +52,9 @@ export default {
     ratio: {
       type: Number,
     },
+    width: {
+      type: Number,
+    },
   },
   data() {
     return {
@@ -70,7 +73,7 @@ export default {
     },
     stl() {
       const stl = []
-      stl.push({ width: this.width / this.ratio - 4 + 'px' })
+      stl.push({ width: this.width + 'px' })
       stl.push({ height: this.rowHeight - 4 + 'px' })
       return stl
     },
@@ -94,13 +97,13 @@ export default {
       }
       return stl
     },
-    width() {
-      const diff = dayjs(this.booking.end_at).diff(
-        dayjs(this.booking.start_at),
-        'minute',
-      )
-      return diff * this.widthByMinute + this.diff
-    },
+    // width() {
+    //   const diff = dayjs(this.booking.end_at).diff(
+    //     dayjs(this.booking.start_at),
+    //     'minute',
+    //   )
+    //   return diff * this.widthByMinute + this.diff
+    // },
     ghost() {
       return this.booking.ghost
     },

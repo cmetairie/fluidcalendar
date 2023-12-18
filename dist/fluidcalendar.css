@@ -160,6 +160,7 @@
 }
 
 .t__fluid__calendar__header__cell {
+  user-select: none;
   position: relative;
   font-size: 0.75rem;
   display: flex;
@@ -407,6 +408,7 @@
 }
 
 .t__fluid__calendar__selection {
+  pointer-events: none;
   position: absolute;
   background: var(--color-focuslight);
   z-index: 3;
