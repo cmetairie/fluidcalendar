@@ -202,6 +202,7 @@
   left: 0;
   animation: slideFromBottomSoft 0.2s;
   opacity: 0.75;
+  z-index: 1;
 }
 .t__fluid__calendar__header__time__cell {
   position: absolute;
@@ -338,7 +339,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 3;
+  z-index: 8;
 }
 .t__fluid__calendar__booking {
   all: unset;
@@ -761,6 +762,28 @@
 .t__fluid__calendar__booking__content {
   line-height: 1;
 }
+
+.t__fluid__calendar__header__time__areas {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  z-index: 0;
+  animation: fade 1s;
+}
+.t__fluid__calendar__header__time__area {
+  flex: 1;
+  // background: rgba(0, 0, 0, 0.05);
+  opacity: 0.09;
+  // border-left: solid var(--color-border) 0.5px;
+  &:nth-child(even) {
+    background: #dbdeec;
+  }
+  // position: absolute;
+  // top: 0;
+  // left: 0;
+}
 // .t__fluid__calendar__mobile__hour > span::before {
 //   content: '';
 //   display: block;
@@ -820,5 +843,14 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

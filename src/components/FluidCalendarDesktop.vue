@@ -29,7 +29,7 @@
     <button @click="prev()">prev</button>
     <button @click="centerViewTo()">today</button>
     <button @click="next()">next</button>
-    {{ dragData }}
+    <!-- {{ dragData }} -->
     <!-- <h2>{{ format(pointerDate) }}</h2>
   <button @click="centerViewTo('2023-10-17')">2023-10-17</button>
   <button @click="generate">generate</button>
@@ -265,6 +265,22 @@
                     <span>{{ hour.label }}</span>
                   </div>
                 </div>
+                <div
+                  v-if="displayArea"
+                  class="t__fluid__calendar__header__time__areas"
+                  :style="{
+                    top: rowHeight + 'px',
+                    height: Math.min(fullHeight, h) + 'px',
+                  }"
+                >
+                  <div
+                    v-for="i in areas"
+                    class="t__fluid__calendar__header__time__area"
+                  >
+                    <!-- ? -->
+                    <!-- {{ i }} -->
+                  </div>
+                </div>
               </div>
             </div>
             <div
@@ -490,8 +506,16 @@ export default {
       }
       return hours
     },
+    areas() {
+      const h = this.hours.map((i) => i.index)
+      h.push({})
+      return h
+    },
     displayHours() {
       return this.zoom > 10
+    },
+    displayArea() {
+      return this.zoom > 8
     },
     headerHeight() {
       return 40
@@ -662,13 +686,6 @@ export default {
   },
   methods: {
     getWidth({ start, end }) {
-      // const
-      const diffInDays = dayjs(end).diff(dayjs(start))
-      // console.log('DIFF IN DAY ', diffInDays)
-      const diff = dayjs(end).diff(dayjs(start), 'minute')
-      console.log('DIFF => ', this.dateToX(end), this.dateToX(start))
-      // const offset = ((this.offsetStart + this.offsetEnd) * diffInDays) / 60
-      // return diff * this.widthByMinute
       return this.dateToX(end) - this.dateToX(start)
     },
     pinch(p) {
@@ -678,8 +695,8 @@ export default {
       }
     },
     mousedown(event) {
-      if (event.button != 0) return
       this.dragData = null
+      if (event.button != 0) return
       this.point = {
         x: event.clientX,
         y: event.clientY,
@@ -705,7 +722,6 @@ export default {
         return
         // document.addEventListener('mouseup', this.endDrag)
       } else {
-        console.log('DAAAATA => ', data)
         this.dragData = data
         // document.body.style.cursor = 'ew-resize'
       }
@@ -796,7 +812,7 @@ export default {
       }
       if (current.bookable.id != this.dragData.bookable.id) return
 
-      console.log('Drag ', current)
+      // console.log('Drag ', current)
 
       this.dragData = {
         ...this.dragData,
@@ -837,7 +853,7 @@ export default {
       this.collisions.push(id)
     },
     scroll({ x, y }) {
-      // this.dragData = null
+      this.dragData = null
       if (x != undefined) {
         this.fakeMove = x
         this.positionX = this.positionX - x

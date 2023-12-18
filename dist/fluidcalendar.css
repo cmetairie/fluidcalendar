@@ -199,6 +199,7 @@
   left: 0;
   animation: slideFromBottomSoft 0.2s;
   opacity: 0.75;
+  z-index: 1;
 }
 
 .t__fluid__calendar__header__time__cell {
@@ -337,7 +338,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 3;
+  z-index: 8;
 }
 
 .t__fluid__calendar__booking {
@@ -774,6 +775,24 @@
   line-height: 1;
 }
 
+.t__fluid__calendar__header__time__areas {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  z-index: 0;
+  animation: fade 1s;
+}
+
+.t__fluid__calendar__header__time__area {
+  flex: 1;
+  opacity: 0.09;
+}
+.t__fluid__calendar__header__time__area:nth-child(even) {
+  background: #dbdeec;
+}
+
 @keyframes shake {
   10%, 90% {
     transform: translate3d(-1px, 0, 0);
@@ -810,6 +829,14 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

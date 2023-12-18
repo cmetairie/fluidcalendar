@@ -18,12 +18,21 @@ function dayjs(s) {
   // Public methods
   function format(s) {
     // console.log('Format ', date)
-    const options = {
+    let options = {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     };
     if (s === 'iso') return date.toISOString()
+
+    if (s === 'time') {
+      options = {
+        ...options,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      };
+    }
 
     return date.toLocaleDateString(undefined, options)
   }
@@ -370,6 +379,16 @@ function dayjs(s) {
     return date
   }
 
+  function diffHours(time1, time2) {
+    const timeToSeconds = (time) => {
+      const [hours, minutes, seconds] = time.split(':').map(Number);
+      return hours * 3600 + minutes * 60 + seconds
+    };
+    const seconds1 = timeToSeconds(time1);
+    const seconds2 = timeToSeconds(time2);
+    return Math.abs(seconds1 - seconds2)
+  }
+
   function diff(
     otherDate,
     unit = 'day',
@@ -415,6 +434,7 @@ function dayjs(s) {
     gptAdd,
     snapToTime,
     setTime,
+    diffHours,
   }
 }
 
@@ -6453,6 +6473,9 @@ var script$a = {
     ratio: {
       type: Number,
     },
+    width: {
+      type: Number,
+    },
   },
   data() {
     return {
@@ -6471,7 +6494,7 @@ var script$a = {
     },
     stl() {
       const stl = [];
-      stl.push({ width: this.width / this.ratio - 4 + 'px' });
+      stl.push({ width: this.width + 'px' });
       stl.push({ height: this.rowHeight - 4 + 'px' });
       return stl
     },
@@ -6495,13 +6518,13 @@ var script$a = {
       }
       return stl
     },
-    width() {
-      const diff = dayjs(this.booking.end_at).diff(
-        dayjs(this.booking.start_at),
-        'minute',
-      );
-      return diff * this.widthByMinute + this.diff
-    },
+    // width() {
+    //   const diff = dayjs(this.booking.end_at).diff(
+    //     dayjs(this.booking.start_at),
+    //     'minute',
+    //   )
+    //   return diff * this.widthByMinute + this.diff
+    // },
     ghost() {
       return this.booking.ghost
     },
@@ -7283,7 +7306,7 @@ var script$5 = {
   },
   computed: {
     pointerDate() {
-      return this.date
+      return dayjs(this.date).format('time')
     },
     clss() {
       const clss = [];
@@ -7506,6 +7529,12 @@ var script$3 = {
     },
   },
   computed: {
+    offsetStart() {
+      return dayjs().diffHours('00:00:00', this.slotMinTime)
+    },
+    offsetEnd() {
+      return dayjs().diffHours('24:00:00', this.slotMaxTime)
+    },
     slots() {
       const [hours, minutes, seconds] = this.slotDuration.split(':').map(Number);
       return [hours, minutes, seconds]
@@ -7525,8 +7554,16 @@ var script$3 = {
       }
       return hours
     },
+    areas() {
+      const h = this.hours.map((i) => i.index);
+      h.push({});
+      return h
+    },
     displayHours() {
       return this.zoom > 10
+    },
+    displayArea() {
+      return this.zoom > 8
     },
     headerHeight() {
       return 40
@@ -7682,6 +7719,9 @@ var script$3 = {
     },
   },
   methods: {
+    getWidth({ start, end }) {
+      return this.dateToX(end) - this.dateToX(start)
+    },
     pinch(p) {
       if (p.zoom > 2 && p.zoom < 40) {
         this.pincher = p;
@@ -7689,8 +7729,8 @@ var script$3 = {
       }
     },
     mousedown(event) {
-      if (event.button != 0) return
       this.dragData = null;
+      if (event.button != 0) return
       this.point = {
         x: event.clientX,
         y: event.clientY,
@@ -7716,7 +7756,6 @@ var script$3 = {
         return
         // document.addEventListener('mouseup', this.endDrag)
       } else {
-        console.log('DAAAATA => ', data);
         this.dragData = data;
         // document.body.style.cursor = 'ew-resize'
       }
@@ -7807,7 +7846,7 @@ var script$3 = {
       }
       if (current.bookable.id != this.dragData.bookable.id) return
 
-      console.log('Drag ', current);
+      // console.log('Drag ', current)
 
       this.dragData = {
         ...this.dragData,
@@ -7877,8 +7916,8 @@ var script$3 = {
       const date = dayjs(this.pointerDate).add(5, 'day').date;
       this.centerViewTo(date);
     },
-    format(date) {
-      return dayjs(date).format('DD MMMM')
+    format(date, f = 'DD MMMM') {
+      return dayjs(date).format(f)
     },
     bookableToY(bookableId, diffY = 0) {
       const bookableIndex = this.filteredBookables.findIndex(
@@ -7964,8 +8003,11 @@ var script$3 = {
       return date
     },
     dateToX(date) {
+      const diffInDays = dayjs(date).diff(dayjs(this.rangeX.start));
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute');
-      return (diff / this.ratio) * this.widthByMinute
+      const offset = ((this.offsetStart + this.offsetEnd) * diffInDays) / 60;
+      // console.log('OFFSET ', diffInDays)
+      return (diff - offset) * this.widthByMinute
     },
     centerViewTo(unTimedDate, speed = 0.5) {
       console.log('Center => ', unTimedDate);
@@ -8006,10 +8048,7 @@ const _hoisted_5$2 = [
 const _hoisted_6$1 = { key: 1 };
 const _hoisted_7$1 = { class: "t__fluid__calendar__unavailabilities" };
 const _hoisted_8$1 = { class: "t__fluid__calendar__booking__label" };
-const _hoisted_9$1 = {
-  key: 1,
-  class: "t__fluid__calendar__booking__label"
-};
+const _hoisted_9$1 = { class: "t__fluid__calendar__booking__label" };
 const _hoisted_10$1 = ["width", "height"];
 const _hoisted_11$1 = ["d"];
 const _hoisted_12$1 = /*#__PURE__*/createElementVNode("rect", {
@@ -8028,13 +8067,14 @@ const _hoisted_16 = {
   key: 0,
   class: "t__fluid__calendar__header__time__cells"
 };
-const _hoisted_17 = {
+const _hoisted_17 = { class: "t__fluid__calendar__header__time__area" };
+const _hoisted_18 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_18 = ["width", "height"];
-const _hoisted_19 = ["d"];
-const _hoisted_20 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_19 = ["width", "height"];
+const _hoisted_20 = ["d"];
+const _hoisted_21 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#grid)"
@@ -8223,19 +8263,18 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         widthByMinute: $options.widthByMinute,
                         rowHeight: $data.rowHeight,
                         collisions: $data.collisions,
+                        width: 
+                    $options.getWidth({ start: booking.start_at, end: booking.end_at })
+                  ,
                         ratio: $options.ratio,
                         refX: $options.translateX + $options.dateToX(booking.start_at)
                       }, {
                         default: withCtx(() => [
-                          (_ctx.$slots.booking)
-                            ? renderSlot(_ctx.$slots, "booking", {
-                                key: 0,
-                                booking: booking
-                              })
-                            : (openBlock(), createElementBlock("span", _hoisted_9$1, toDisplayString(booking.id) + " " + toDisplayString(booking.label), 1 /* TEXT */))
+                          createCommentVNode(" <slot\n                    v-if=\"$slots.booking\"\n                    name=\"booking\"\n                    :booking=\"booking\"\n                  /> "),
+                          createElementVNode("span", _hoisted_9$1, toDisplayString($options.format(booking.start_at, 'time')) + " " + toDisplayString(booking.label) + ", " + toDisplayString($options.format(booking.end_at, 'time')), 1 /* TEXT */)
                         ]),
                         _: 2 /* DYNAMIC */
-                      }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "ratio", "refX"])
+                      }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "width", "ratio", "refX"])
                     ]),
                     _: 2 /* DYNAMIC */
                   }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["y", "x", "ghost"]))
@@ -8327,6 +8366,23 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                             ], 4 /* STYLE */))
                           }), 256 /* UNKEYED_FRAGMENT */))
                         ]))
+                      : createCommentVNode("v-if", true),
+                    ($options.displayArea)
+                      ? (openBlock(), createElementBlock("div", {
+                          key: 1,
+                          class: "t__fluid__calendar__header__time__areas",
+                          style: normalizeStyle({
+                    top: $data.rowHeight + 'px',
+                    height: Math.min($options.fullHeight, $props.h) + 'px',
+                  })
+                        }, [
+                          (openBlock(true), createElementBlock(Fragment, null, renderList($options.areas, (i) => {
+                            return (openBlock(), createElementBlock("div", _hoisted_17, [
+                              createCommentVNode(" ? "),
+                              createCommentVNode(" {{ i }} ")
+                            ]))
+                          }), 256 /* UNKEYED_FRAGMENT */))
+                        ], 4 /* STYLE */))
                       : createCommentVNode("v-if", true)
                   ], 4 /* STYLE */))
                 }), 128 /* KEYED_FRAGMENT */))
@@ -8338,7 +8394,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 transform: `translateY(${$data.positionY}px)`,
               })
               }, [
-                (openBlock(), createElementBlock("svg", _hoisted_17, [
+                (openBlock(), createElementBlock("svg", _hoisted_18, [
                   createElementVNode("defs", null, [
                     createElementVNode("pattern", {
                       id: "grid",
@@ -8351,10 +8407,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         fill: "none",
                         stroke: "currentColor",
                         "stroke-width": "1"
-                      }, null, 8 /* PROPS */, _hoisted_19)
-                    ], 8 /* PROPS */, _hoisted_18)
+                      }, null, 8 /* PROPS */, _hoisted_20)
+                    ], 8 /* PROPS */, _hoisted_19)
                   ]),
-                  _hoisted_20
+                  _hoisted_21
                 ]))
               ], 4 /* STYLE */),
               createCommentVNode(" </div> ")
