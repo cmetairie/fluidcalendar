@@ -101,7 +101,6 @@
   position: relative;
   display: grid;
   grid-template-columns: var(--bookables-width) calc(100% - var(--bookables-width));
-  overflow: hidden;
   border-bottom: solid var(--color-border-m) 0.5px;
   border-left: solid var(--color-border-m) 0.5px;
 }
@@ -140,8 +139,7 @@
 .t__fluid__calendar__header {
   position: relative;
   display: flex;
-  background: var(--color-bg2);
-  z-index: 5;
+  z-index: 7;
 }
 
 .t__fluid__calendar__header::before {
@@ -162,26 +160,35 @@
 }
 
 .t__fluid__calendar__header__cell {
+  position: relative;
   font-size: 0.75rem;
   display: flex;
+  align-items: center;
   justify-content: center;
   position: relative;
   padding: 0 var(--space);
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  z-index: 2;
 }
 
 .t__fluid__calendar__header__cell__date {
-  display: block;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: transform 0.2s;
-  background: var(--color-bg2);
-  padding: 0 1rem;
-  z-index: 1;
+  padding: 0 0.65rem;
+  height: 1.45rem;
+  z-index: 2;
+}
+.t__fluid__calendar__header__cell__date.--up {
+  background: var(--color-bg1);
+  border: solid #d5d9ea 0.5px;
 }
 
 .t__fluid__calendar__header__time__cells {
@@ -221,6 +228,10 @@
   position: absolute;
   width: 100%;
   z-index: 6;
+}
+
+.t__fluid__calendar__header__grid {
+  background: var(--color-bg2);
 }
 
 .t__fluid__calendar__header__time__grid {
@@ -601,10 +612,16 @@
 }
 
 .t__fluid__viewbar__date {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: var(--bookables-width);
   padding: 0 var(--space);
   font-weight: 600;
   color: var(--color-title);
+  height: 100%;
+  background: #fff;
+  z-index: 2;
 }
 .t__fluid__viewbar__date::before {
   content: "";

@@ -105,7 +105,7 @@
   grid-template-columns: var(--bookables-width) calc(
       100% - var(--bookables-width)
     );
-  overflow: hidden;
+  // overflow: hidden;
   border-bottom: solid var(--color-border-m) 0.5px;
   border-left: solid var(--color-border-m) 0.5px;
 }
@@ -142,8 +142,8 @@
 .t__fluid__calendar__header {
   position: relative;
   display: flex;
-  background: var(--color-bg2);
-  z-index: 5;
+  // background: var(--color-bg2);
+  z-index: 7;
 }
 
 .t__fluid__calendar__header::before {
@@ -162,28 +162,38 @@
   height: 100000px;
 }
 .t__fluid__calendar__header__cell {
+  user-select: none;
+  position: relative;
   font-size: 0.75rem;
   display: flex;
-  // align-items: center;
+  align-items: center;
   justify-content: center;
   position: relative;
   // text-align: center;
   padding: 0 var(--space);
   white-space: nowrap;
-  overflow: hidden;
+  // overflow: hidden;
   text-overflow: ellipsis;
+  z-index: 2;
 }
 
 .t__fluid__calendar__header__cell__date {
-  display: block;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: transform 0.2s;
-  background: var(--color-bg2);
-  padding: 0 1rem;
-  z-index: 1;
+  padding: 0 0.65rem;
+  height: 1.45rem;
+  z-index: 2;
+  &.--up {
+    background: var(--color-bg1);
+    border: solid #d5d9ea 0.5px;
+  }
 }
 .t__fluid__calendar__header__time__cells {
   position: absolute;
@@ -221,6 +231,9 @@
   position: absolute;
   width: 100%;
   z-index: 6;
+}
+.t__fluid__calendar__header__grid {
+  background: var(--color-bg2);
 }
 .t__fluid__calendar__header__time__grid {
   width: calc(100% - 1px);
@@ -583,10 +596,16 @@
 }
 
 .t__fluid__viewbar__date {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: var(--bookables-width);
   padding: 0 var(--space);
   font-weight: 600;
   color: var(--color-title);
+  height: 100%;
+  background: #fff;
+  z-index: 2;
   &::before {
     content: '';
     display: block;

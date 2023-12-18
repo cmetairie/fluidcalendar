@@ -355,10 +355,17 @@ export function dayjs(s) {
     }
   }
 
-  function snapToTime(value, duration) {
+  function snapToTime(duration) {
     const [hours, mins] = duration.split(':').map(Number)
     const intervalInMinutes = hours * 60 + mins
-    return Math.round(value / intervalInMinutes) * intervalInMinutes
+
+    const minutes = date.getHours() * 60 + date.getMinutes()
+    const round = Math.round(minutes / intervalInMinutes) * intervalInMinutes
+
+    date.setHours(0, round, 0, 0)
+    // console.log('Snap ', duration, date, date.getTime())
+    // return date
+    return date
   }
 
   function diff(

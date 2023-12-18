@@ -157,6 +157,12 @@ function dayjs(s) {
     }
   }
 
+  function setTime(time = '00:00:00') {
+    const [hours, minutes, seconds] = time.split(':').map(Number);
+    date.setHours(hours, minutes, seconds, 0);
+    return date
+  }
+
   function add(value, unit = 'hour') {
     if (unit === 'minute') {
       date.setMinutes(date.getMinutes() + value);
@@ -401,6 +407,7 @@ function dayjs(s) {
     get,
     gptAdd,
     snapToTime,
+    setTime,
   }
 }
 
@@ -6661,31 +6668,26 @@ const _hoisted_1$6 = {
   ref: "inner",
   class: "t__fluid__calendar__booking__inner"
 };
-const _hoisted_2$4 = /*#__PURE__*/createElementVNode("svg", {
+const _hoisted_2$4 = {
   x: "0",
   y: "0"
-}, [
-  /*#__PURE__*/createElementVNode("defs", null, [
-    /*#__PURE__*/createElementVNode("pattern", {
-      id: "diagonalHatch",
-      patternUnits: "userSpaceOnUse",
-      width: "4",
-      height: "8",
-      patternTransform: "rotate(-45 2 2)"
-    }, [
-      /*#__PURE__*/createElementVNode("path", {
-        d: "M -1,2 l 6,0",
-        stroke: "#D0D6E3",
-        "stroke-width": ".5"
-      })
-    ])
-  ]),
-  /*#__PURE__*/createElementVNode("rect", {
-    x: "1",
-    y: "1",
-    fill: "url(#diagonalHatch)"
-  })
+};
+const _hoisted_3$4 = /*#__PURE__*/createElementVNode("defs", null, [
+  /*#__PURE__*/createElementVNode("pattern", {
+    id: "diagonalHatch",
+    patternUnits: "userSpaceOnUse",
+    width: "4",
+    height: "8",
+    patternTransform: "rotate(-45 2 2)"
+  }, [
+    /*#__PURE__*/createElementVNode("path", {
+      d: "M -1,2 l 6,0",
+      stroke: "#D0D6E3",
+      "stroke-width": ".5"
+    })
+  ])
 ], -1 /* HOISTED */);
+const _hoisted_4$4 = ["height", "width"];
 
 function render$9(_ctx, _cache, $props, $setup, $data, $options) {
   return (openBlock(), createElementBlock("div", {
@@ -6706,7 +6708,16 @@ function render$9(_ctx, _cache, $props, $setup, $data, $options) {
           : createCommentVNode("v-if", true),
         createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
       ], 4 /* STYLE */),
-      _hoisted_2$4,
+      (openBlock(), createElementBlock("svg", _hoisted_2$4, [
+        _hoisted_3$4,
+        createElementVNode("rect", {
+          x: "1",
+          y: "1",
+          height: $options.height,
+          width: $options.width,
+          fill: "url(#diagonalHatch)"
+        }, null, 8 /* PROPS */, _hoisted_4$4)
+      ])),
       createElementVNode("button", {
         class: "t__fluid__calendar__booking__resize",
         onMousedown: _cache[0] || (_cache[0] = withModifiers((...args) => ($options.startSize && $options.startSize(...args)), ["stop"]))
@@ -7645,7 +7656,7 @@ var script$3 = {
 
       // let slots = []
 
-      console.log('Slots => ', dayjs().startOf('day', this.slotMinTime).date);
+      // console.log('Slots => ', dayjs().startOf('day', this.slotMinTime).date)
 
       let cells = [];
       for (let i = 0; i < diffInDays; i++) {
@@ -7852,11 +7863,11 @@ var script$3 = {
     },
 
     prev() {
-      const date = dayjs(this.pointerDate).add(-5, 'day').format();
+      const date = dayjs(this.pointerDate).add(-5, 'day').date;
       this.centerViewTo(date);
     },
     next() {
-      const date = dayjs(this.pointerDate).add(5, 'day').format();
+      const date = dayjs(this.pointerDate).add(5, 'day').date;
       this.centerViewTo(date);
     },
     format(date) {
@@ -7942,8 +7953,25 @@ var script$3 = {
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute');
       return (diff / this.ratio) * this.widthByMinute
     },
-    centerViewTo(date, speed = 0.5) {
-      return
+    centerViewTo(unTimedDate, speed = 0.5) {
+      console.log('Center => ', unTimedDate);
+      const date = dayjs(unTimedDate).setTime(this.slotMinTime);
+      const d = dayjs(date);
+      const r = dayjs(this.rangeX.start);
+      const diff = r.diff(d, 'minute') / this.ratio;
+      const t = this.positionX - this.translateX + diff * this.widthByMinute;
+      if (!speed) {
+        this.positionX = t;
+        return
+      }
+      const interpolation = { value: this.positionX };
+      gsapWithCSS.to(interpolation, {
+        value: t,
+        onUpdate: () => {
+          this.positionX = interpolation.value;
+        },
+        duration: speed,
+      });
     },
   },
 };
@@ -8033,6 +8061,18 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
         }), 1 /* TEXT */)
         ]))
       : createCommentVNode("v-if", true),
+    createElementVNode("button", {
+      onClick: _cache[0] || (_cache[0] = $event => ($options.centerViewTo('2024-01-20')))
+    }, "2023-12-20"),
+    createElementVNode("button", {
+      onClick: _cache[1] || (_cache[1] = $event => ($options.prev()))
+    }, "prev"),
+    createElementVNode("button", {
+      onClick: _cache[2] || (_cache[2] = $event => ($options.centerViewTo()))
+    }, "today"),
+    createElementVNode("button", {
+      onClick: _cache[3] || (_cache[3] = $event => ($options.next()))
+    }, "next"),
     createCommentVNode(" <h2>{{ format(pointerDate) }}</h2>\n  <button @click=\"centerViewTo('2023-10-17')\">2023-10-17</button>\n  <button @click=\"generate\">generate</button>\n  <button @click=\"reset\">reset</button>\n\n  <input type=\"range\" min=\"20\" max=\"100\" v-model=\"rowHeight\" step=\"1\" /> "),
     createCommentVNode(" {{ dragData }} "),
     createCommentVNode(" {{ dragData }} "),
@@ -8100,7 +8140,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
           createCommentVNode(" <button class=\"t__fluid__calendar__prev\" @click=\"prev\"></button> "),
           createElementVNode("div", {
             class: "t__fluid__calendar__content",
-            onMousedown: _cache[0] || (_cache[0] = (...args) => ($options.mousedown && $options.mousedown(...args)))
+            onMousedown: _cache[4] || (_cache[4] = (...args) => ($options.mousedown && $options.mousedown(...args)))
           }, [
             createCommentVNode(" <span class=\"t__fluid__calendar__pointer\"></span> "),
             ($data.dragData)
@@ -8254,12 +8294,11 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   }, [
                     createCommentVNode(" <slot v-if=\"$slots.date\" name=\"date\" :date=\"cell\" /> "),
                     createElementVNode("span", {
-                      class: "t__fluid__calendar__header__cell__date",
+                      class: normalizeClass(["t__fluid__calendar__header__cell__date", { '--up': $options.displayHours }]),
                       style: normalizeStyle({
-                    display: 'block',
-                    transform: `translateY(${12}px)`,
+                    transform: `translateY(${$options.displayHours ? -20 : 0}px)`,
                   })
-                    }, toDisplayString($options.format(cell.date)), 5 /* TEXT, STYLE */),
+                    }, toDisplayString($options.format(cell.date)), 7 /* TEXT, CLASS, STYLE */),
                     ($options.displayHours)
                       ? (openBlock(), createElementBlock("div", _hoisted_16, [
                           (openBlock(true), createElementBlock(Fragment, null, renderList($options.hours, (hour) => {

@@ -29,6 +29,7 @@
     <button @click="prev()">prev</button>
     <button @click="centerViewTo()">today</button>
     <button @click="next()">next</button>
+    {{ dragData }}
     <!-- <h2>{{ format(pointerDate) }}</h2>
   <button @click="centerViewTo('2023-10-17')">2023-10-17</button>
   <button @click="generate">generate</button>
@@ -100,7 +101,7 @@
         <!-- <button class="t__fluid__calendar__prev" @click="prev"></button> -->
         <div class="t__fluid__calendar__content" @mousedown="mousedown">
           <!-- <span class="t__fluid__calendar__pointer"></span> -->
-          <span
+          <!-- <span
             v-if="dragData"
             :style="{
               top: dragData[0].y + 'px',
@@ -110,7 +111,7 @@
               height: `${rowHeight}px`,
             }"
             class="t__fluid__calendar__selection"
-          ></span>
+          ></span> -->
           <div
             class="t__fluid__calendar__canva"
             :style="{
@@ -238,9 +239,9 @@
                 <!-- <slot v-if="$slots.date" name="date" :date="cell" /> -->
                 <span
                   class="t__fluid__calendar__header__cell__date"
+                  :class="{ '--up': displayHours }"
                   :style="{
-                    display: 'block',
-                    transform: `translateY(${12}px)`,
+                    transform: `translateY(${displayHours ? -20 : 0}px)`,
                   }"
                 >
                   {{ format(cell.date) }}
@@ -663,7 +664,7 @@ export default {
         y: event.clientY,
       }
       const data = this.pointToData(this.point)
-      // console.log('DATA => ', data)
+      // console.log('POINT ', data)
       this.point.data = data
       if (data.collision) {
         this.addCollision(data.collision.id)
@@ -682,6 +683,7 @@ export default {
         return
         // document.addEventListener('mouseup', this.endDrag)
       } else {
+        console.log('DAAAATA => ', data)
         this.dragData = [data]
         // document.body.style.cursor = 'ew-resize'
       }
@@ -765,7 +767,6 @@ export default {
         y: event.clientY,
       }
       const current = this.pointToData(point)
-
       if (current.collision) {
         document.body.style.cursor = 'not-allowed'
         this.addCollision(current.collision.id)
@@ -835,7 +836,6 @@ export default {
         this.positionY = y
       }
     },
-
     prev() {
       const date = dayjs(this.pointerDate).add(-5, 'day').date
       this.centerViewTo(date)
@@ -853,12 +853,12 @@ export default {
       )
       return bookableIndex * this.rowHeight + diffY + this.headerHeight
     },
-    pointToData({ x, y }) {
+    pointToData({ x, y, snap = false }) {
       const top =
         y -
         this.$refs.fluidCalendar.getBoundingClientRect().top +
         this.positionY * -1
-      const date = this.xToDate(x, this.slotDuration)
+      const date = this.xToDate(x, this.slotDuration, snap)
 
       // console.log('Date ', date, dayjs(date).snapToTime())
       const bookable = this.yToBookable(top)
@@ -911,11 +911,6 @@ export default {
     },
     xToDate(x, snap = false) {
       let v = x
-      if (snap) {
-        // v = dayjs().snapToTime(x, this.slotDuration)
-        // console.log('Snap ', x, v)
-      }
-      // const value =
       const zero =
         v -
         this.$refs.fluidCalendar.getBoundingClientRect().left -
@@ -923,9 +918,21 @@ export default {
       const p = zero + this.translateX * -1
       const days = p / this.widthByMinute
 
-      let value = days * this.ratio
-      // console.log('Snap ', this.slotDuration, value)
-      return dayjs(this.rangeX.start).add(value, 'minute').date
+      const date = dayjs(this.rangeX.start).gptAdd(
+        days,
+        'minute',
+        this.slotMinTime,
+        this.slotMaxTime,
+      ).date
+      if (snap) {
+        const test = dayjs(date).snapToTime(this.slotDuration)
+        console.log('SNap', test)
+        // v = dayjs().snapToTime(x, this.slotDuration)
+        // console.log('Snap ', x, v)
+      }
+      // const value =
+
+      return date
     },
     dateToX(date) {
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute')
