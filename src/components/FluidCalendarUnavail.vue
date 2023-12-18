@@ -31,7 +31,13 @@
             <path d="M -1,2 l 6,0" stroke="#D0D6E3" stroke-width=".5" />
           </pattern>
         </defs>
-        <rect x="1" y="1" fill="url(#diagonalHatch)" />
+        <rect
+          x="1"
+          y="1"
+          :height="height"
+          :width="width"
+          fill="url(#diagonalHatch)"
+        />
       </svg>
       <button
         class="t__fluid__calendar__booking__resize"

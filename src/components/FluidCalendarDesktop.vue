@@ -25,6 +25,10 @@
         }
       }}</pre>
     </div>
+    <button @click="centerViewTo('2024-01-20')">2023-12-20</button>
+    <button @click="prev()">prev</button>
+    <button @click="centerViewTo()">today</button>
+    <button @click="next()">next</button>
     <!-- <h2>{{ format(pointerDate) }}</h2>
   <button @click="centerViewTo('2023-10-17')">2023-10-17</button>
   <button @click="generate">generate</button>
@@ -626,7 +630,7 @@ export default {
 
       // let slots = []
 
-      console.log('Slots => ', dayjs().startOf('day', this.slotMinTime).date)
+      // console.log('Slots => ', dayjs().startOf('day', this.slotMinTime).date)
 
       let cells = []
       for (let i = 0; i < diffInDays; i++) {
@@ -833,11 +837,11 @@ export default {
     },
 
     prev() {
-      const date = dayjs(this.pointerDate).add(-5, 'day').format()
+      const date = dayjs(this.pointerDate).add(-5, 'day').date
       this.centerViewTo(date)
     },
     next() {
-      const date = dayjs(this.pointerDate).add(5, 'day').format()
+      const date = dayjs(this.pointerDate).add(5, 'day').date
       this.centerViewTo(date)
     },
     format(date) {
@@ -927,11 +931,12 @@ export default {
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute')
       return (diff / this.ratio) * this.widthByMinute
     },
-    centerViewTo(date, speed = 0.5) {
-      return
+    centerViewTo(unTimedDate, speed = 0.5) {
+      console.log('Center => ', unTimedDate)
+      const date = dayjs(unTimedDate).setTime(this.slotMinTime)
       const d = dayjs(date)
       const r = dayjs(this.rangeX.start)
-      const diff = r.diff(d.startOf('day'), 'minute')
+      const diff = r.diff(d, 'minute') / this.ratio
       const t = this.positionX - this.translateX + diff * this.widthByMinute
       if (!speed) {
         this.positionX = t

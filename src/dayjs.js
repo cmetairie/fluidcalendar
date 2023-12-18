@@ -155,6 +155,12 @@ export function dayjs(s) {
     }
   }
 
+  function setTime(time = '00:00:00') {
+    const [hours, minutes, seconds] = time.split(':').map(Number)
+    date.setHours(hours, minutes, seconds, 0)
+    return date
+  }
+
   function add(value, unit = 'hour') {
     if (unit === 'minute') {
       date.setMinutes(date.getMinutes() + value)
@@ -399,5 +405,6 @@ export function dayjs(s) {
     get,
     gptAdd,
     snapToTime,
+    setTime,
   }
 }
