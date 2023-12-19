@@ -139,7 +139,7 @@
 .t__fluid__calendar__header {
   position: relative;
   display: flex;
-  z-index: 7;
+  z-index: 10;
 }
 
 .t__fluid__calendar__header::before {
@@ -170,6 +170,7 @@
   padding: 0 var(--space);
   white-space: nowrap;
   text-overflow: ellipsis;
+  background: var(--color-bg2);
   z-index: 2;
 }
 .t__fluid__calendar__header__cell::after {
@@ -254,11 +255,7 @@
   color: var(--color-border-m);
   position: absolute;
   width: 100%;
-  z-index: 6;
-}
-
-.t__fluid__calendar__header__grid {
-  background: var(--color-bg2);
+  z-index: 11;
 }
 
 .t__fluid__calendar__header__time__grid {
@@ -297,6 +294,7 @@
   padding: 0 var(--space);
   z-index: 1;
   background: var(--color-bg1);
+  font-weight: 500;
 }
 
 .t__fluid__calendar__bookables__header::before {
@@ -316,7 +314,6 @@
   display: flex;
   align-items: center;
   padding: 0 var(--space);
-  color: var(--color-title);
 }
 
 .t__fluid__calendar__bookable::before {

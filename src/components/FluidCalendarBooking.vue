@@ -1,36 +1,36 @@
 <template>
-  <div>
-    <!-- <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
+  <!-- <div> -->
+  <!-- <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
       222
     </button> -->
-    <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
-      <!-- <button>m</button> -->
-      <div ref="inner" class="t__fluid__calendar__booking__inner">
-        <div
-          ref="content"
-          class="t__fluid__calendar__booking__content"
-          :style="sltContent"
-        >
-          <!-- {{ $slots.bookable }} -->
-          <!-- {{ diff }} -->
-          <!-- {{ refX }} -->
-          <!-- {{ diff }} -->
-          <!-- {{ lastResize }} -->
-          <slot v-if="!ghost" />
-          <!-- <span class="t__fluid__calendar__booking__label">
+  <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
+    <!-- <button>m</button> -->
+    <div ref="inner" class="t__fluid__calendar__booking__inner">
+      <div
+        ref="content"
+        class="t__fluid__calendar__booking__content"
+        :style="sltContent"
+      >
+        <!-- {{ $slots.bookable }} -->
+        <!-- {{ diff }} -->
+        <!-- {{ refX }} -->
+        <!-- {{ diff }} -->
+        <!-- {{ lastResize }} -->
+        <slot v-if="!ghost" />
+        <!-- <span class="t__fluid__calendar__booking__label">
         <span>{{ format(booking.start_at) }}</span>
         <span>{{ format(booking.end_at) }}</span>
       </span> -->
-        </div>
-        <button
-          class="t__fluid__calendar__booking__resize"
-          @mousedown.stop="startSize"
-        >
-          <!-- {{ diff }} -->
-        </button>
       </div>
-    </button>
-  </div>
+      <button
+        class="t__fluid__calendar__booking__resize"
+        @mousedown.stop="startSize"
+      >
+        <!-- {{ diff }} -->
+      </button>
+    </div>
+  </button>
+  <!-- </div> -->
 </template>
 
 <script>
@@ -86,7 +86,7 @@ export default {
     },
     stl() {
       const stl = []
-      stl.push({ width: this.allWidth + 'px' })
+      stl.push({ width: this.width + 'px' })
       stl.push({ height: this.rowHeight - 4 + 'px' })
       return stl
     },

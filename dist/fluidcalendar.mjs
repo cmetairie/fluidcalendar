@@ -1,4 +1,4 @@
-import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createCommentVNode, createElementVNode, createTextVNode, toDisplayString, renderSlot, withModifiers, resolveComponent, createVNode, withCtx, Fragment, renderList, createBlock, mergeProps } from 'vue';
+import { openBlock, createElementBlock, createCommentVNode, createElementVNode, normalizeClass, normalizeStyle, renderSlot, withModifiers, resolveComponent, toDisplayString, createVNode, withCtx, Fragment, renderList, createBlock, createTextVNode, mergeProps } from 'vue';
 
 function parseTime(timeString) {
   const [hours, minutes, seconds] = timeString.split(':').map(Number);
@@ -6633,35 +6633,38 @@ const _hoisted_1$7 = {
 };
 
 function render$a(_ctx, _cache, $props, $setup, $data, $options) {
-  return (openBlock(), createElementBlock("button", {
-    class: normalizeClass(["t__fluid__calendar__booking", $options.clss]),
-    style: normalizeStyle($options.stl)
-  }, [
-    createCommentVNode(" <button>m</button> "),
-    createElementVNode("div", _hoisted_1$7, [
-      createElementVNode("div", {
-        ref: "content",
-        class: "t__fluid__calendar__booking__content",
-        style: normalizeStyle($options.sltContent)
-      }, [
-        createCommentVNode(" {{ $slots.bookable }} "),
-        createCommentVNode(" {{ diff }} "),
-        createCommentVNode(" {{ refX }} "),
-        createCommentVNode(" {{ diff }} "),
-        createTextVNode(" " + toDisplayString($data.lastResize) + " ", 1 /* TEXT */),
-        (!$options.ghost)
-          ? renderSlot(_ctx.$slots, "default", { key: 0 })
-          : createCommentVNode("v-if", true),
-        createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
-      ], 4 /* STYLE */),
-      createElementVNode("button", {
-        class: "t__fluid__calendar__booking__resize",
-        onMousedown: _cache[0] || (_cache[0] = withModifiers((...args) => ($options.startSize && $options.startSize(...args)), ["stop"]))
-      }, [
-        createCommentVNode(" {{ diff }} ")
-      ], 32 /* HYDRATE_EVENTS */)
-    ], 512 /* NEED_PATCH */)
-  ], 6 /* CLASS, STYLE */))
+  return (openBlock(), createElementBlock("div", null, [
+    createCommentVNode(" <button class=\"t__fluid__calendar__booking\" :style=\"stl\" :class=\"clss\">\n      222\n    </button> "),
+    createElementVNode("button", {
+      class: normalizeClass(["t__fluid__calendar__booking", $options.clss]),
+      style: normalizeStyle($options.stl)
+    }, [
+      createCommentVNode(" <button>m</button> "),
+      createElementVNode("div", _hoisted_1$7, [
+        createElementVNode("div", {
+          ref: "content",
+          class: "t__fluid__calendar__booking__content",
+          style: normalizeStyle($options.sltContent)
+        }, [
+          createCommentVNode(" {{ $slots.bookable }} "),
+          createCommentVNode(" {{ diff }} "),
+          createCommentVNode(" {{ refX }} "),
+          createCommentVNode(" {{ diff }} "),
+          createCommentVNode(" {{ lastResize }} "),
+          (!$options.ghost)
+            ? renderSlot(_ctx.$slots, "default", { key: 0 })
+            : createCommentVNode("v-if", true),
+          createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
+        ], 4 /* STYLE */),
+        createElementVNode("button", {
+          class: "t__fluid__calendar__booking__resize",
+          onMousedown: _cache[0] || (_cache[0] = withModifiers((...args) => ($options.startSize && $options.startSize(...args)), ["stop"]))
+        }, [
+          createCommentVNode(" {{ diff }} ")
+        ], 32 /* HYDRATE_EVENTS */)
+      ], 512 /* NEED_PATCH */)
+    ], 6 /* CLASS, STYLE */)
+  ]))
 }
 
 script$a.render = render$a;
@@ -8234,27 +8237,26 @@ const _hoisted_3$2 = {
   ref: "bookables"
 };
 const _hoisted_4$2 = { key: 1 };
-const _hoisted_5$2 = { class: "t__fluid__calendar__unavailabilities" };
+const _hoisted_5$2 = { class: "t__fluid__calendar__booking__label" };
 const _hoisted_6$1 = { class: "t__fluid__calendar__booking__label" };
-const _hoisted_7$1 = { class: "t__fluid__calendar__booking__label" };
-const _hoisted_8$1 = ["width", "height"];
-const _hoisted_9$1 = ["d"];
-const _hoisted_10$1 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_7$1 = ["width", "height"];
+const _hoisted_8$1 = ["d"];
+const _hoisted_9$1 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_11$1 = {
+const _hoisted_10$1 = {
   key: 0,
   class: "t__fluid__calendar__header__time__cells"
 };
-const _hoisted_12$1 = {
+const _hoisted_11$1 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_13$1 = ["width", "height"];
-const _hoisted_14 = ["d"];
-const _hoisted_15 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_12$1 = ["width", "height"];
+const _hoisted_13$1 = ["d"];
+const _hoisted_14 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#grid)"
@@ -8296,18 +8298,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
         }), 1 /* TEXT */)
         ]))
       : createCommentVNode("v-if", true),
-    createElementVNode("button", {
-      onClick: _cache[0] || (_cache[0] = $event => ($options.centerViewTo('2024-01-20')))
-    }, "2023-12-20"),
-    createElementVNode("button", {
-      onClick: _cache[1] || (_cache[1] = $event => ($options.prev()))
-    }, "prev"),
-    createElementVNode("button", {
-      onClick: _cache[2] || (_cache[2] = $event => ($options.centerViewTo()))
-    }, "today"),
-    createElementVNode("button", {
-      onClick: _cache[3] || (_cache[3] = $event => ($options.next()))
-    }, "next"),
+    createCommentVNode(" <button @click=\"centerViewTo('2024-01-20')\">2023-12-20</button>\n    <button @click=\"prev()\">prev</button>\n    <button @click=\"centerViewTo()\">today</button>\n    <button @click=\"next()\">next</button> "),
     createCommentVNode(" {{ dragData }} "),
     createCommentVNode(" <h2>{{ format(pointerDate) }}</h2>\n  <button @click=\"centerViewTo('2023-10-17')\">2023-10-17</button>\n  <button @click=\"generate\">generate</button>\n  <button @click=\"reset\">reset</button>\n\n  <input type=\"range\" min=\"20\" max=\"100\" v-model=\"rowHeight\" step=\"1\" /> "),
     createCommentVNode(" {{ dragData }} "),
@@ -8373,7 +8364,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
           createCommentVNode(" <button class=\"t__fluid__calendar__prev\" @click=\"prev\"></button> "),
           createElementVNode("div", {
             class: "t__fluid__calendar__content",
-            onMousedown: _cache[4] || (_cache[4] = (...args) => ($options.mousedown && $options.mousedown(...args)))
+            onMousedown: _cache[0] || (_cache[0] = (...args) => ($options.mousedown && $options.mousedown(...args)))
           }, [
             createCommentVNode(" <span class=\"t__fluid__calendar__pointer\"></span> "),
             createElementVNode("div", {
@@ -8397,7 +8388,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   }, null, 4 /* STYLE */))
                 : createCommentVNode("v-if", true),
               createCommentVNode(" <div class=\"t__fluid__calendar__content__translate\"> "),
-              createElementVNode("div", _hoisted_5$2, [
+              createElementVNode("div", {
+                class: "t__fluid__calendar__unavailabilities",
+                style: normalizeStyle({ transform: `translateY(${$data.positionY}px)` })
+              }, [
                 (openBlock(true), createElementBlock(Fragment, null, renderList($props.unavailabilities, (unavail) => {
                   return (openBlock(), createBlock(_component_FluidDraggable, {
                     key: unavail.id,
@@ -8415,7 +8409,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         refX: $options.translateX + $options.dateToX(unavail.start_at)
                       }, {
                         default: withCtx(() => [
-                          createElementVNode("span", _hoisted_6$1, toDisplayString(unavail.id) + " " + toDisplayString(unavail.label), 1 /* TEXT */)
+                          createElementVNode("span", _hoisted_5$2, toDisplayString(unavail.id) + " " + toDisplayString(unavail.label), 1 /* TEXT */)
                         ]),
                         _: 2 /* DYNAMIC */
                       }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["unavail", "widthByMinute", "rowHeight", "ratio", "refX"]))
@@ -8423,7 +8417,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                     _: 2 /* DYNAMIC */
                   }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["y", "x", "ghost"]))
                 }), 128 /* KEYED_FRAGMENT */))
-              ]),
+              ], 4 /* STYLE */),
               createElementVNode("div", {
                 class: "t__fluid__calendar__bookings",
                 style: normalizeStyle({ transform: `translateY(${$data.positionY}px)` })
@@ -8458,7 +8452,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                                 booking: booking
                               })
                             : createCommentVNode("v-if", true),
-                          createElementVNode("span", _hoisted_7$1, [
+                          createElementVNode("span", _hoisted_6$1, [
                             createTextVNode(toDisplayString(booking.label) + " ", 1 /* TEXT */),
                             createCommentVNode(" {{ format(booking.start_at, 'time') }}\n                    {{ format(booking.end_at, 'time') }} ")
                           ])
@@ -8487,10 +8481,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                       fill: "none",
                       stroke: "currentColor",
                       "stroke-width": "1"
-                    }, null, 8 /* PROPS */, _hoisted_9$1)
-                  ], 8 /* PROPS */, _hoisted_8$1)
+                    }, null, 8 /* PROPS */, _hoisted_8$1)
+                  ], 8 /* PROPS */, _hoisted_7$1)
                 ]),
-                _hoisted_10$1
+                _hoisted_9$1
               ], 4 /* STYLE */)),
               createCommentVNode(" <svg\n              class=\"t__fluid__calendar__header__time__grid\"\n              xmlns=\"http://www.w3.org/2000/svg\"\n              v-if=\"displayHours\"\n              :style=\"{ height: headerHeight + 'px' }\"\n            >\n              <defs>\n                <pattern\n                  id=\"header_time_grid\"\n                  :width=\"slotDurationInMinutes * widthByMinute\"\n                  :height=\"headerHeight\"\n                  patternUnits=\"userSpaceOnUse\"\n                >\n                  <path\n                    :d=\"`M ${\n                      slotDurationInMinutes * widthByMinute\n                    } ${headerHeight} L ${\n                      slotDurationInMinutes * widthByMinute\n                    } ${headerHeight - 6}`\"\n                    fill=\"none\"\n                    stroke=\"#aaa\"\n                    stroke-width=\"1\"\n                  />\n                </pattern>\n              </defs>\n              <rect width=\"100%\" height=\"100%\" fill=\"url(#header_time_grid)\" />\n            </svg> "),
               createElementVNode("div", {
@@ -8516,7 +8510,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   })
                     }, toDisplayString($options.format(cell.date)), 7 /* TEXT, CLASS, STYLE */),
                     ($options.displayHours)
-                      ? (openBlock(), createElementBlock("div", _hoisted_11$1, [
+                      ? (openBlock(), createElementBlock("div", _hoisted_10$1, [
                           (openBlock(true), createElementBlock(Fragment, null, renderList($options.hours, (hour) => {
                             return (openBlock(), createElementBlock("div", {
                               class: "t__fluid__calendar__header__time__cell",
@@ -8559,7 +8553,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 transform: `translateY(${$data.positionY}px)`,
               })
               }, [
-                (openBlock(), createElementBlock("svg", _hoisted_12$1, [
+                (openBlock(), createElementBlock("svg", _hoisted_11$1, [
                   createElementVNode("defs", null, [
                     createElementVNode("pattern", {
                       id: "grid",
@@ -8572,10 +8566,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         fill: "none",
                         stroke: "currentColor",
                         "stroke-width": "1"
-                      }, null, 8 /* PROPS */, _hoisted_14)
-                    ], 8 /* PROPS */, _hoisted_13$1)
+                      }, null, 8 /* PROPS */, _hoisted_13$1)
+                    ], 8 /* PROPS */, _hoisted_12$1)
                   ]),
-                  _hoisted_15
+                  _hoisted_14
                 ]))
               ], 4 /* STYLE */),
               createCommentVNode(" </div> ")

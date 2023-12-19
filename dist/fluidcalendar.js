@@ -6635,35 +6635,38 @@ const _hoisted_1$7 = {
 };
 
 function render$a(_ctx, _cache, $props, $setup, $data, $options) {
-  return (vue.openBlock(), vue.createElementBlock("button", {
-    class: vue.normalizeClass(["t__fluid__calendar__booking", $options.clss]),
-    style: vue.normalizeStyle($options.stl)
-  }, [
-    vue.createCommentVNode(" <button>m</button> "),
-    vue.createElementVNode("div", _hoisted_1$7, [
-      vue.createElementVNode("div", {
-        ref: "content",
-        class: "t__fluid__calendar__booking__content",
-        style: vue.normalizeStyle($options.sltContent)
-      }, [
-        vue.createCommentVNode(" {{ $slots.bookable }} "),
-        vue.createCommentVNode(" {{ diff }} "),
-        vue.createCommentVNode(" {{ refX }} "),
-        vue.createCommentVNode(" {{ diff }} "),
-        vue.createTextVNode(" " + vue.toDisplayString($data.lastResize) + " ", 1 /* TEXT */),
-        (!$options.ghost)
-          ? vue.renderSlot(_ctx.$slots, "default", { key: 0 })
-          : vue.createCommentVNode("v-if", true),
-        vue.createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
-      ], 4 /* STYLE */),
-      vue.createElementVNode("button", {
-        class: "t__fluid__calendar__booking__resize",
-        onMousedown: _cache[0] || (_cache[0] = vue.withModifiers((...args) => ($options.startSize && $options.startSize(...args)), ["stop"]))
-      }, [
-        vue.createCommentVNode(" {{ diff }} ")
-      ], 32 /* HYDRATE_EVENTS */)
-    ], 512 /* NEED_PATCH */)
-  ], 6 /* CLASS, STYLE */))
+  return (vue.openBlock(), vue.createElementBlock("div", null, [
+    vue.createCommentVNode(" <button class=\"t__fluid__calendar__booking\" :style=\"stl\" :class=\"clss\">\n      222\n    </button> "),
+    vue.createElementVNode("button", {
+      class: vue.normalizeClass(["t__fluid__calendar__booking", $options.clss]),
+      style: vue.normalizeStyle($options.stl)
+    }, [
+      vue.createCommentVNode(" <button>m</button> "),
+      vue.createElementVNode("div", _hoisted_1$7, [
+        vue.createElementVNode("div", {
+          ref: "content",
+          class: "t__fluid__calendar__booking__content",
+          style: vue.normalizeStyle($options.sltContent)
+        }, [
+          vue.createCommentVNode(" {{ $slots.bookable }} "),
+          vue.createCommentVNode(" {{ diff }} "),
+          vue.createCommentVNode(" {{ refX }} "),
+          vue.createCommentVNode(" {{ diff }} "),
+          vue.createCommentVNode(" {{ lastResize }} "),
+          (!$options.ghost)
+            ? vue.renderSlot(_ctx.$slots, "default", { key: 0 })
+            : vue.createCommentVNode("v-if", true),
+          vue.createCommentVNode(" <span class=\"t__fluid__calendar__booking__label\">\n        <span>{{ format(booking.start_at) }}</span>\n        <span>{{ format(booking.end_at) }}</span>\n      </span> ")
+        ], 4 /* STYLE */),
+        vue.createElementVNode("button", {
+          class: "t__fluid__calendar__booking__resize",
+          onMousedown: _cache[0] || (_cache[0] = vue.withModifiers((...args) => ($options.startSize && $options.startSize(...args)), ["stop"]))
+        }, [
+          vue.createCommentVNode(" {{ diff }} ")
+        ], 32 /* HYDRATE_EVENTS */)
+      ], 512 /* NEED_PATCH */)
+    ], 6 /* CLASS, STYLE */)
+  ]))
 }
 
 script$a.render = render$a;
@@ -8236,27 +8239,26 @@ const _hoisted_3$2 = {
   ref: "bookables"
 };
 const _hoisted_4$2 = { key: 1 };
-const _hoisted_5$2 = { class: "t__fluid__calendar__unavailabilities" };
+const _hoisted_5$2 = { class: "t__fluid__calendar__booking__label" };
 const _hoisted_6$1 = { class: "t__fluid__calendar__booking__label" };
-const _hoisted_7$1 = { class: "t__fluid__calendar__booking__label" };
-const _hoisted_8$1 = ["width", "height"];
-const _hoisted_9$1 = ["d"];
-const _hoisted_10$1 = /*#__PURE__*/vue.createElementVNode("rect", {
+const _hoisted_7$1 = ["width", "height"];
+const _hoisted_8$1 = ["d"];
+const _hoisted_9$1 = /*#__PURE__*/vue.createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_11$1 = {
+const _hoisted_10$1 = {
   key: 0,
   class: "t__fluid__calendar__header__time__cells"
 };
-const _hoisted_12$1 = {
+const _hoisted_11$1 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_13$1 = ["width", "height"];
-const _hoisted_14 = ["d"];
-const _hoisted_15 = /*#__PURE__*/vue.createElementVNode("rect", {
+const _hoisted_12$1 = ["width", "height"];
+const _hoisted_13$1 = ["d"];
+const _hoisted_14 = /*#__PURE__*/vue.createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#grid)"
@@ -8298,18 +8300,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
         }), 1 /* TEXT */)
         ]))
       : vue.createCommentVNode("v-if", true),
-    vue.createElementVNode("button", {
-      onClick: _cache[0] || (_cache[0] = $event => ($options.centerViewTo('2024-01-20')))
-    }, "2023-12-20"),
-    vue.createElementVNode("button", {
-      onClick: _cache[1] || (_cache[1] = $event => ($options.prev()))
-    }, "prev"),
-    vue.createElementVNode("button", {
-      onClick: _cache[2] || (_cache[2] = $event => ($options.centerViewTo()))
-    }, "today"),
-    vue.createElementVNode("button", {
-      onClick: _cache[3] || (_cache[3] = $event => ($options.next()))
-    }, "next"),
+    vue.createCommentVNode(" <button @click=\"centerViewTo('2024-01-20')\">2023-12-20</button>\n    <button @click=\"prev()\">prev</button>\n    <button @click=\"centerViewTo()\">today</button>\n    <button @click=\"next()\">next</button> "),
     vue.createCommentVNode(" {{ dragData }} "),
     vue.createCommentVNode(" <h2>{{ format(pointerDate) }}</h2>\n  <button @click=\"centerViewTo('2023-10-17')\">2023-10-17</button>\n  <button @click=\"generate\">generate</button>\n  <button @click=\"reset\">reset</button>\n\n  <input type=\"range\" min=\"20\" max=\"100\" v-model=\"rowHeight\" step=\"1\" /> "),
     vue.createCommentVNode(" {{ dragData }} "),
@@ -8375,7 +8366,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
           vue.createCommentVNode(" <button class=\"t__fluid__calendar__prev\" @click=\"prev\"></button> "),
           vue.createElementVNode("div", {
             class: "t__fluid__calendar__content",
-            onMousedown: _cache[4] || (_cache[4] = (...args) => ($options.mousedown && $options.mousedown(...args)))
+            onMousedown: _cache[0] || (_cache[0] = (...args) => ($options.mousedown && $options.mousedown(...args)))
           }, [
             vue.createCommentVNode(" <span class=\"t__fluid__calendar__pointer\"></span> "),
             vue.createElementVNode("div", {
@@ -8399,7 +8390,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   }, null, 4 /* STYLE */))
                 : vue.createCommentVNode("v-if", true),
               vue.createCommentVNode(" <div class=\"t__fluid__calendar__content__translate\"> "),
-              vue.createElementVNode("div", _hoisted_5$2, [
+              vue.createElementVNode("div", {
+                class: "t__fluid__calendar__unavailabilities",
+                style: vue.normalizeStyle({ transform: `translateY(${$data.positionY}px)` })
+              }, [
                 (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($props.unavailabilities, (unavail) => {
                   return (vue.openBlock(), vue.createBlock(_component_FluidDraggable, {
                     key: unavail.id,
@@ -8417,7 +8411,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         refX: $options.translateX + $options.dateToX(unavail.start_at)
                       }, {
                         default: vue.withCtx(() => [
-                          vue.createElementVNode("span", _hoisted_6$1, vue.toDisplayString(unavail.id) + " " + vue.toDisplayString(unavail.label), 1 /* TEXT */)
+                          vue.createElementVNode("span", _hoisted_5$2, vue.toDisplayString(unavail.id) + " " + vue.toDisplayString(unavail.label), 1 /* TEXT */)
                         ]),
                         _: 2 /* DYNAMIC */
                       }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["unavail", "widthByMinute", "rowHeight", "ratio", "refX"]))
@@ -8425,7 +8419,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                     _: 2 /* DYNAMIC */
                   }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["y", "x", "ghost"]))
                 }), 128 /* KEYED_FRAGMENT */))
-              ]),
+              ], 4 /* STYLE */),
               vue.createElementVNode("div", {
                 class: "t__fluid__calendar__bookings",
                 style: vue.normalizeStyle({ transform: `translateY(${$data.positionY}px)` })
@@ -8460,7 +8454,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                                 booking: booking
                               })
                             : vue.createCommentVNode("v-if", true),
-                          vue.createElementVNode("span", _hoisted_7$1, [
+                          vue.createElementVNode("span", _hoisted_6$1, [
                             vue.createTextVNode(vue.toDisplayString(booking.label) + " ", 1 /* TEXT */),
                             vue.createCommentVNode(" {{ format(booking.start_at, 'time') }}\n                    {{ format(booking.end_at, 'time') }} ")
                           ])
@@ -8489,10 +8483,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                       fill: "none",
                       stroke: "currentColor",
                       "stroke-width": "1"
-                    }, null, 8 /* PROPS */, _hoisted_9$1)
-                  ], 8 /* PROPS */, _hoisted_8$1)
+                    }, null, 8 /* PROPS */, _hoisted_8$1)
+                  ], 8 /* PROPS */, _hoisted_7$1)
                 ]),
-                _hoisted_10$1
+                _hoisted_9$1
               ], 4 /* STYLE */)),
               vue.createCommentVNode(" <svg\n              class=\"t__fluid__calendar__header__time__grid\"\n              xmlns=\"http://www.w3.org/2000/svg\"\n              v-if=\"displayHours\"\n              :style=\"{ height: headerHeight + 'px' }\"\n            >\n              <defs>\n                <pattern\n                  id=\"header_time_grid\"\n                  :width=\"slotDurationInMinutes * widthByMinute\"\n                  :height=\"headerHeight\"\n                  patternUnits=\"userSpaceOnUse\"\n                >\n                  <path\n                    :d=\"`M ${\n                      slotDurationInMinutes * widthByMinute\n                    } ${headerHeight} L ${\n                      slotDurationInMinutes * widthByMinute\n                    } ${headerHeight - 6}`\"\n                    fill=\"none\"\n                    stroke=\"#aaa\"\n                    stroke-width=\"1\"\n                  />\n                </pattern>\n              </defs>\n              <rect width=\"100%\" height=\"100%\" fill=\"url(#header_time_grid)\" />\n            </svg> "),
               vue.createElementVNode("div", {
@@ -8518,7 +8512,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   })
                     }, vue.toDisplayString($options.format(cell.date)), 7 /* TEXT, CLASS, STYLE */),
                     ($options.displayHours)
-                      ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_11$1, [
+                      ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_10$1, [
                           (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.hours, (hour) => {
                             return (vue.openBlock(), vue.createElementBlock("div", {
                               class: "t__fluid__calendar__header__time__cell",
@@ -8561,7 +8555,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 transform: `translateY(${$data.positionY}px)`,
               })
               }, [
-                (vue.openBlock(), vue.createElementBlock("svg", _hoisted_12$1, [
+                (vue.openBlock(), vue.createElementBlock("svg", _hoisted_11$1, [
                   vue.createElementVNode("defs", null, [
                     vue.createElementVNode("pattern", {
                       id: "grid",
@@ -8574,10 +8568,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         fill: "none",
                         stroke: "currentColor",
                         "stroke-width": "1"
-                      }, null, 8 /* PROPS */, _hoisted_14)
-                    ], 8 /* PROPS */, _hoisted_13$1)
+                      }, null, 8 /* PROPS */, _hoisted_13$1)
+                    ], 8 /* PROPS */, _hoisted_12$1)
                   ]),
-                  _hoisted_15
+                  _hoisted_14
                 ]))
               ], 4 /* STYLE */),
               vue.createCommentVNode(" </div> ")
