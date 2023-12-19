@@ -77,7 +77,7 @@ function dayjs(s) {
     startDay = '00:00:00',
     endDay = '23:59:59',
   ) {
-    // console.log('ADD ', value)
+    // console.log('ADD ', value, startDay, endDay)
     const startTime = parseTime(startDay);
     const endTime = parseTime(endDay);
     const workingHours = endTime - startTime;
@@ -376,7 +376,7 @@ function dayjs(s) {
   // }
 
   function snapToTime(startTime, duration, roundUp) {
-    // console.log(' up ?', roundUp)
+    // console.log(' up ?', startTime, duration)
     const [startHours, startMinutes] = startTime.split(':').map(Number);
     const [durationHours, durationMinutes] = duration.split(':').map(Number);
 
@@ -400,10 +400,10 @@ function dayjs(s) {
     const roundedMinutes = roundedIntervalStart % 60;
 
     // Set the rounded hours and minutes to the date
-    const roundedDate = new Date(date);
-    roundedDate.setHours(roundedHours, roundedMinutes, 0, 0);
+    date = new Date(date);
+    date.setHours(roundedHours, roundedMinutes, 0, 0);
 
-    return roundedDate
+    return this
   }
 
   function diffHours(time1, time2) {
@@ -6497,6 +6497,9 @@ gsapWithCSS.core.Tween;
 var script$a = {
   name: 'FluidCalendarBooking',
   props: {
+    slotMinTime: { type: String },
+    slotMaxTime: { type: String },
+    slotDuration: { type: String },
     booking: {
       type: Object,
     },
@@ -6528,8 +6531,10 @@ var script$a = {
       baseX: 0,
       diff: 0,
       lastDecal: 0,
+      lastResize: null,
     }
   },
+  emits: ['resize'],
   computed: {
     clss() {
       const clss = [];
@@ -6540,7 +6545,7 @@ var script$a = {
     },
     stl() {
       const stl = [];
-      stl.push({ width: this.width + 'px' });
+      stl.push({ width: this.allWidth + 'px' });
       stl.push({ height: this.rowHeight - 4 + 'px' });
       return stl
     },
@@ -6564,13 +6569,36 @@ var script$a = {
       }
       return stl
     },
-    // width() {
-    //   const diff = dayjs(this.booking.end_at).diff(
-    //     dayjs(this.booking.start_at),
-    //     'minute',
-    //   )
-    //   return diff * this.widthByMinute + this.diff
-    // },
+    allWidth() {
+      // this.$emit('size', this.diff)
+
+      const nextDate = dayjs(this.booking.end_at)
+        .gptAdd(
+          this.diff / this.widthByMinute,
+          'minute',
+          this.slotMinTime,
+          this.slotMaxTime,
+        )
+        .snapToTime(this.slotMinTime, this.slotDuration, true)
+        .format('iso');
+
+      if (nextDate === this.lastResize) ; else {
+        // console.log('RESIZE to ', nextDate)
+        this.lastResize = nextDate;
+        // this.booking.end_at = nextDate
+        // this.$emit('resize', nextDate)
+        return this.width
+      }
+
+      // console.log('Test => ', test)
+      // return this.width
+
+      // const diff = dayjs(this.booking.end_at).diff(
+      //   dayjs(this.booking.start_at),
+      //   'minute',
+      // )
+      // return diff * this.widthByMinute + this.diff
+    },
     ghost() {
       return this.booking.ghost
     },
@@ -6589,6 +6617,7 @@ var script$a = {
     },
     size(event) {
       this.diff = event.clientX - this.baseX;
+      // this.$emit('size', this.diff)
     },
     endSize(event) {
       this.baseX = event.clientX;
@@ -6604,7 +6633,7 @@ const _hoisted_1$7 = {
 };
 
 function render$a(_ctx, _cache, $props, $setup, $data, $options) {
-  return (openBlock(), createElementBlock("div", {
+  return (openBlock(), createElementBlock("button", {
     class: normalizeClass(["t__fluid__calendar__booking", $options.clss]),
     style: normalizeStyle($options.stl)
   }, [
@@ -6616,7 +6645,9 @@ function render$a(_ctx, _cache, $props, $setup, $data, $options) {
         style: normalizeStyle($options.sltContent)
       }, [
         createCommentVNode(" {{ $slots.bookable }} "),
+        createCommentVNode(" {{ diff }} "),
         createCommentVNode(" {{ refX }} "),
+        createCommentVNode(" {{ diff }} "),
         (!$options.ghost)
           ? renderSlot(_ctx.$slots, "default", { key: 0 })
           : createCommentVNode("v-if", true),
@@ -7502,6 +7533,7 @@ var script$3 = {
   emits: ['updateDate', 'updateRange', 'clickBooking'],
   data() {
     return {
+      prevResize: 0,
       moveY: 0,
       mouseMoveStartPoint: 0,
       mouseMoveListener: null,
@@ -7615,10 +7647,12 @@ var script$3 = {
       const slotDuration = this.slotDurationInMinutes;
       const nbSlots = splitNumber(h / slotDuration);
       // console.log('Nb slots => ', nbSlots, slotDuration, minHours)
-      let j;
+      let j = 0;
       for (let i = 0; i < nbSlots.value; i++) {
         j = i + 1;
+        // console.log('????')
         if (i === 0 && nbSlots.value === 0) {
+          // console.log('?????')
           hours.push({
             index: 0,
             x: 0,
@@ -7648,6 +7682,7 @@ var script$3 = {
         }
       }
       if (nbSlots.rest) {
+        console.log('????');
         const label = dayjs().addDuration(
           this.slotMinTime,
           this.slotDurationInMinutes * j,
@@ -7764,12 +7799,6 @@ var script$3 = {
     },
     decalX() {
       const d = this.positionX / this.widthByMinute / this.minutesByCell;
-      // console.log('d => ', d)
-      // console.log(
-      //   'd => ',
-      //   d,
-      //   (this.positionX / this.widthByMinute) / this.minutesByCell,
-      // )
       return ((d + this.threshold) / this.threshold) | 0
     },
     width() {
@@ -7831,6 +7860,32 @@ var script$3 = {
     },
   },
   methods: {
+    resizeBooking(booking, v) {
+      // console.log('Resize ', booking, v)
+      // booking.end_at = v
+      // if (!v) return
+      // const value = v - this.prevResize
+      // console.log('Resize ', v, this.prevResize, value)
+      // const nextEnd = dayjs(this.xToDate(this.dateToX(booking.end_at) + value))
+      //   .snapToTime(this.slotMinTime, this.slotDuration)
+      //   .format('iso')
+      // // console.log('nextEnd => ', nextEnd)
+      // booking.end_at = nextEnd
+      // this.prevResize = value
+      // console.log(
+      //   'booking ',
+      //   booking,
+      //   value,
+      //   this.dateToX(booking.end_at),
+      //   nextEnd,
+      // )
+      // const size = value / this.widthByMinute
+      // console.log('resizeBooking ', booking, size)
+      // booking.end_at = dayjs(booking.end_at)
+      //   .gptAdd(size, 'minute', this.slotMinTime, this.slotMaxTime)
+      //   .snapToTime(this.slotMinTime, this.slotDuration)
+      //   .format('iso')
+    },
     getWidth({ start, end }) {
       return this.dateToX(end) - this.dateToX(start)
     },
@@ -7886,10 +7941,15 @@ var script$3 = {
         y: y,
         xInMinutes: m,
       };
+
       const newBooking = {
         ...booking,
-        start_at: dayjs(booking.start_at).add(m, 'minute').format('iso'),
-        end_at: dayjs(booking.end_at).add(m, 'minute').format('iso'),
+        start_at: dayjs(booking.start_at)
+          .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
+          .format('iso'),
+        end_at: dayjs(booking.end_at)
+          .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
+          .format('iso'),
         diff: diff,
         ghosted: true,
       };
@@ -7897,12 +7957,12 @@ var script$3 = {
         ...booking,
         id: booking.id + '--ghost',
         start_at: dayjs(booking.start_at)
-          .add(m, 'minute')
-          .startOf('day')
+          .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
+          .snapToTime(this.slotMinTime, this.slotDuration)
           .format('iso'),
         end_at: dayjs(booking.end_at)
-          .add(m, 'minute')
-          .startOf('day')
+          .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
+          .snapToTime(this.slotMinTime, this.slotDuration)
           .format('iso'),
         bookableId: this.yToBookable(
           event.clientY -
@@ -8121,19 +8181,8 @@ var script$3 = {
       ).date;
 
       if (snap) {
-        // console.log(
-        //   ' UP ? ',
-        //   dayjs(date).snapToTime(this.slotMinTime, this.slotDuration, true),
-        // )
-        // console.log(
-        //   ' down ? ',
-        //   dayjs(date).snapToTime(this.slotMinTime, this.slotDuration, false),
-        // )
         return dayjs(date).snapToTime(this.slotMinTime, this.slotDuration, up)
       }
-
-      // console.log('SNAP => ', date)
-
       return date
     },
     dateToX(date) {
@@ -8392,15 +8441,19 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         width: 
                     $options.getWidth({ start: booking.start_at, end: booking.end_at })
                   ,
+                        slotMinTime: $props.slotMinTime,
+                        slotMaxTime: $props.slotMaxTime,
+                        slotDuration: $props.slotDuration,
+                        onResize: (size) => $options.resizeBooking(booking, size),
                         ratio: $options.ratio,
                         refX: $options.translateX + $options.dateToX(booking.start_at)
                       }, {
                         default: withCtx(() => [
                           createCommentVNode(" <slot\n                    v-if=\"$slots.booking\"\n                    name=\"booking\"\n                    :booking=\"booking\"\n                  /> "),
-                          createElementVNode("span", _hoisted_9$1, toDisplayString($options.format(booking.start_at, 'time')) + " " + toDisplayString(booking.label) + ", " + toDisplayString($options.format(booking.end_at, 'time')), 1 /* TEXT */)
+                          createElementVNode("span", _hoisted_9$1, toDisplayString($options.format(booking.start_at, 'time')) + " " + toDisplayString($options.format(booking.end_at, 'time')), 1 /* TEXT */)
                         ]),
                         _: 2 /* DYNAMIC */
-                      }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "width", "ratio", "refX"])
+                      }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "width", "slotMinTime", "slotMaxTime", "slotDuration", "onResize", "ratio", "refX"])
                     ]),
                     _: 2 /* DYNAMIC */
                   }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["y", "x", "ghost"]))
@@ -9046,7 +9099,7 @@ var script = {
   emits: ['updateDate', 'updateRange'],
   data() {
     return {
-      displayFR: false,
+      displayFR: true,
       mobile: false,
       desktop: false,
       h: 0,

@@ -75,7 +75,7 @@ export function dayjs(s) {
     startDay = '00:00:00',
     endDay = '23:59:59',
   ) {
-    // console.log('ADD ', value)
+    // console.log('ADD ', value, startDay, endDay)
     const startTime = parseTime(startDay)
     const endTime = parseTime(endDay)
     const workingHours = endTime - startTime
@@ -374,7 +374,7 @@ export function dayjs(s) {
   // }
 
   function snapToTime(startTime, duration, roundUp) {
-    // console.log(' up ?', roundUp)
+    // console.log(' up ?', startTime, duration)
     const [startHours, startMinutes] = startTime.split(':').map(Number)
     const [durationHours, durationMinutes] = duration.split(':').map(Number)
 
@@ -398,10 +398,10 @@ export function dayjs(s) {
     const roundedMinutes = roundedIntervalStart % 60
 
     // Set the rounded hours and minutes to the date
-    const roundedDate = new Date(date)
-    roundedDate.setHours(roundedHours, roundedMinutes, 0, 0)
+    date = new Date(date)
+    date.setHours(roundedHours, roundedMinutes, 0, 0)
 
-    return roundedDate
+    return this
   }
 
   function diffHours(time1, time2) {

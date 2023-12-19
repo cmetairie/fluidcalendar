@@ -1,5 +1,5 @@
 <template>
-  <div class="t__fluid__calendar__booking" :style="stl" :class="clss">
+  <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
     <!-- <button>m</button> -->
     <div ref="inner" class="t__fluid__calendar__booking__inner">
       <div
@@ -8,7 +8,9 @@
         :style="sltContent"
       >
         <!-- {{ $slots.bookable }} -->
+        <!-- {{ diff }} -->
         <!-- {{ refX }} -->
+        <!-- {{ diff }} -->
         <slot v-if="!ghost" />
         <!-- <span class="t__fluid__calendar__booking__label">
         <span>{{ format(booking.start_at) }}</span>
@@ -22,7 +24,7 @@
         <!-- {{ diff }} -->
       </button>
     </div>
-  </div>
+  </button>
 </template>
 
 <script>
@@ -30,6 +32,9 @@ import { dayjs } from '../dayjs.js'
 export default {
   name: 'FluidCalendarBooking',
   props: {
+    slotMinTime: { type: String },
+    slotMaxTime: { type: String },
+    slotDuration: { type: String },
     booking: {
       type: Object,
     },
@@ -61,8 +66,10 @@ export default {
       baseX: 0,
       diff: 0,
       lastDecal: 0,
+      lastResize: null,
     }
   },
+  emits: ['resize'],
   computed: {
     clss() {
       const clss = []
@@ -73,7 +80,7 @@ export default {
     },
     stl() {
       const stl = []
-      stl.push({ width: this.width + 'px' })
+      stl.push({ width: this.allWidth + 'px' })
       stl.push({ height: this.rowHeight - 4 + 'px' })
       return stl
     },
@@ -97,13 +104,37 @@ export default {
       }
       return stl
     },
-    // width() {
-    //   const diff = dayjs(this.booking.end_at).diff(
-    //     dayjs(this.booking.start_at),
-    //     'minute',
-    //   )
-    //   return diff * this.widthByMinute + this.diff
-    // },
+    allWidth() {
+      // this.$emit('size', this.diff)
+
+      const nextDate = dayjs(this.booking.end_at)
+        .gptAdd(
+          this.diff / this.widthByMinute,
+          'minute',
+          this.slotMinTime,
+          this.slotMaxTime,
+        )
+        .snapToTime(this.slotMinTime, this.slotDuration, true)
+        .format('iso')
+
+      if (nextDate === this.lastResize) {
+      } else {
+        // console.log('RESIZE to ', nextDate)
+        this.lastResize = nextDate
+        // this.booking.end_at = nextDate
+        // this.$emit('resize', nextDate)
+        return this.width
+      }
+
+      // console.log('Test => ', test)
+      // return this.width
+
+      // const diff = dayjs(this.booking.end_at).diff(
+      //   dayjs(this.booking.start_at),
+      //   'minute',
+      // )
+      // return diff * this.widthByMinute + this.diff
+    },
     ghost() {
       return this.booking.ghost
     },
@@ -122,6 +153,7 @@ export default {
     },
     size(event) {
       this.diff = event.clientX - this.baseX
+      // this.$emit('size', this.diff)
     },
     endSize(event) {
       this.baseX = event.clientX
