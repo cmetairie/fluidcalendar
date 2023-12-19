@@ -1,7 +1,7 @@
 <template>
   <div class="t__fluid__viewbar" :class="clss">
     <div class="t__fluid__viewbar__date">
-      {{ pointerDate }}
+      <!-- {{ pointerDate }} -->
     </div>
     <slot />
   </div>

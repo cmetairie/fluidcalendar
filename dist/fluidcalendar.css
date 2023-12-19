@@ -622,11 +622,6 @@
   width: 1rem;
 }
 
-.t__fluid__viewbar {
-  display: flex;
-  align-items: center;
-}
-
 .t__fluid__viewbar.--debug {
   max-width: 80rem;
   margin: var(--space) auto;
@@ -636,10 +631,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  height: var(--row-height);
-  border-top: solid var(--color-border-m) 0.5px;
-  border-right: solid var(--color-border-m) 0.5px;
-  border-left: solid var(--color-border-m) 0.5px;
+  height: 0.75rem;
 }
 
 .t__fluid__viewbar__date {
@@ -647,24 +639,12 @@
   display: flex;
   align-items: center;
   width: var(--bookables-width);
-  padding: 0 var(--space);
   font-weight: 600;
   color: var(--color-title);
   height: 100%;
   background: #fff;
   z-index: 2;
 }
-.t__fluid__viewbar__date::before {
-  content: "";
-  display: block;
-  position: absolute;
-  top: 0;
-  left: var(--bookables-width);
-  bottom: 0;
-  width: 0.5px;
-  background: var(--color-border-m);
-}
-
 .t__fluid__calendar__mobile {
   display: flex;
   flex-flow: column;

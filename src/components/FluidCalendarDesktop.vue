@@ -3,6 +3,7 @@
     <div v-if="debug" class="t__debugg">
       <pre>{{
         {
+          zoom,
           rangeDays,
           threshold,
           minutesByCell,
@@ -25,10 +26,10 @@
         }
       }}</pre>
     </div>
-    <button @click="centerViewTo('2024-01-20')">2023-12-20</button>
+    <!-- <button @click="centerViewTo('2024-01-20')">2023-12-20</button>
     <button @click="prev()">prev</button>
     <button @click="centerViewTo()">today</button>
-    <button @click="next()">next</button>
+    <button @click="next()">next</button> -->
     <!-- {{ dragData }} -->
     <!-- <h2>{{ format(pointerDate) }}</h2>
   <button @click="centerViewTo('2023-10-17')">2023-10-17</button>
@@ -44,11 +45,7 @@
       :rangeY="rangeY"
       :date="pointerDate"
       :debug="debug"
-    >
-      <!-- <button @click="zoom = zoom - 0.5">-</button>
-      <input type="range" min="0.1" max="10" v-model="zoom" step="0.01" />
-      <button @click="zoom = zoom + 0.5">+</button> -->
-    </FluidViewbar>
+    ></FluidViewbar>
     <FluidPinch :zoom="zoom" @pinch="pinch">
       <div
         class="t__fluid__calendar"
@@ -61,7 +58,7 @@
             class="t__fluid__calendar__bookables__header"
             :style="{ height: headerHeight + 'px' }"
           >
-            <span>bookables</span>
+            <span>{{ bookableType.label }}</span>
           </div>
           <div
             class="t__fluid__calendar__bookables__inner"
@@ -121,7 +118,7 @@
               class="t__fluid__calendar__selection"
             ></span>
             <!-- <div class="t__fluid__calendar__content__translate"> -->
-            <div class="t__fluid__calendar__unavailabilities">
+            <div class="t__fluid__calendar__unavailabilities" :style="{ transform: `translateY(${positionY}px)` }">
               <FluidDraggable
                 v-for="unavail of unavailabilities"
                 :key="unavail.id"
@@ -376,6 +373,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    bookableType: {
+      type: Object,
+      default: () => {},
+    },
     unavailabilities: {
       type: Array,
       default: () => [],
@@ -600,7 +601,7 @@ export default {
       return Math.floor(this.rangeDays / 8)
     },
     rangeDays() {
-      return 6
+      return 14
       const width = screen.width
       const nbDays = this.widthByMinute * 60 * 24
       console.log('NB DAYS ?', width / nbDays)

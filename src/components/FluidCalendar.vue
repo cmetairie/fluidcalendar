@@ -65,6 +65,10 @@ export default {
       type: String,
       default: 'fr',
     },
+    bookableType: {
+      type: Object,
+      default: () => {},
+    },
     bookings: {
       type: Array,
       default: () => [],

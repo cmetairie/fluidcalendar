@@ -1,4 +1,4 @@
-import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createCommentVNode, createElementVNode, renderSlot, withModifiers, toDisplayString, resolveComponent, createVNode, withCtx, Fragment, renderList, createBlock, createTextVNode, mergeProps } from 'vue';
+import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createCommentVNode, createElementVNode, createTextVNode, toDisplayString, renderSlot, withModifiers, resolveComponent, createVNode, withCtx, Fragment, renderList, createBlock, mergeProps } from 'vue';
 
 function parseTime(timeString) {
   const [hours, minutes, seconds] = timeString.split(':').map(Number);
@@ -6648,6 +6648,7 @@ function render$a(_ctx, _cache, $props, $setup, $data, $options) {
         createCommentVNode(" {{ diff }} "),
         createCommentVNode(" {{ refX }} "),
         createCommentVNode(" {{ diff }} "),
+        createTextVNode(" " + toDisplayString($data.lastResize) + " ", 1 /* TEXT */),
         (!$options.ghost)
           ? renderSlot(_ctx.$slots, "default", { key: 0 })
           : createCommentVNode("v-if", true),
@@ -7401,13 +7402,15 @@ var script$5 = {
   methods: {},
 };
 
-const _hoisted_1$4 = { class: "t__fluid__viewbar__date" };
+const _hoisted_1$4 = /*#__PURE__*/createElementVNode("div", { class: "t__fluid__viewbar__date" }, [
+  /*#__PURE__*/createCommentVNode(" {{ pointerDate }} ")
+], -1 /* HOISTED */);
 
 function render$5(_ctx, _cache, $props, $setup, $data, $options) {
   return (openBlock(), createElementBlock("div", {
     class: normalizeClass(["t__fluid__viewbar", $options.clss])
   }, [
-    createElementVNode("div", _hoisted_1$4, toDisplayString($options.pointerDate), 1 /* TEXT */),
+    _hoisted_1$4,
     renderSlot(_ctx.$slots, "default")
   ], 2 /* CLASS */))
 }
@@ -7500,6 +7503,10 @@ var script$3 = {
     bookables: {
       type: Array,
       default: () => [],
+    },
+    bookableType: {
+      type: Object,
+      default: () => {},
     },
     unavailabilities: {
       type: Array,
@@ -7723,7 +7730,7 @@ var script$3 = {
       return 2
     },
     rangeDays() {
-      return 6
+      return 14
     },
     // _bookings() {
     //   return [...this.bookings] //this.bookings.concat(this.cal.bookings)
@@ -8023,11 +8030,13 @@ var script$3 = {
 
       this.dragData = {
         ...this.dragData,
-        snapEnd: current.snapUp,
-        snapStartX: this.dateToX(this.dragData.snapStart),
-        snapEndX: this.dateToX(current.snapUp),
+        snapEnd: current.snapUp.format('iso'),
+        snapStartX: this.dateToX(this.dragData.snapStart.format('iso')),
+        snapEndX: this.dateToX(current.snapUp.format('iso')),
         // width: current.x - this.dragData.x,
       };
+
+      // console.log('Drag Data ', this.dragData)
 
       return
       // if (data.collision) return // Collision
@@ -8224,32 +8233,28 @@ const _hoisted_3$2 = {
   class: "t__fluid__calendar__bookables",
   ref: "bookables"
 };
-const _hoisted_4$2 = /*#__PURE__*/createElementVNode("span", null, "bookables", -1 /* HOISTED */);
-const _hoisted_5$2 = [
-  _hoisted_4$2
-];
-const _hoisted_6$1 = { key: 1 };
-const _hoisted_7$1 = { class: "t__fluid__calendar__unavailabilities" };
-const _hoisted_8$1 = { class: "t__fluid__calendar__booking__label" };
-const _hoisted_9$1 = { class: "t__fluid__calendar__booking__label" };
-const _hoisted_10$1 = ["width", "height"];
-const _hoisted_11$1 = ["d"];
-const _hoisted_12$1 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_4$2 = { key: 1 };
+const _hoisted_5$2 = { class: "t__fluid__calendar__unavailabilities" };
+const _hoisted_6$1 = { class: "t__fluid__calendar__booking__label" };
+const _hoisted_7$1 = { class: "t__fluid__calendar__booking__label" };
+const _hoisted_8$1 = ["width", "height"];
+const _hoisted_9$1 = ["d"];
+const _hoisted_10$1 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_13$1 = {
+const _hoisted_11$1 = {
   key: 0,
   class: "t__fluid__calendar__header__time__cells"
 };
-const _hoisted_14 = {
+const _hoisted_12$1 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_15 = ["width", "height"];
-const _hoisted_16 = ["d"];
-const _hoisted_17 = /*#__PURE__*/createElementVNode("rect", {
+const _hoisted_13$1 = ["width", "height"];
+const _hoisted_14 = ["d"];
+const _hoisted_15 = /*#__PURE__*/createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#grid)"
@@ -8268,6 +8273,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
     ($props.debug)
       ? (openBlock(), createElementBlock("div", _hoisted_2$2, [
           createElementVNode("pre", null, toDisplayString({
+          zoom: $data.zoom,
           rangeDays: $options.rangeDays,
           threshold: $options.threshold,
           minutesByCell: $options.minutesByCell,
@@ -8311,12 +8317,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
       rangeY: $options.rangeY,
       date: $options.pointerDate,
       debug: $props.debug
-    }, {
-      default: withCtx(() => [
-        createCommentVNode(" <button @click=\"zoom = zoom - 0.5\">-</button>\n      <input type=\"range\" min=\"0.1\" max=\"10\" v-model=\"zoom\" step=\"0.01\" />\n      <button @click=\"zoom = zoom + 0.5\">+</button> ")
-      ]),
-      _: 1 /* STABLE */
-    }, 8 /* PROPS */, ["rangeX", "rangeY", "date", "debug"]),
+    }, null, 8 /* PROPS */, ["rangeX", "rangeY", "date", "debug"]),
     createVNode(_component_FluidPinch, {
       zoom: $data.zoom,
       onPinch: $options.pinch
@@ -8331,7 +8332,9 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
             createElementVNode("div", {
               class: "t__fluid__calendar__bookables__header",
               style: normalizeStyle({ height: $options.headerHeight + 'px' })
-            }, [..._hoisted_5$2], 4 /* STYLE */),
+            }, [
+              createElementVNode("span", null, toDisplayString($props.bookableType.label), 1 /* TEXT */)
+            ], 4 /* STYLE */),
             createElementVNode("div", {
               class: "t__fluid__calendar__bookables__inner",
               style: normalizeStyle({
@@ -8349,7 +8352,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         key: 0,
                         bookable: bookable
                       })
-                    : (openBlock(), createElementBlock("span", _hoisted_6$1, toDisplayString(bookable.label), 1 /* TEXT */))
+                    : (openBlock(), createElementBlock("span", _hoisted_4$2, toDisplayString(bookable.label), 1 /* TEXT */))
                 ], 4 /* STYLE */))
               }), 128 /* KEYED_FRAGMENT */))
             ], 4 /* STYLE */)
@@ -8394,7 +8397,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   }, null, 4 /* STYLE */))
                 : createCommentVNode("v-if", true),
               createCommentVNode(" <div class=\"t__fluid__calendar__content__translate\"> "),
-              createElementVNode("div", _hoisted_7$1, [
+              createElementVNode("div", _hoisted_5$2, [
                 (openBlock(true), createElementBlock(Fragment, null, renderList($props.unavailabilities, (unavail) => {
                   return (openBlock(), createBlock(_component_FluidDraggable, {
                     key: unavail.id,
@@ -8412,7 +8415,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         refX: $options.translateX + $options.dateToX(unavail.start_at)
                       }, {
                         default: withCtx(() => [
-                          createElementVNode("span", _hoisted_8$1, toDisplayString(unavail.id) + " " + toDisplayString(unavail.label), 1 /* TEXT */)
+                          createElementVNode("span", _hoisted_6$1, toDisplayString(unavail.id) + " " + toDisplayString(unavail.label), 1 /* TEXT */)
                         ]),
                         _: 2 /* DYNAMIC */
                       }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["unavail", "widthByMinute", "rowHeight", "ratio", "refX"]))
@@ -8449,8 +8452,16 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         refX: $options.translateX + $options.dateToX(booking.start_at)
                       }, {
                         default: withCtx(() => [
-                          createCommentVNode(" <slot\n                    v-if=\"$slots.booking\"\n                    name=\"booking\"\n                    :booking=\"booking\"\n                  /> "),
-                          createElementVNode("span", _hoisted_9$1, toDisplayString($options.format(booking.start_at, 'time')) + " " + toDisplayString($options.format(booking.end_at, 'time')), 1 /* TEXT */)
+                          (_ctx.$slots.booking)
+                            ? renderSlot(_ctx.$slots, "booking", {
+                                key: 0,
+                                booking: booking
+                              })
+                            : createCommentVNode("v-if", true),
+                          createElementVNode("span", _hoisted_7$1, [
+                            createTextVNode(toDisplayString(booking.label) + " ", 1 /* TEXT */),
+                            createCommentVNode(" {{ format(booking.start_at, 'time') }}\n                    {{ format(booking.end_at, 'time') }} ")
+                          ])
                         ]),
                         _: 2 /* DYNAMIC */
                       }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["booking", "widthByMinute", "rowHeight", "collisions", "width", "slotMinTime", "slotMaxTime", "slotDuration", "onResize", "ratio", "refX"])
@@ -8476,10 +8487,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                       fill: "none",
                       stroke: "currentColor",
                       "stroke-width": "1"
-                    }, null, 8 /* PROPS */, _hoisted_11$1)
-                  ], 8 /* PROPS */, _hoisted_10$1)
+                    }, null, 8 /* PROPS */, _hoisted_9$1)
+                  ], 8 /* PROPS */, _hoisted_8$1)
                 ]),
-                _hoisted_12$1
+                _hoisted_10$1
               ], 4 /* STYLE */)),
               createCommentVNode(" <svg\n              class=\"t__fluid__calendar__header__time__grid\"\n              xmlns=\"http://www.w3.org/2000/svg\"\n              v-if=\"displayHours\"\n              :style=\"{ height: headerHeight + 'px' }\"\n            >\n              <defs>\n                <pattern\n                  id=\"header_time_grid\"\n                  :width=\"slotDurationInMinutes * widthByMinute\"\n                  :height=\"headerHeight\"\n                  patternUnits=\"userSpaceOnUse\"\n                >\n                  <path\n                    :d=\"`M ${\n                      slotDurationInMinutes * widthByMinute\n                    } ${headerHeight} L ${\n                      slotDurationInMinutes * widthByMinute\n                    } ${headerHeight - 6}`\"\n                    fill=\"none\"\n                    stroke=\"#aaa\"\n                    stroke-width=\"1\"\n                  />\n                </pattern>\n              </defs>\n              <rect width=\"100%\" height=\"100%\" fill=\"url(#header_time_grid)\" />\n            </svg> "),
               createElementVNode("div", {
@@ -8505,7 +8516,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   })
                     }, toDisplayString($options.format(cell.date)), 7 /* TEXT, CLASS, STYLE */),
                     ($options.displayHours)
-                      ? (openBlock(), createElementBlock("div", _hoisted_13$1, [
+                      ? (openBlock(), createElementBlock("div", _hoisted_11$1, [
                           (openBlock(true), createElementBlock(Fragment, null, renderList($options.hours, (hour) => {
                             return (openBlock(), createElementBlock("div", {
                               class: "t__fluid__calendar__header__time__cell",
@@ -8548,7 +8559,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 transform: `translateY(${$data.positionY}px)`,
               })
               }, [
-                (openBlock(), createElementBlock("svg", _hoisted_14, [
+                (openBlock(), createElementBlock("svg", _hoisted_12$1, [
                   createElementVNode("defs", null, [
                     createElementVNode("pattern", {
                       id: "grid",
@@ -8561,10 +8572,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         fill: "none",
                         stroke: "currentColor",
                         "stroke-width": "1"
-                      }, null, 8 /* PROPS */, _hoisted_16)
-                    ], 8 /* PROPS */, _hoisted_15)
+                      }, null, 8 /* PROPS */, _hoisted_14)
+                    ], 8 /* PROPS */, _hoisted_13$1)
                   ]),
-                  _hoisted_17
+                  _hoisted_15
                 ]))
               ], 4 /* STYLE */),
               createCommentVNode(" </div> ")
@@ -9062,6 +9073,10 @@ var script = {
     lang: {
       type: String,
       default: 'fr',
+    },
+    bookableType: {
+      type: Object,
+      default: () => {},
     },
     bookings: {
       type: Array,

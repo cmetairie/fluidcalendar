@@ -1,30 +1,36 @@
 <template>
-  <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
-    <!-- <button>m</button> -->
-    <div ref="inner" class="t__fluid__calendar__booking__inner">
-      <div
-        ref="content"
-        class="t__fluid__calendar__booking__content"
-        :style="sltContent"
-      >
-        <!-- {{ $slots.bookable }} -->
-        <!-- {{ diff }} -->
-        <!-- {{ refX }} -->
-        <!-- {{ diff }} -->
-        <slot v-if="!ghost" />
-        <!-- <span class="t__fluid__calendar__booking__label">
+  <div>
+    <!-- <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
+      222
+    </button> -->
+    <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
+      <!-- <button>m</button> -->
+      <div ref="inner" class="t__fluid__calendar__booking__inner">
+        <div
+          ref="content"
+          class="t__fluid__calendar__booking__content"
+          :style="sltContent"
+        >
+          <!-- {{ $slots.bookable }} -->
+          <!-- {{ diff }} -->
+          <!-- {{ refX }} -->
+          <!-- {{ diff }} -->
+          <!-- {{ lastResize }} -->
+          <slot v-if="!ghost" />
+          <!-- <span class="t__fluid__calendar__booking__label">
         <span>{{ format(booking.start_at) }}</span>
         <span>{{ format(booking.end_at) }}</span>
       </span> -->
+        </div>
+        <button
+          class="t__fluid__calendar__booking__resize"
+          @mousedown.stop="startSize"
+        >
+          <!-- {{ diff }} -->
+        </button>
       </div>
-      <button
-        class="t__fluid__calendar__booking__resize"
-        @mousedown.stop="startSize"
-      >
-        <!-- {{ diff }} -->
-      </button>
-    </div>
-  </button>
+    </button>
+  </div>
 </template>
 
 <script>
