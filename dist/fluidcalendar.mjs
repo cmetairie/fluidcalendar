@@ -1,4 +1,4 @@
-import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createCommentVNode, createElementVNode, renderSlot, withModifiers, toDisplayString, resolveComponent, createTextVNode, createVNode, withCtx, Fragment, renderList, createBlock, mergeProps } from 'vue';
+import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createCommentVNode, createElementVNode, renderSlot, withModifiers, toDisplayString, resolveComponent, createVNode, withCtx, Fragment, renderList, createBlock, createTextVNode, mergeProps } from 'vue';
 
 function parseTime(timeString) {
   const [hours, minutes, seconds] = timeString.split(':').map(Number);
@@ -7663,7 +7663,9 @@ var script$3 = {
       return ((d + this.threshold) / this.threshold) | 0
     },
     width() {
-      return this.cellWidth * (this.rangeDays * 2 + 1)
+      if (!this.rangeX || !this.rangeX.cells || !this.rangeX.cells.length)
+        return 0
+      return this.cellWidth * this.rangeX.cells.length
     },
     translateX() {
       return (
@@ -7875,7 +7877,7 @@ var script$3 = {
       this.collisions.push(id);
     },
     scroll({ x, y }) {
-      // this.dragData = null
+      this.dragData = null;
       if (x != undefined) {
         this.fakeMove = x;
         this.positionX = this.positionX - x;
@@ -8127,7 +8129,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
     createElementVNode("button", {
       onClick: _cache[3] || (_cache[3] = $event => ($options.next()))
     }, "next"),
-    createTextVNode(" " + toDisplayString($data.dragData) + " ", 1 /* TEXT */),
+    createCommentVNode(" {{ dragData }} "),
     createCommentVNode(" <h2>{{ format(pointerDate) }}</h2>\n  <button @click=\"centerViewTo('2023-10-17')\">2023-10-17</button>\n  <button @click=\"generate\">generate</button>\n  <button @click=\"reset\">reset</button>\n\n  <input type=\"range\" min=\"20\" max=\"100\" v-model=\"rowHeight\" step=\"1\" /> "),
     createCommentVNode(" {{ dragData }} "),
     createCommentVNode(" {{ dragData }} "),
@@ -8312,7 +8314,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                     createElementVNode("defs", null, [
                       createElementVNode("pattern", {
                         id: "header_time_grid",
-                        width: ($options.cellWidth / $options.minutesByCell) * 60,
+                        width: (($options.cellWidth / $options.minutesByCell) * 60) ,
                         height: $options.headerHeight,
                         patternUnits: "userSpaceOnUse"
                       }, [

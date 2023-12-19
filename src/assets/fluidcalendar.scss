@@ -175,6 +175,16 @@
   // overflow: hidden;
   text-overflow: ellipsis;
   z-index: 2;
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 1px;
+    right: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-bg2);
+  }
 }
 
 .t__fluid__calendar__header__cell__date {

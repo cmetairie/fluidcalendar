@@ -208,7 +208,7 @@
               <defs>
                 <pattern
                   id="header_time_grid"
-                  :width="(cellWidth / minutesByCell) * 60"
+                  :width="((cellWidth / minutesByCell) * 60) "
                   :height="headerHeight"
                   patternUnits="userSpaceOnUse"
                 >
@@ -629,7 +629,9 @@ export default {
       return ((d + this.threshold) / this.threshold) | 0
     },
     width() {
-      return this.cellWidth * (this.rangeDays * 2 + 1)
+      if (!this.rangeX || !this.rangeX.cells || !this.rangeX.cells.length)
+        return 0
+      return this.cellWidth * this.rangeX.cells.length
     },
     translateX() {
       return (
