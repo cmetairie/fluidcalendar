@@ -217,16 +217,25 @@
   left: 0;
   bottom: 0;
 }
+.t__fluid__calendar__header__time__cell::before {
+  content: "";
+  position: absolute;
+  width: 0.5px;
+  background: #aaa;
+  top: 100%;
+  bottom: -6px;
+  left: 0;
+}
 .t__fluid__calendar__header__time__cell > span {
   font-size: 11px;
   display: block;
   transform: translateX(-50%);
 }
+.t__fluid__calendar__header__time__cell:first-child::before {
+  content: none;
+}
 .t__fluid__calendar__header__time__cell:first-child > span {
   transform: translateX(1rem);
-}
-.t__fluid__calendar__header__time__cell:last-child > span {
-  transform: translateX(-100%) translateX(-1rem);
 }
 
 .t__fluid__calendar__pointer {
@@ -351,6 +360,13 @@
 }
 
 .t__fluid__calendar__bookings {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9;
+}
+
+.t__fluid__calendar__unavailabilities {
   position: absolute;
   top: 0;
   left: 0;
@@ -795,20 +811,21 @@
   pointer-events: none;
   position: absolute;
   inset: 0;
-  display: flex;
   overflow: hidden;
   z-index: 0;
   animation: fade 1s;
 }
 
 .t__fluid__calendar__header__time__area {
-  flex: 1;
-  opacity: 0.09;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-left: solid var(--color-border) 0.5px;
 }
-.t__fluid__calendar__header__time__area:nth-child(even) {
-  background: #dbdeec;
+.t__fluid__calendar__header__time__area.--is-rest {
+  background: var(--color-bg2);
 }
-
 @keyframes shake {
   10%, 90% {
     transform: translate3d(-1px, 0, 0);

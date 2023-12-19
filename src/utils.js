@@ -34,7 +34,9 @@ export function generateEntriesWithDetails(bookables, num = 100) {
   for (let i = 1; i <= num; i++) {
     const id = i
     const start_at = getRandomDateTime()
-    const end_at = dayjs(start_at).add(getRandomNumber(1, 4), 'day').format('iso')
+    const end_at = dayjs(start_at)
+      .add(getRandomNumber(1, 4), 'day')
+      .format('iso')
     const label = `Lorem ipsum${i % 2 === 0 ? ' solor' : ''}`
     const bookableId = bookables[i % bookables.length].id
 
@@ -65,4 +67,11 @@ export function getRandomDateTime() {
   )}:${padZero(minutes)}:${padZero(seconds)}+02:00`
 
   return dayjs(isoString).format('iso')
+}
+
+export function splitNumber(num) {
+  const value = Math.floor(num)
+  const rest = num - value
+
+  return { value, rest }
 }

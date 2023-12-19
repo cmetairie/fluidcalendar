@@ -199,7 +199,7 @@
               </defs>
               <rect width="100%" height="100%" fill="url(#header_grid)" />
             </svg>
-            <svg
+            <!-- <svg
               class="t__fluid__calendar__header__time__grid"
               xmlns="http://www.w3.org/2000/svg"
               v-if="displayHours"
@@ -225,7 +225,7 @@
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#header_time_grid)" />
-            </svg>
+            </svg> -->
             <div
               class="t__fluid__calendar__header"
               :style="{
@@ -266,7 +266,7 @@
                   </div>
                 </div>
                 <div
-                  v-if="displayArea"
+                  v-if="displayHours"
                   class="t__fluid__calendar__header__time__areas"
                   :style="{
                     top: rowHeight + 'px',
@@ -274,8 +274,10 @@
                   }"
                 >
                   <div
-                    v-for="i in areas"
+                    v-for="hour in hours"
                     class="t__fluid__calendar__header__time__area"
+                    :class="{ '--is-rest': hour.isRest }"
+                    :style="{ width: hour.width + 'px', left: hour.x + 'px' }"
                   >
                     <!-- ? -->
                     <!-- {{ i }} -->
@@ -341,7 +343,7 @@ import FluidDraggable from './FluidDraggable.vue'
 import FluidViewbar from './FluidViewbar.vue'
 import FluidPinch from './FluidPinch.vue'
 
-import { debounce } from '../utils.js'
+import { debounce, wait, splitNumber } from '../utils.js'
 
 // import '../styles.css'
 
@@ -512,18 +514,53 @@ export default {
       let firstLabel = this.slotMinTime.split(':')
       firstLabel = `${firstLabel[0]}:${firstLabel[1]}`
       const slotDuration = this.slotDurationInMinutes
-      const nbSlots = h / slotDuration
+      const nbSlots = splitNumber(h / slotDuration)
       // console.log('Nb slots => ', nbSlots, slotDuration, minHours)
-      hours.push({ index: 0, x: 0, label: firstLabel })
-      for (let i = 1; i <= nbSlots; i++) {
-        console.log('Nb slots => ', i, nbSlots, slotDuration, minHours)
-        // const restMinutes = 60 - minMinutes
-        startX = startX + this.widthByMinute * slotDuration
+      let j
+      for (let i = 0; i < nbSlots.value; i++) {
+        j = i + 1
+        if (i === 0 && nbSlots.value === 0) {
+          hours.push({
+            index: 0,
+            x: 0,
+            label: firstLabel,
+            width: slotDuration * nbSlots.rest * this.widthByMinute,
+            isRest: true,
+          })
+        } else if (i === 0) {
+          hours.push({
+            index: 0,
+            x: 0,
+            label: firstLabel,
+            width: slotDuration * this.widthByMinute,
+          })
+        } else {
+          startX = startX + this.widthByMinute * slotDuration
+          const label = dayjs().addDuration(
+            this.slotMinTime,
+            this.slotDurationInMinutes * i,
+          )
+          hours.push({
+            index: i,
+            x: startX,
+            label: label,
+            width: this.widthByMinute * slotDuration,
+          })
+        }
+      }
+      if (nbSlots.rest) {
         const label = dayjs().addDuration(
           this.slotMinTime,
-          this.slotDurationInMinutes * i,
+          this.slotDurationInMinutes * j,
         )
-        hours.push({ index: i, x: startX, label: label })
+        hours.push({
+          index: j,
+          x: startX + this.widthByMinute * slotDuration,
+          label: label,
+          width: slotDuration * nbSlots.rest * this.widthByMinute,
+          isRest: true,
+          // width: this.widthByMinute * slotDuration,
+        })
       }
       return hours
     },
@@ -533,7 +570,8 @@ export default {
       return h
     },
     displayHours() {
-      return this.zoom > 10
+      if (!this.hours || !this.hours.length) return
+      return this.zoom > 10 // / this.hours.length
     },
     displayArea() {
       return this.zoom > 8
@@ -717,8 +755,9 @@ export default {
         this.zoom = p.zoom
       }
     },
-    mousedown(event) {
+    async mousedown(event) {
       this.dragData = null
+      await wait(0)
       if (event.button != 0) return
       this.point = {
         x: event.clientX,
@@ -839,9 +878,9 @@ export default {
 
       this.dragData = {
         ...this.dragData,
-        snapEnd: current.snapStart,
+        snapEnd: current.snapUp,
         snapStartX: this.dateToX(this.dragData.snapStart),
-        snapEndX: this.dateToX(current.snapStart),
+        snapEndX: this.dateToX(current.snapUp),
         // width: current.x - this.dragData.x,
       }
 
@@ -933,10 +972,14 @@ export default {
         this.positionY * -1
       const date = this.xToDate(x)
       const snapStart = this.xToDate(x, true)
+      const snapDown = this.xToDate(x, true)
+      const snapUp = this.xToDate(x, true, true)
       const bookable = this.yToBookable(top)
 
       if (!bookable) {
         return {
+          snapUp: snapUp,
+          snapDown: snapDown,
           snapStart: snapStart,
           date: date,
           x: this.dateToX(date),
@@ -956,6 +999,8 @@ export default {
 
       if (clickOnBooking) {
         return {
+          snapUp: snapUp,
+          snapDown: snapDown,
           snapStart: snapStart,
           date: date,
           bookable: bookable,
@@ -973,6 +1018,8 @@ export default {
         )
       })
       return {
+        snapUp: snapUp,
+        snapDown: snapDown,
         snapStart: snapStart,
         date: date,
         bookable: bookable,
@@ -984,7 +1031,7 @@ export default {
     yToBookable(top) {
       return this.filteredBookables[((top / this.rowHeight) | 0) - 1]
     },
-    xToDate(x, snap = false) {
+    xToDate(x, snap = false, up) {
       let v = x
       const zero =
         v -
@@ -999,7 +1046,20 @@ export default {
         this.slotMinTime,
         this.slotMaxTime,
       ).date
-      if (snap) dayjs(date).snapToTime(this.slotDuration)
+
+      if (snap) {
+        // console.log(
+        //   ' UP ? ',
+        //   dayjs(date).snapToTime(this.slotMinTime, this.slotDuration, true),
+        // )
+        // console.log(
+        //   ' down ? ',
+        //   dayjs(date).snapToTime(this.slotMinTime, this.slotDuration, false),
+        // )
+        return dayjs(date).snapToTime(this.slotMinTime, this.slotDuration, up)
+      }
+
+      // console.log('SNAP => ', date)
 
       return date
     },

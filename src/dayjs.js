@@ -364,13 +364,44 @@ export function dayjs(s) {
     }
   }
 
-  function snapToTime(duration) {
-    const [hours, mins] = duration.split(':').map(Number)
-    const intervalInMinutes = hours * 60 + mins
-    const minutes = date.getHours() * 60 + date.getMinutes()
-    const round = Math.round(minutes / intervalInMinutes) * intervalInMinutes
-    date.setHours(0, round, 0, 0)
-    return date
+  // function snapToTime(start, duration) {
+  // const [hours, mins] = duration.split(':').map(Number)
+  // const intervalInMinutes = hours * 60 + mins
+  // const minutes = date.getHours() * 60 + date.getMinutes()
+  // const round = Math.round(minutes / intervalInMinutes) * intervalInMinutes
+  // date.setHours(0, round, 0, 0)
+  // return date
+  // }
+
+  function snapToTime(startTime, duration, roundUp) {
+    // console.log(' up ?', roundUp)
+    const [startHours, startMinutes] = startTime.split(':').map(Number)
+    const [durationHours, durationMinutes] = duration.split(':').map(Number)
+
+    const startTotalMinutes = startHours * 60 + startMinutes
+    const durationTotalMinutes = durationHours * 60 + durationMinutes
+
+    const currentMinutes = date.getHours() * 60 + date.getMinutes()
+    const elapsedSinceStart = currentMinutes - startTotalMinutes
+
+    let intervalsSinceStart = Math.floor(
+      elapsedSinceStart / durationTotalMinutes,
+    )
+    if (roundUp && elapsedSinceStart % durationTotalMinutes !== 0) {
+      intervalsSinceStart++
+    }
+
+    const roundedIntervalStart =
+      startTotalMinutes + intervalsSinceStart * durationTotalMinutes
+
+    const roundedHours = Math.floor(roundedIntervalStart / 60)
+    const roundedMinutes = roundedIntervalStart % 60
+
+    // Set the rounded hours and minutes to the date
+    const roundedDate = new Date(date)
+    roundedDate.setHours(roundedHours, roundedMinutes, 0, 0)
+
+    return roundedDate
   }
 
   function diffHours(time1, time2) {

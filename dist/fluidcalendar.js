@@ -368,13 +368,44 @@ function dayjs(s) {
     }
   }
 
-  function snapToTime(duration) {
-    const [hours, mins] = duration.split(':').map(Number);
-    const intervalInMinutes = hours * 60 + mins;
-    const minutes = date.getHours() * 60 + date.getMinutes();
-    const round = Math.round(minutes / intervalInMinutes) * intervalInMinutes;
-    date.setHours(0, round, 0, 0);
-    return date
+  // function snapToTime(start, duration) {
+  // const [hours, mins] = duration.split(':').map(Number)
+  // const intervalInMinutes = hours * 60 + mins
+  // const minutes = date.getHours() * 60 + date.getMinutes()
+  // const round = Math.round(minutes / intervalInMinutes) * intervalInMinutes
+  // date.setHours(0, round, 0, 0)
+  // return date
+  // }
+
+  function snapToTime(startTime, duration, roundUp) {
+    // console.log(' up ?', roundUp)
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [durationHours, durationMinutes] = duration.split(':').map(Number);
+
+    const startTotalMinutes = startHours * 60 + startMinutes;
+    const durationTotalMinutes = durationHours * 60 + durationMinutes;
+
+    const currentMinutes = date.getHours() * 60 + date.getMinutes();
+    const elapsedSinceStart = currentMinutes - startTotalMinutes;
+
+    let intervalsSinceStart = Math.floor(
+      elapsedSinceStart / durationTotalMinutes,
+    );
+    if (roundUp && elapsedSinceStart % durationTotalMinutes !== 0) {
+      intervalsSinceStart++;
+    }
+
+    const roundedIntervalStart =
+      startTotalMinutes + intervalsSinceStart * durationTotalMinutes;
+
+    const roundedHours = Math.floor(roundedIntervalStart / 60);
+    const roundedMinutes = roundedIntervalStart % 60;
+
+    // Set the rounded hours and minutes to the date
+    const roundedDate = new Date(date);
+    roundedDate.setHours(roundedHours, roundedMinutes, 0, 0);
+
+    return roundedDate
   }
 
   function diffHours(time1, time2) {
@@ -6796,6 +6827,13 @@ function wait(secondes) {
   })
 }
 
+function splitNumber(num) {
+  const value = Math.floor(num);
+  const rest = num - value;
+
+  return { value, rest }
+}
+
 var script$8 = {
   name: 'FluidCalendarScroller',
   props: {
@@ -7573,29 +7611,68 @@ var script$3 = {
       //   this.slotDuration,
       //   dayjs().getDuration(this.slotDuration),
       // )
+
+      let firstLabel = this.slotMinTime.split(':');
+      firstLabel = `${firstLabel[0]}:${firstLabel[1]}`;
       const slotDuration = this.slotDurationInMinutes;
-      const nbSlots = h / slotDuration;
+      const nbSlots = splitNumber(h / slotDuration);
       // console.log('Nb slots => ', nbSlots, slotDuration, minHours)
-      hours.push({ index: 0, x: 0, label: `${minHours}:${minMinutes}` });
-      for (let i = 1; i <= nbSlots; i++) {
-        console.log('Nb slots => ', i, nbSlots, slotDuration, minHours);
-        // const restMinutes = 60 - minMinutes
-        startX = startX + this.widthByMinute * slotDuration;
+      let j;
+      for (let i = 0; i < nbSlots.value; i++) {
+        j = i + 1;
+        if (i === 0 && nbSlots.value === 0) {
+          hours.push({
+            index: 0,
+            x: 0,
+            label: firstLabel,
+            width: slotDuration * nbSlots.rest * this.widthByMinute,
+            isRest: true,
+          });
+        } else if (i === 0) {
+          hours.push({
+            index: 0,
+            x: 0,
+            label: firstLabel,
+            width: slotDuration * this.widthByMinute,
+          });
+        } else {
+          startX = startX + this.widthByMinute * slotDuration;
+          const label = dayjs().addDuration(
+            this.slotMinTime,
+            this.slotDurationInMinutes * i,
+          );
+          hours.push({
+            index: i,
+            x: startX,
+            label: label,
+            width: this.widthByMinute * slotDuration,
+          });
+        }
+      }
+      if (nbSlots.rest) {
         const label = dayjs().addDuration(
           this.slotMinTime,
-          this.slotDurationInMinutes * i,
+          this.slotDurationInMinutes * j,
         );
-        hours.push({ index: i, x: startX, label: label });
+        hours.push({
+          index: j,
+          x: startX + this.widthByMinute * slotDuration,
+          label: label,
+          width: slotDuration * nbSlots.rest * this.widthByMinute,
+          isRest: true,
+          // width: this.widthByMinute * slotDuration,
+        });
       }
       return hours
     },
     areas() {
       const h = this.hours.map((i) => i.index);
-      h.push({});
+      h.pop();
       return h
     },
     displayHours() {
-      return this.zoom > 10
+      if (!this.hours || !this.hours.length) return
+      return this.zoom > 10 // / this.hours.length
     },
     displayArea() {
       return this.zoom > 8
@@ -7765,8 +7842,9 @@ var script$3 = {
         this.zoom = p.zoom;
       }
     },
-    mousedown(event) {
+    async mousedown(event) {
       this.dragData = null;
+      await wait(0);
       if (event.button != 0) return
       this.point = {
         x: event.clientX,
@@ -7887,9 +7965,9 @@ var script$3 = {
 
       this.dragData = {
         ...this.dragData,
-        snapEnd: current.snapStart,
+        snapEnd: current.snapUp,
         snapStartX: this.dateToX(this.dragData.snapStart),
-        snapEndX: this.dateToX(current.snapStart),
+        snapEndX: this.dateToX(current.snapUp),
         // width: current.x - this.dragData.x,
       };
 
@@ -7969,10 +8047,14 @@ var script$3 = {
         this.positionY * -1;
       const date = this.xToDate(x);
       const snapStart = this.xToDate(x, true);
+      const snapDown = this.xToDate(x, true);
+      const snapUp = this.xToDate(x, true, true);
       const bookable = this.yToBookable(top);
 
       if (!bookable) {
         return {
+          snapUp: snapUp,
+          snapDown: snapDown,
           snapStart: snapStart,
           date: date,
           x: this.dateToX(date),
@@ -7992,6 +8074,8 @@ var script$3 = {
 
       if (clickOnBooking) {
         return {
+          snapUp: snapUp,
+          snapDown: snapDown,
           snapStart: snapStart,
           date: date,
           bookable: bookable,
@@ -8009,6 +8093,8 @@ var script$3 = {
         )
       });
       return {
+        snapUp: snapUp,
+        snapDown: snapDown,
         snapStart: snapStart,
         date: date,
         bookable: bookable,
@@ -8020,7 +8106,7 @@ var script$3 = {
     yToBookable(top) {
       return this.filteredBookables[((top / this.rowHeight) | 0) - 1]
     },
-    xToDate(x, snap = false) {
+    xToDate(x, snap = false, up) {
       let v = x;
       const zero =
         v -
@@ -8035,7 +8121,20 @@ var script$3 = {
         this.slotMinTime,
         this.slotMaxTime,
       ).date;
-      if (snap) dayjs(date).snapToTime(this.slotDuration);
+
+      if (snap) {
+        // console.log(
+        //   ' UP ? ',
+        //   dayjs(date).snapToTime(this.slotMinTime, this.slotDuration, true),
+        // )
+        // console.log(
+        //   ' down ? ',
+        //   dayjs(date).snapToTime(this.slotMinTime, this.slotDuration, false),
+        // )
+        return dayjs(date).snapToTime(this.slotMinTime, this.slotDuration, up)
+      }
+
+      // console.log('SNAP => ', date)
 
       return date
     },
@@ -8093,25 +8192,17 @@ const _hoisted_12$1 = /*#__PURE__*/vue.createElementVNode("rect", {
   height: "100%",
   fill: "url(#header_grid)"
 }, null, -1 /* HOISTED */);
-const _hoisted_13$1 = ["width", "height"];
-const _hoisted_14 = ["d"];
-const _hoisted_15 = /*#__PURE__*/vue.createElementVNode("rect", {
-  width: "100%",
-  height: "100%",
-  fill: "url(#header_time_grid)"
-}, null, -1 /* HOISTED */);
-const _hoisted_16 = {
+const _hoisted_13$1 = {
   key: 0,
   class: "t__fluid__calendar__header__time__cells"
 };
-const _hoisted_17 = { class: "t__fluid__calendar__header__time__area" };
-const _hoisted_18 = {
+const _hoisted_14 = {
   class: "t__fluid__calendar__grid",
   xmlns: "http://www.w3.org/2000/svg"
 };
-const _hoisted_19 = ["width", "height"];
-const _hoisted_20 = ["d"];
-const _hoisted_21 = /*#__PURE__*/vue.createElementVNode("rect", {
+const _hoisted_15 = ["width", "height"];
+const _hoisted_16 = ["d"];
+const _hoisted_17 = /*#__PURE__*/vue.createElementVNode("rect", {
   width: "100%",
   height: "100%",
   fill: "url(#grid)"
@@ -8339,35 +8430,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 ]),
                 _hoisted_12$1
               ], 4 /* STYLE */)),
-              ($options.displayHours)
-                ? (vue.openBlock(), vue.createElementBlock("svg", {
-                    key: 1,
-                    class: "t__fluid__calendar__header__time__grid",
-                    xmlns: "http://www.w3.org/2000/svg",
-                    style: vue.normalizeStyle({ height: $options.headerHeight + 'px' })
-                  }, [
-                    vue.createElementVNode("defs", null, [
-                      vue.createElementVNode("pattern", {
-                        id: "header_time_grid",
-                        width: $options.slotDurationInMinutes * $options.widthByMinute,
-                        height: $options.headerHeight,
-                        patternUnits: "userSpaceOnUse"
-                      }, [
-                        vue.createElementVNode("path", {
-                          d: `M ${
-                      $options.slotDurationInMinutes * $options.widthByMinute
-                    } ${$options.headerHeight} L ${
-                      $options.slotDurationInMinutes * $options.widthByMinute
-                    } ${$options.headerHeight - 6}`,
-                          fill: "none",
-                          stroke: "#aaa",
-                          "stroke-width": "1"
-                        }, null, 8 /* PROPS */, _hoisted_14)
-                      ], 8 /* PROPS */, _hoisted_13$1)
-                    ]),
-                    _hoisted_15
-                  ], 4 /* STYLE */))
-                : vue.createCommentVNode("v-if", true),
+              vue.createCommentVNode(" <svg\n              class=\"t__fluid__calendar__header__time__grid\"\n              xmlns=\"http://www.w3.org/2000/svg\"\n              v-if=\"displayHours\"\n              :style=\"{ height: headerHeight + 'px' }\"\n            >\n              <defs>\n                <pattern\n                  id=\"header_time_grid\"\n                  :width=\"slotDurationInMinutes * widthByMinute\"\n                  :height=\"headerHeight\"\n                  patternUnits=\"userSpaceOnUse\"\n                >\n                  <path\n                    :d=\"`M ${\n                      slotDurationInMinutes * widthByMinute\n                    } ${headerHeight} L ${\n                      slotDurationInMinutes * widthByMinute\n                    } ${headerHeight - 6}`\"\n                    fill=\"none\"\n                    stroke=\"#aaa\"\n                    stroke-width=\"1\"\n                  />\n                </pattern>\n              </defs>\n              <rect width=\"100%\" height=\"100%\" fill=\"url(#header_time_grid)\" />\n            </svg> "),
               vue.createElementVNode("div", {
                 class: "t__fluid__calendar__header",
                 style: vue.normalizeStyle({
@@ -8391,7 +8454,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   })
                     }, vue.toDisplayString($options.format(cell.date)), 7 /* TEXT, CLASS, STYLE */),
                     ($options.displayHours)
-                      ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_16, [
+                      ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_13$1, [
                           (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.hours, (hour) => {
                             return (vue.openBlock(), vue.createElementBlock("div", {
                               class: "t__fluid__calendar__header__time__cell",
@@ -8404,7 +8467,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                           }), 256 /* UNKEYED_FRAGMENT */))
                         ]))
                       : vue.createCommentVNode("v-if", true),
-                    ($options.displayArea)
+                    ($options.displayHours)
                       ? (vue.openBlock(), vue.createElementBlock("div", {
                           key: 1,
                           class: "t__fluid__calendar__header__time__areas",
@@ -8413,11 +8476,14 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                     height: Math.min($options.fullHeight, $props.h) + 'px',
                   })
                         }, [
-                          (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.areas, (i) => {
-                            return (vue.openBlock(), vue.createElementBlock("div", _hoisted_17, [
+                          (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($options.hours, (hour) => {
+                            return (vue.openBlock(), vue.createElementBlock("div", {
+                              class: vue.normalizeClass(["t__fluid__calendar__header__time__area", { '--is-rest': hour.isRest }]),
+                              style: vue.normalizeStyle({ width: hour.width + 'px', left: hour.x + 'px' })
+                            }, [
                               vue.createCommentVNode(" ? "),
                               vue.createCommentVNode(" {{ i }} ")
-                            ]))
+                            ], 6 /* CLASS, STYLE */))
                           }), 256 /* UNKEYED_FRAGMENT */))
                         ], 4 /* STYLE */))
                       : vue.createCommentVNode("v-if", true)
@@ -8431,7 +8497,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 transform: `translateY(${$data.positionY}px)`,
               })
               }, [
-                (vue.openBlock(), vue.createElementBlock("svg", _hoisted_18, [
+                (vue.openBlock(), vue.createElementBlock("svg", _hoisted_14, [
                   vue.createElementVNode("defs", null, [
                     vue.createElementVNode("pattern", {
                       id: "grid",
@@ -8444,10 +8510,10 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         fill: "none",
                         stroke: "currentColor",
                         "stroke-width": "1"
-                      }, null, 8 /* PROPS */, _hoisted_20)
-                    ], 8 /* PROPS */, _hoisted_19)
+                      }, null, 8 /* PROPS */, _hoisted_16)
+                    ], 8 /* PROPS */, _hoisted_15)
                   ]),
-                  _hoisted_21
+                  _hoisted_17
                 ]))
               ], 4 /* STYLE */),
               vue.createCommentVNode(" </div> ")
