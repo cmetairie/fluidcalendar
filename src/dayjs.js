@@ -367,13 +367,9 @@ export function dayjs(s) {
   function snapToTime(duration) {
     const [hours, mins] = duration.split(':').map(Number)
     const intervalInMinutes = hours * 60 + mins
-
     const minutes = date.getHours() * 60 + date.getMinutes()
     const round = Math.round(minutes / intervalInMinutes) * intervalInMinutes
-
     date.setHours(0, round, 0, 0)
-    // console.log('Snap ', duration, date, date.getTime())
-    // return date
     return date
   }
 
@@ -415,6 +411,23 @@ export function dayjs(s) {
 
     return NaN // Invalid unit
   }
+
+  function getDuration(duration) {
+    const [hours, minutes] = duration.split(':').map(Number)
+    return hours * 60 + minutes
+  }
+
+  function addDuration(time, minutesToAdd) {
+    const [hours, minutes, seconds] = time.split(':').map(Number)
+    const timeDate = new Date(0, 0, 0, hours, minutes, seconds)
+    timeDate.setMinutes(timeDate.getMinutes() + minutesToAdd)
+
+    const resultHours = timeDate.getHours().toString().padStart(2, '0')
+    const resultMinutes = timeDate.getMinutes().toString().padStart(2, '0')
+
+    return `${resultHours}:${resultMinutes}`
+  }
+
   // Return an object with public methods
   return {
     diff,
@@ -433,5 +446,7 @@ export function dayjs(s) {
     snapToTime,
     setTime,
     diffHours,
+    getDuration,
+    addDuration,
   }
 }

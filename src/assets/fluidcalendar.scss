@@ -223,6 +223,16 @@
     display: block;
     transform: translateX(-50%);
   }
+  &:first-child {
+    > span {
+      transform: translateX(1rem);
+    }
+  }
+  &:last-child {
+    > span {
+      transform: translateX(-100%) translateX(-1rem);
+    }
+  }
   // flex: 1;
 }
 

@@ -222,6 +222,12 @@
   display: block;
   transform: translateX(-50%);
 }
+.t__fluid__calendar__header__time__cell:first-child > span {
+  transform: translateX(1rem);
+}
+.t__fluid__calendar__header__time__cell:last-child > span {
+  transform: translateX(-100%) translateX(-1rem);
+}
 
 .t__fluid__calendar__pointer {
   position: absolute;

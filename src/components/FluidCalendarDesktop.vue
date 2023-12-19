@@ -208,16 +208,16 @@
               <defs>
                 <pattern
                   id="header_time_grid"
-                  :width="((cellWidth / minutesByCell) * 60) "
+                  :width="slotDurationInMinutes * widthByMinute"
                   :height="headerHeight"
                   patternUnits="userSpaceOnUse"
                 >
                   <path
                     :d="`M ${
-                      (cellWidth / minutesByCell) * 60
-                    } ${headerHeight} L ${(cellWidth / minutesByCell) * 60} ${
-                      headerHeight - 6
-                    }`"
+                      slotDurationInMinutes * widthByMinute
+                    } ${headerHeight} L ${
+                      slotDurationInMinutes * widthByMinute
+                    } ${headerHeight - 6}`"
                     fill="none"
                     stroke="#aaa"
                     stroke-width="1"
@@ -481,6 +481,9 @@ export default {
     },
   },
   computed: {
+    slotDurationInMinutes() {
+      return dayjs().getDuration(this.slotDuration)
+    },
     offsetStart() {
       return dayjs().diffHours('00:00:00', this.slotMinTime)
     },
@@ -497,18 +500,36 @@ export default {
       const hours = []
       const [minHours, minMinutes] = this.slotMinTime.split(':').map(Number)
       const [maxHours] = this.slotMaxTime.split(':').map(Number)
-      const h = maxHours - minHours
+      const h = (maxHours - minHours) * 60
       let startX = 0
-      for (let i = 0; i < h - 1; i++) {
-        const restMinutes = 60 - minMinutes
-        startX = startX + this.widthByMinute * restMinutes
-        hours.push({ index: i, x: startX, label: `${minHours + i + 1}:00` })
+      // console.log(
+      //   'Calc hours => ',
+      //   h,
+      //   this.slotDuration,
+      //   dayjs().getDuration(this.slotDuration),
+      // )
+
+      let firstLabel = this.slotMinTime.split(':')
+      firstLabel = `${firstLabel[0]}:${firstLabel[1]}`
+      const slotDuration = this.slotDurationInMinutes
+      const nbSlots = h / slotDuration
+      // console.log('Nb slots => ', nbSlots, slotDuration, minHours)
+      hours.push({ index: 0, x: 0, label: firstLabel })
+      for (let i = 1; i <= nbSlots; i++) {
+        console.log('Nb slots => ', i, nbSlots, slotDuration, minHours)
+        // const restMinutes = 60 - minMinutes
+        startX = startX + this.widthByMinute * slotDuration
+        const label = dayjs().addDuration(
+          this.slotMinTime,
+          this.slotDurationInMinutes * i,
+        )
+        hours.push({ index: i, x: startX, label: label })
       }
       return hours
     },
     areas() {
       const h = this.hours.map((i) => i.index)
-      h.push({})
+      h.pop()
       return h
     },
     displayHours() {

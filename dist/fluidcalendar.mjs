@@ -369,13 +369,9 @@ function dayjs(s) {
   function snapToTime(duration) {
     const [hours, mins] = duration.split(':').map(Number);
     const intervalInMinutes = hours * 60 + mins;
-
     const minutes = date.getHours() * 60 + date.getMinutes();
     const round = Math.round(minutes / intervalInMinutes) * intervalInMinutes;
-
     date.setHours(0, round, 0, 0);
-    // console.log('Snap ', duration, date, date.getTime())
-    // return date
     return date
   }
 
@@ -417,6 +413,23 @@ function dayjs(s) {
 
     return NaN // Invalid unit
   }
+
+  function getDuration(duration) {
+    const [hours, minutes] = duration.split(':').map(Number);
+    return hours * 60 + minutes
+  }
+
+  function addDuration(time, minutesToAdd) {
+    const [hours, minutes, seconds] = time.split(':').map(Number);
+    const timeDate = new Date(0, 0, 0, hours, minutes, seconds);
+    timeDate.setMinutes(timeDate.getMinutes() + minutesToAdd);
+
+    const resultHours = timeDate.getHours().toString().padStart(2, '0');
+    const resultMinutes = timeDate.getMinutes().toString().padStart(2, '0');
+
+    return `${resultHours}:${resultMinutes}`
+  }
+
   // Return an object with public methods
   return {
     diff,
@@ -435,6 +448,8 @@ function dayjs(s) {
     snapToTime,
     setTime,
     diffHours,
+    getDuration,
+    addDuration,
   }
 }
 
@@ -7529,6 +7544,9 @@ var script$3 = {
     },
   },
   computed: {
+    slotDurationInMinutes() {
+      return dayjs().getDuration(this.slotDuration)
+    },
     offsetStart() {
       return dayjs().diffHours('00:00:00', this.slotMinTime)
     },
@@ -7545,12 +7563,27 @@ var script$3 = {
       const hours = [];
       const [minHours, minMinutes] = this.slotMinTime.split(':').map(Number);
       const [maxHours] = this.slotMaxTime.split(':').map(Number);
-      const h = maxHours - minHours;
+      const h = (maxHours - minHours) * 60;
       let startX = 0;
-      for (let i = 0; i < h - 1; i++) {
-        const restMinutes = 60 - minMinutes;
-        startX = startX + this.widthByMinute * restMinutes;
-        hours.push({ index: i, x: startX, label: `${minHours + i + 1}:00` });
+      // console.log(
+      //   'Calc hours => ',
+      //   h,
+      //   this.slotDuration,
+      //   dayjs().getDuration(this.slotDuration),
+      // )
+      const slotDuration = this.slotDurationInMinutes;
+      const nbSlots = h / slotDuration;
+      // console.log('Nb slots => ', nbSlots, slotDuration, minHours)
+      hours.push({ index: 0, x: 0, label: `${minHours}:${minMinutes}` });
+      for (let i = 1; i <= nbSlots; i++) {
+        console.log('Nb slots => ', i, nbSlots, slotDuration, minHours);
+        // const restMinutes = 60 - minMinutes
+        startX = startX + this.widthByMinute * slotDuration;
+        const label = dayjs().addDuration(
+          this.slotMinTime,
+          this.slotDurationInMinutes * i,
+        );
+        hours.push({ index: i, x: startX, label: label });
       }
       return hours
     },
@@ -8314,16 +8347,16 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                     createElementVNode("defs", null, [
                       createElementVNode("pattern", {
                         id: "header_time_grid",
-                        width: (($options.cellWidth / $options.minutesByCell) * 60) ,
+                        width: $options.slotDurationInMinutes * $options.widthByMinute,
                         height: $options.headerHeight,
                         patternUnits: "userSpaceOnUse"
                       }, [
                         createElementVNode("path", {
                           d: `M ${
-                      ($options.cellWidth / $options.minutesByCell) * 60
-                    } ${$options.headerHeight} L ${($options.cellWidth / $options.minutesByCell) * 60} ${
-                      $options.headerHeight - 6
-                    }`,
+                      $options.slotDurationInMinutes * $options.widthByMinute
+                    } ${$options.headerHeight} L ${
+                      $options.slotDurationInMinutes * $options.widthByMinute
+                    } ${$options.headerHeight - 6}`,
                           fill: "none",
                           stroke: "#aaa",
                           "stroke-width": "1"
