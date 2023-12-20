@@ -155,7 +155,6 @@ export function dayjs(s) {
       let newDate = new Date(date.getTime() + milliseconds)
       // console.log('Add time => ', milliseconds)
       if (newDate.getHours() >= endTime || newDate.getHours() < startTime) {
-        // console.log('???')
         // If outside working hours, adjust to next working day
         newDate = new Date(newDate.setHours(startTime, 0, 0, 0))
         newDate.setDate(newDate.getDate() + 1)
@@ -364,22 +363,14 @@ export function dayjs(s) {
     }
   }
 
-  // function snapToTime(start, duration) {
-  // const [hours, mins] = duration.split(':').map(Number)
-  // const intervalInMinutes = hours * 60 + mins
-  // const minutes = date.getHours() * 60 + date.getMinutes()
-  // const round = Math.round(minutes / intervalInMinutes) * intervalInMinutes
-  // date.setHours(0, round, 0, 0)
-  // return date
-  // }
-
-  function snapToTime(startTime, duration, roundUp) {
-    // console.log(' up ?', startTime, duration)
+  function snapToTime(startTime, duration, roundUp, endTime) {
     const [startHours, startMinutes] = startTime.split(':').map(Number)
     const [durationHours, durationMinutes] = duration.split(':').map(Number)
+    const [endHours, endMinutes] = endTime.split(':').map(Number)
 
     const startTotalMinutes = startHours * 60 + startMinutes
     const durationTotalMinutes = durationHours * 60 + durationMinutes
+    const endTotalMinutes = endHours * 60 + endMinutes
 
     const currentMinutes = date.getHours() * 60 + date.getMinutes()
     const elapsedSinceStart = currentMinutes - startTotalMinutes
@@ -391,8 +382,13 @@ export function dayjs(s) {
       intervalsSinceStart++
     }
 
-    const roundedIntervalStart =
+    let roundedIntervalStart =
       startTotalMinutes + intervalsSinceStart * durationTotalMinutes
+
+    // Check if the rounded interval start is after the end time
+    if (roundedIntervalStart > endTotalMinutes) {
+      roundedIntervalStart = endTotalMinutes
+    }
 
     const roundedHours = Math.floor(roundedIntervalStart / 60)
     const roundedMinutes = roundedIntervalStart % 60
@@ -400,7 +396,6 @@ export function dayjs(s) {
     // Set the rounded hours and minutes to the date
     date = new Date(date)
     date.setHours(roundedHours, roundedMinutes, 0, 0)
-
     return this
   }
 

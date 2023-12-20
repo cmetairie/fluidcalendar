@@ -276,7 +276,7 @@
                   </div>
                 </div>
                 <div
-                  v-if="displayHours"
+                  v-if="false"
                   class="t__fluid__calendar__header__time__areas"
                   :style="{
                     top: rowHeight + 'px',
@@ -545,9 +545,7 @@ export default {
       let j = 0
       for (let i = 0; i < nbSlots.value; i++) {
         j = i + 1
-        // console.log('????')
         if (i === 0 && nbSlots.value === 0) {
-          // console.log('?????')
           hours.push({
             index: 0,
             x: 0,
@@ -577,7 +575,6 @@ export default {
         }
       }
       if (nbSlots.rest) {
-        console.log('????')
         const label = dayjs().addDuration(
           this.slotMinTime,
           this.slotDurationInMinutes * j,
@@ -772,15 +769,31 @@ export default {
     resizeBooking(booking, v) {
       // console.log('Resize ', booking, v)
       // booking.end_at = v
-      // if (!v) return
+      if (!v) return
+
+      console.log('VALUE=>', v)
+
+      // const value = v - this.prevResize
+      // console.log('Resize ', booking, v)
       // const value = v - this.prevResize
       // console.log('Resize ', v, this.prevResize, value)
       // const nextEnd = dayjs(this.xToDate(this.dateToX(booking.end_at) + value))
       //   .snapToTime(this.slotMinTime, this.slotDuration)
       //   .format('iso')
-      // // console.log('nextEnd => ', nextEnd)
+
+      // console.log('Value => ', nextEnd)
+
       // booking.end_at = nextEnd
-      // this.prevResize = value
+
+      // this.prevResize = v
+
+      // booking.end_at = nextEnd
+      // if (nextEnd != this.prevResize) {
+      // console.log('nextEnd => ', v, nextEnd)
+      // this.prevResize = nextEnd
+      // booking.end_at = nextEnd
+      // }
+
       // console.log(
       //   'booking ',
       //   booking,
@@ -871,11 +884,21 @@ export default {
         id: booking.id + '--ghost',
         start_at: dayjs(booking.start_at)
           .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
-          .snapToTime(this.slotMinTime, this.slotDuration)
+          .snapToTime(
+            this.slotMinTime,
+            this.slotDuration,
+            false,
+            this.slotMaxTime,
+          )
           .format('iso'),
         end_at: dayjs(booking.end_at)
           .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
-          .snapToTime(this.slotMinTime, this.slotDuration)
+          .snapToTime(
+            this.slotMinTime,
+            this.slotDuration,
+            false,
+            this.slotMaxTime,
+          )
           .format('iso'),
         bookableId: this.yToBookable(
           event.clientY -
@@ -1108,7 +1131,12 @@ export default {
       ).date
 
       if (snap) {
-        return dayjs(date).snapToTime(this.slotMinTime, this.slotDuration, up)
+        return dayjs(date).snapToTime(
+          this.slotMinTime,
+          this.slotDuration,
+          up,
+          this.slotMaxTime,
+        )
       }
       return date
     },

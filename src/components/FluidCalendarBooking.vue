@@ -111,7 +111,9 @@ export default {
       return stl
     },
     allWidth() {
-      // this.$emit('size', this.diff)
+      // this.$emit('resize', this.diff)
+
+      return
 
       const nextDate = dayjs(this.booking.end_at)
         .gptAdd(
@@ -159,7 +161,7 @@ export default {
     },
     size(event) {
       this.diff = event.clientX - this.baseX
-      // this.$emit('size', this.diff)
+      this.$emit('resize', this.diff)
     },
     endSize(event) {
       this.baseX = event.clientX
