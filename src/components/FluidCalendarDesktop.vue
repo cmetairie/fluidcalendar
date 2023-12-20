@@ -39,13 +39,19 @@
   <input type="range" min="20" max="100" v-model="rowHeight" step="1" /> -->
     <!-- {{ dragData }} -->
     <!-- {{ dragData }} -->
-
+    <!-- 
     <FluidViewbar
       :rangeX="rangeX"
       :rangeY="rangeY"
       :date="pointerDate"
       :debug="debug"
-    ></FluidViewbar>
+    ></FluidViewbar> -->
+    <!-- <FluidViewbar
+      :rangeX="rangeX"
+      :rangeY="rangeY"
+      :date="pointerDate"
+      :debug="debug"
+    ></FluidViewbar> -->
     <FluidPinch :zoom="zoom" @pinch="pinch">
       <div
         class="t__fluid__calendar"
@@ -257,7 +263,7 @@
                   class="t__fluid__calendar__header__cell__date"
                   :class="{ '--up': displayHours }"
                   :style="{
-                    transform: `translateY(${displayHours ? -20 : 0}px)`,
+                    transform: `translateY(${displayHours ? 0 : 0}px)`,
                   }"
                 >
                   {{ format(cell.date) }}
@@ -374,6 +380,10 @@ export default {
       type: String,
       default: 'fr',
     },
+    dates: {
+      type: Array,
+      default: () => [],
+    },
     bookings: {
       type: Array,
       default: () => [],
@@ -415,7 +425,13 @@ export default {
       default: 0,
     },
   },
-  emits: ['updateDate', 'updateRange', 'clickBooking'],
+  emits: [
+    'updateDate',
+    'updateRange',
+    'clickBooking',
+    'updateDebouncedDate',
+    'updateDebouncedRange',
+  ],
   data() {
     return {
       prevResize: 0,
@@ -475,9 +491,14 @@ export default {
   },
   watch: {
     pointerDate(date) {
+      this.$emit('updateDate', date)
+      this.$emit('updateRange', {
+        start: this.rangeX.start,
+        end: this.rangeX.end,
+      })
       debounce(() => {
-        this.$emit('updateDate', date)
-        this.$emit('updateRange', {
+        this.$emit('updateDebouncedDate', date)
+        this.$emit('updateDebouncedRange', {
           start: this.rangeX.start,
           end: this.rangeX.end,
         })
@@ -504,6 +525,7 @@ export default {
       async handler(width, oldWidth) {
         const now = dayjs()
         if (!oldWidth) {
+          console.log('CENTER VIEW')
           this.centerViewTo(now.date, 0.001)
         }
       },

@@ -7934,39 +7934,46 @@ var script$3 = {
         y: y,
         xInMinutes: m,
       };
-
+      const nBStart = dayjs(booking.start_at)
+        .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
+        .format('iso');
+      const nBEnd = dayjs(booking.end_at)
+        .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
+        .format('iso');
       const newBooking = {
         ...booking,
-        start_at: dayjs(booking.start_at)
-          .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
-          .format('iso'),
-        end_at: dayjs(booking.end_at)
-          .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
-          .format('iso'),
+        start_at: nBStart,
+        _start_at: nBStart,
+        end_at: nBEnd,
+        _end_at: nBEnd,
         diff: diff,
         ghosted: true,
       };
+      const gStart = dayjs(booking.start_at)
+        .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
+        .snapToTime(
+          this.slotMinTime,
+          this.slotDuration,
+          false,
+          this.slotMaxTime,
+        )
+        .format('iso');
+      const gEnd = dayjs(booking.end_at)
+        .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
+        .snapToTime(
+          this.slotMinTime,
+          this.slotDuration,
+          false,
+          this.slotMaxTime,
+        )
+        .format('iso');
       const ghost = {
         ...booking,
         id: booking.id + '--ghost',
-        start_at: dayjs(booking.start_at)
-          .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
-          .snapToTime(
-            this.slotMinTime,
-            this.slotDuration,
-            false,
-            this.slotMaxTime,
-          )
-          .format('iso'),
-        end_at: dayjs(booking.end_at)
-          .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
-          .snapToTime(
-            this.slotMinTime,
-            this.slotDuration,
-            false,
-            this.slotMaxTime,
-          )
-          .format('iso'),
+        start_at: gStart,
+        _start_at: gStart,
+        end_at: gEnd,
+        _end_at: gEnd,
         bookableId: this.yToBookable(
           event.clientY -
             this.$refs.fluidCalendar.getBoundingClientRect().top +
@@ -8301,6 +8308,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
     vue.createCommentVNode(" <h2>{{ format(pointerDate) }}</h2>\n  <button @click=\"centerViewTo('2023-10-17')\">2023-10-17</button>\n  <button @click=\"generate\">generate</button>\n  <button @click=\"reset\">reset</button>\n\n  <input type=\"range\" min=\"20\" max=\"100\" v-model=\"rowHeight\" step=\"1\" /> "),
     vue.createCommentVNode(" {{ dragData }} "),
     vue.createCommentVNode(" {{ dragData }} "),
+    vue.createCommentVNode(" \n    <FluidViewbar\n      :rangeX=\"rangeX\"\n      :rangeY=\"rangeY\"\n      :date=\"pointerDate\"\n      :debug=\"debug\"\n    ></FluidViewbar> "),
     vue.createVNode(_component_FluidViewbar, {
       rangeX: $options.rangeX,
       rangeY: $options.rangeY,

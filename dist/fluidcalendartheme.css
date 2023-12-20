@@ -20,6 +20,7 @@
   line-height: 1.618;
   font-size: clamp(14px, 1vw, 16px);
   color: var(--color-txt);
+  overflow: hidden;
 }
 
 .t__fluid__calendar__mobile__header {

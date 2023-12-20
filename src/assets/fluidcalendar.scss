@@ -55,7 +55,7 @@
 }
 
 .t__fluid__calendar__wrapper {
-  overflow: hidden;
+  // overflow: hidden;
 }
 
 .t__fluid__calendar__wrapper.--debug {
@@ -491,6 +491,7 @@
   // text-overflow: ellipsis;
 }
 .t__fluid__calendar__booking__label {
+  display: block;
   font-size: 0.85rem;
   white-space: nowrap;
   overflow: hidden;
@@ -806,6 +807,9 @@
 
 .t__fluid__calendar__booking__content {
   line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .t__fluid__calendar__header__time__areas {

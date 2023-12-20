@@ -17,7 +17,9 @@
       :h="h"
       :w="w"
       @updateDate="(v) => $emit('updateDate', v)"
+      @updateDebouncedDate="(v) => $emit('updateDebouncedDate', v)"
       @updateRange="(v) => $emit('updateRange', v)"
+      @updateDebouncedRange="(v) => $emit('updateDebouncedRange', v)"
       @clickBooking="(v) => $emit('clickBooking', v)"
     >
       <template #date="{date}">
@@ -59,7 +61,13 @@ import FluidCalendarMobile from './FluidCalendarMobile.vue'
 export default {
   name: 'FluidCalendar',
   components: { FluidCalendarDesktop, FluidCalendarMobile },
-  emits: ['updateDate', 'updateRange', 'clickBooking'],
+  emits: [
+    'updateDate',
+    'updateRange',
+    'clickBooking',
+    'updateDebouncedDate',
+    'updateDebouncedRange',
+  ],
   props: {
     lang: {
       type: String,
@@ -68,6 +76,10 @@ export default {
     bookableType: {
       type: Object,
       default: () => {},
+    },
+    dates: {
+      type: Array,
+      default: () => [],
     },
     bookings: {
       type: Array,
