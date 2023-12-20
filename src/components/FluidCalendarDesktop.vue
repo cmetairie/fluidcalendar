@@ -187,28 +187,7 @@
                 </FluidCalendarBooking>
               </FluidDraggable>
             </div>
-            <svg
-              class="t__fluid__calendar__header__grid"
-              xmlns="http://www.w3.org/2000/svg"
-              :style="{ height: headerHeight + 'px' }"
-            >
-              <defs>
-                <pattern
-                  id="header_grid"
-                  :width="cellWidth"
-                  :height="headerHeight"
-                  patternUnits="userSpaceOnUse"
-                >
-                  <path
-                    :d="`M ${cellWidth} 0 L 0 0 0 ${headerHeight}`"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1"
-                  />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#header_grid)" />
-            </svg>
+
             <!-- <svg
               class="t__fluid__calendar__header__time__grid"
               xmlns="http://www.w3.org/2000/svg"
@@ -243,6 +222,28 @@
                 height: headerHeight + 'px',
               }"
             >
+              <svg
+                class="t__fluid__calendar__header__grid"
+                xmlns="http://www.w3.org/2000/svg"
+                :style="{ height: headerHeight + 'px' }"
+              >
+                <defs>
+                  <pattern
+                    id="header_grid"
+                    :width="cellWidth"
+                    :height="headerHeight"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      :d="`M ${cellWidth} 0 L 0 0 0 ${headerHeight}`"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1"
+                    />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#header_grid)" />
+              </svg>
               <div
                 class="t__fluid__calendar__header__cell"
                 v-for="cell of rangeX.cells"
@@ -771,7 +772,7 @@ export default {
       // booking.end_at = v
       if (!v) return
 
-      console.log('VALUE=>', v)
+      // console.log('VALUE=>', v, )
 
       // const value = v - this.prevResize
       // console.log('Resize ', booking, v)
@@ -783,7 +784,16 @@ export default {
 
       // console.log('Value => ', nextEnd)
 
-      // booking.end_at = nextEnd
+      const nextDate = dayjs(this.xToDate(v))
+        .snapToTime(
+          this.slotMinTime,
+          this.slotDuration,
+          false,
+          this.slotMaxTime,
+        )
+        .format('iso')
+
+      booking.end_at = booking._end_at = nextDate
 
       // this.prevResize = v
 

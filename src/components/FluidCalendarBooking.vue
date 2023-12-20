@@ -160,8 +160,8 @@ export default {
       document.addEventListener('mouseup', this.endSize)
     },
     size(event) {
-      this.diff = event.clientX - this.baseX
-      this.$emit('resize', this.diff)
+      // this.diff = event.clientX - this.baseX
+      this.$emit('resize', event.clientX)
     },
     endSize(event) {
       this.baseX = event.clientX

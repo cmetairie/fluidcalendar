@@ -139,6 +139,7 @@
 .t__fluid__calendar__header {
   position: relative;
   display: flex;
+  background: var(--color-bg2);
   z-index: 10;
 }
 
@@ -170,7 +171,6 @@
   padding: 0 var(--space);
   white-space: nowrap;
   text-overflow: ellipsis;
-  background: var(--color-bg2);
   z-index: 2;
 }
 .t__fluid__calendar__header__cell::after {
@@ -255,7 +255,6 @@
   color: var(--color-border-m);
   position: absolute;
   width: 100%;
-  z-index: 11;
 }
 
 .t__fluid__calendar__header__time__grid {
