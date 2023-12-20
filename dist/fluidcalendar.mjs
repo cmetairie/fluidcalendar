@@ -6596,8 +6596,8 @@ var script$a = {
       document.addEventListener('mouseup', this.endSize);
     },
     size(event) {
-      this.diff = event.clientX - this.baseX;
-      this.$emit('resize', this.diff);
+      // this.diff = event.clientX - this.baseX
+      this.$emit('resize', event.clientX);
     },
     endSize(event) {
       this.baseX = event.clientX;
@@ -7861,49 +7861,20 @@ var script$3 = {
   },
   methods: {
     resizeBooking(booking, v) {
-      // console.log('Resize ', booking, v)
-      // booking.end_at = v
       if (!v) return
 
-      console.log('VALUE=>', v);
+      const nextDate = dayjs(this.xToDate(v))
+        .snapToTime(
+          this.slotMinTime,
+          this.slotDuration,
+          false,
+          this.slotMaxTime,
+        )
+        .format('iso');
 
-      // const value = v - this.prevResize
-      // console.log('Resize ', booking, v)
-      // const value = v - this.prevResize
-      // console.log('Resize ', v, this.prevResize, value)
-      // const nextEnd = dayjs(this.xToDate(this.dateToX(booking.end_at) + value))
-      //   .snapToTime(this.slotMinTime, this.slotDuration)
-      //   .format('iso')
-
-      // console.log('Value => ', nextEnd)
-
-      // booking.end_at = nextEnd
-
-      // this.prevResize = v
-
-      // booking.end_at = nextEnd
-      // if (nextEnd != this.prevResize) {
-      // console.log('nextEnd => ', v, nextEnd)
-      // this.prevResize = nextEnd
-      // booking.end_at = nextEnd
-      // }
-
-      // console.log(
-      //   'booking ',
-      //   booking,
-      //   value,
-      //   this.dateToX(booking.end_at),
-      //   nextEnd,
-      // )
-      // const size = value / this.widthByMinute
-      // console.log('resizeBooking ', booking, size)
-      // booking.end_at = dayjs(booking.end_at)
-      //   .gptAdd(size, 'minute', this.slotMinTime, this.slotMaxTime)
-      //   .snapToTime(this.slotMinTime, this.slotDuration)
-      //   .format('iso')
+      booking.end_at = booking._end_at = nextDate;
     },
     getWidth({ start, end }) {
-      // console.log('*** get width', start, end)
       return (
         this.dateToX(dayjs(end).format('iso')) -
         this.dateToX(dayjs(start).format('iso'))
