@@ -777,6 +777,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .t__fluid__calendar__header__time__areas {

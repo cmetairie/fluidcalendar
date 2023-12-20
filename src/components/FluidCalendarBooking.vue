@@ -148,9 +148,6 @@ export default {
     },
   },
   methods: {
-    format(date) {
-      return dayjs(date).format('DD MMM')
-    },
     click() {
       console.log('Click', this.booking)
     },

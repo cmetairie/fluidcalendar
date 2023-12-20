@@ -20,7 +20,7 @@
       @updateDebouncedDate="(v) => $emit('updateDebouncedDate', v)"
       @updateRange="(v) => $emit('updateRange', v)"
       @updateDebouncedRange="(v) => $emit('updateDebouncedRange', v)"
-      @clickBooking="(v) => $emit('clickBooking', v)"
+      @openBooking="(v) => $emit('openBooking', v)"
     >
       <template #date="{date}">
         <slot name="date" :date="date" />
@@ -39,7 +39,7 @@
       :w="w"
       @updateDate="(v) => $emit('updateDate', v)"
       @updateRange="(v) => $emit('updateRange', v)"
-      @clickBooking="(v) => $emit('clickBooking', v)"
+      @openBooking="(v) => $emit('openBooking', v)"
     >
       <template #date="{date}">
         <slot name="date" :date="date" />
@@ -64,7 +64,7 @@ export default {
   emits: [
     'updateDate',
     'updateRange',
-    'clickBooking',
+    'openBooking',
     'updateDebouncedDate',
     'updateDebouncedRange',
   ],

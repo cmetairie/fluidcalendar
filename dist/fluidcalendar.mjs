@@ -7481,6 +7481,10 @@ var script$3 = {
       type: String,
       default: 'fr',
     },
+    dates: {
+      type: Array,
+      default: () => [],
+    },
     bookings: {
       type: Array,
       default: () => [],
@@ -7522,7 +7526,13 @@ var script$3 = {
       default: 0,
     },
   },
-  emits: ['updateDate', 'updateRange', 'clickBooking'],
+  emits: [
+    'updateDate',
+    'updateRange',
+    'clickBooking',
+    'updateDebouncedDate',
+    'updateDebouncedRange',
+  ],
   data() {
     return {
       prevResize: 0,
@@ -7549,19 +7559,19 @@ var script$3 = {
   },
   async mounted() {
     // this.loadLocale(this.lang)
-    this._bookings = [...this.bookings].map((m) => {
-      const realStart = dayjs(m.start_at).date;
-      const start = dayjs(m.start_at).setTime(this.slotMinTime);
-      const startDiff = dayjs(realStart).diff(dayjs(start), 'minute');
-      const realEnd = dayjs(m.end_at).date;
-      const end = dayjs(m.end_at).setTime(this.slotMaxTime);
-      const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute');
-      const result = { ...m };
-      if (startDiff < 0) result._start_at = dayjs(start).format('iso');
-      if (endDiff > 0) result._end_at = dayjs(end).format('iso');
-      return result
-    });
-    this._bookables = [...this.bookables];
+    // this._bookings = [...this.bookings].map((m) => {
+    //   const realStart = dayjs(m.start_at).date
+    //   const start = dayjs(m.start_at).setTime(this.slotMinTime)
+    //   const startDiff = dayjs(realStart).diff(dayjs(start), 'minute')
+    //   const realEnd = dayjs(m.end_at).date
+    //   const end = dayjs(m.end_at).setTime(this.slotMaxTime)
+    //   const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute')
+    //   const result = { ...m }
+    //   if (startDiff < 0) result._start_at = dayjs(start).format('iso')
+    //   if (endDiff > 0) result._end_at = dayjs(end).format('iso')
+    //   return result
+    // })
+    // this._bookables = [...this.bookables]
     const root = document.documentElement;
     root.style.setProperty('--row-height', `${this.rowHeight}px`);
 
@@ -7581,10 +7591,31 @@ var script$3 = {
     });
   },
   watch: {
+    bookings(bookings) {
+      this._bookings = [...this.bookings].map((m) => {
+        const realStart = dayjs(m.start_at).date;
+        const start = dayjs(m.start_at).setTime(this.slotMinTime);
+        const startDiff = dayjs(realStart).diff(dayjs(start), 'minute');
+        const realEnd = dayjs(m.end_at).date;
+        const end = dayjs(m.end_at).setTime(this.slotMaxTime);
+        const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute');
+        const result = { ...m };
+        if (startDiff < 0) result._start_at = dayjs(start).format('iso');
+        if (endDiff > 0) result._end_at = dayjs(end).format('iso');
+        return result
+      });
+      this._bookables = [...this.bookables];
+      // console.log('Watch bookings => ', bookings)
+    },
     pointerDate(date) {
+      this.$emit('updateDate', date);
+      this.$emit('updateRange', {
+        start: this.rangeX.start,
+        end: this.rangeX.end,
+      });
       debounce(() => {
-        this.$emit('updateDate', date);
-        this.$emit('updateRange', {
+        this.$emit('updateDebouncedDate', date);
+        this.$emit('updateDebouncedRange', {
           start: this.rangeX.start,
           end: this.rangeX.end,
         });
@@ -7611,6 +7642,7 @@ var script$3 = {
       async handler(width, oldWidth) {
         const now = dayjs();
         if (!oldWidth) {
+          console.log('CENTER VIEW');
           this.centerViewTo(now.date, 0.001);
         }
       },
@@ -7746,8 +7778,10 @@ var script$3 = {
       return this._bookings.filter((f) => {
         if (dayjs(f.start_at).isAfter(dayjs(this.rangeX.end))) return false
         if (dayjs(f.end_at).isBefore(dayjs(this.rangeX.start))) return false
+        // console.log('Filter booking ', f.start_at, this.rangeX.end)
         const visibleBookables = this.rangeY.rows.map((m) => m.id);
-        return visibleBookables.includes(f.bookableId)
+        // console.log('TEST => ', f.resort_purchase.customer)
+        return visibleBookables.includes(f.bookable_id)
       })
     },
     scroller() {
@@ -8137,7 +8171,7 @@ var script$3 = {
         const checkDate =
           (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) &&
           (d.isBefore(end, 'minute') || d.isSame(end, 'minute'));
-        return f.bookableId === bookable.id && checkDate
+        return f.bookable_id === bookable.id && checkDate
       });
 
       if (clickOnBooking) {
@@ -8155,7 +8189,7 @@ var script$3 = {
 
       const collision = this._bookings.find((f) => {
         return (
-          f.bookableId === bookable.id &&
+          f.bookable_id === bookable.id &&
           !dayjs(f.end_at).isBefore(dayjs(date), 'day') &&
           !dayjs(f.start_at).isAfter(dayjs(date), 'day')
         )
@@ -8266,7 +8300,6 @@ const _hoisted_14 = /*#__PURE__*/createElementVNode("rect", {
 }, null, -1 /* HOISTED */);
 
 function render$3(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_FluidViewbar = resolveComponent("FluidViewbar");
   const _component_FluidCalendarNavigator = resolveComponent("FluidCalendarNavigator");
   const _component_FluidCalendarScroller = resolveComponent("FluidCalendarScroller");
   const _component_FluidCalendarUnavail = resolveComponent("FluidCalendarUnavail");
@@ -8307,12 +8340,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
     createCommentVNode(" {{ dragData }} "),
     createCommentVNode(" {{ dragData }} "),
     createCommentVNode(" \n    <FluidViewbar\n      :rangeX=\"rangeX\"\n      :rangeY=\"rangeY\"\n      :date=\"pointerDate\"\n      :debug=\"debug\"\n    ></FluidViewbar> "),
-    createVNode(_component_FluidViewbar, {
-      rangeX: $options.rangeX,
-      rangeY: $options.rangeY,
-      date: $options.pointerDate,
-      debug: $props.debug
-    }, null, 8 /* PROPS */, ["rangeX", "rangeY", "date", "debug"]),
+    createCommentVNode(" <FluidViewbar\n      :rangeX=\"rangeX\"\n      :rangeY=\"rangeY\"\n      :date=\"pointerDate\"\n      :debug=\"debug\"\n    ></FluidViewbar> "),
     createVNode(_component_FluidPinch, {
       zoom: $data.zoom,
       onPinch: $options.pinch
@@ -8399,7 +8427,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 (openBlock(true), createElementBlock(Fragment, null, renderList($props.unavailabilities, (unavail) => {
                   return (openBlock(), createBlock(_component_FluidDraggable, {
                     key: unavail.id,
-                    y: $options.bookableToY(unavail.bookableId, unavail.diff?.y),
+                    y: $options.bookableToY(unavail.bookable_id, unavail.diff?.y),
                     x: $options.dateToX(unavail.start_at),
                     ghost: unavail.ghost
                   }, {
@@ -8429,7 +8457,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 (openBlock(true), createElementBlock(Fragment, null, renderList($options.visibleBookings, (booking) => {
                   return (openBlock(), createBlock(_component_FluidDraggable, {
                     key: booking.id,
-                    y: $options.bookableToY(booking.bookableId, booking.diff?.y),
+                    y: $options.bookableToY(booking.bookable_id, booking.diff?.y),
                     x: $options.dateToX(booking._start_at || booking.start_at),
                     ghost: booking.ghost
                   }, {
@@ -8515,7 +8543,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                     createElementVNode("span", {
                       class: normalizeClass(["t__fluid__calendar__header__cell__date", { '--up': $options.displayHours }]),
                       style: normalizeStyle({
-                    transform: `translateY(${$options.displayHours ? -20 : 0}px)`,
+                    transform: `translateY(${$options.displayHours ? 0 : 0}px)`,
                   })
                     }, toDisplayString($options.format(cell.date)), 7 /* TEXT, CLASS, STYLE */),
                     ($options.displayHours)
@@ -9052,7 +9080,13 @@ script$1.__file = "src/components/FluidCalendarMobile.vue";
 var script = {
   name: 'FluidCalendar',
   components: { FluidCalendarDesktop: script$3, FluidCalendarMobile: script$1 },
-  emits: ['updateDate', 'updateRange', 'clickBooking'],
+  emits: [
+    'updateDate',
+    'updateRange',
+    'clickBooking',
+    'updateDebouncedDate',
+    'updateDebouncedRange',
+  ],
   props: {
     lang: {
       type: String,
@@ -9061,6 +9095,10 @@ var script = {
     bookableType: {
       type: Object,
       default: () => {},
+    },
+    dates: {
+      type: Array,
+      default: () => [],
     },
     bookings: {
       type: Array,
@@ -9189,8 +9227,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           h: $data.h,
           w: $data.w,
           onUpdateDate: _cache[0] || (_cache[0] = (v) => _ctx.$emit('updateDate', v)),
-          onUpdateRange: _cache[1] || (_cache[1] = (v) => _ctx.$emit('updateRange', v)),
-          onClickBooking: _cache[2] || (_cache[2] = (v) => _ctx.$emit('clickBooking', v))
+          onUpdateDebouncedDate: _cache[1] || (_cache[1] = (v) => _ctx.$emit('updateDebouncedDate', v)),
+          onUpdateRange: _cache[2] || (_cache[2] = (v) => _ctx.$emit('updateRange', v)),
+          onUpdateDebouncedRange: _cache[3] || (_cache[3] = (v) => _ctx.$emit('updateDebouncedRange', v)),
+          onClickBooking: _cache[4] || (_cache[4] = (v) => _ctx.$emit('clickBooking', v))
         }), {
           date: withCtx(({date}) => [
             renderSlot(_ctx.$slots, "date", { date: date })
@@ -9208,9 +9248,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       ? (openBlock(), createBlock(_component_FluidCalendarMobile, mergeProps({ key: 2 }, _ctx.$props, {
           h: $data.h,
           w: $data.w,
-          onUpdateDate: _cache[3] || (_cache[3] = (v) => _ctx.$emit('updateDate', v)),
-          onUpdateRange: _cache[4] || (_cache[4] = (v) => _ctx.$emit('updateRange', v)),
-          onClickBooking: _cache[5] || (_cache[5] = (v) => _ctx.$emit('clickBooking', v))
+          onUpdateDate: _cache[5] || (_cache[5] = (v) => _ctx.$emit('updateDate', v)),
+          onUpdateRange: _cache[6] || (_cache[6] = (v) => _ctx.$emit('updateRange', v)),
+          onClickBooking: _cache[7] || (_cache[7] = (v) => _ctx.$emit('clickBooking', v))
         }), {
           date: withCtx(({date}) => [
             renderSlot(_ctx.$slots, "date", { date: date })

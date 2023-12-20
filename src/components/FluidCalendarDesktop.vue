@@ -131,7 +131,7 @@
               <FluidDraggable
                 v-for="unavail of unavailabilities"
                 :key="unavail.id"
-                :y="bookableToY(unavail.bookableId, unavail.diff?.y)"
+                :y="bookableToY(unavail.bookable_id, unavail.diff?.y)"
                 :x="dateToX(unavail.start_at)"
                 :ghost="unavail.ghost"
               >
@@ -156,7 +156,7 @@
               <FluidDraggable
                 v-for="booking of visibleBookings"
                 :key="booking.id"
-                :y="bookableToY(booking.bookableId, booking.diff?.y)"
+                :y="bookableToY(booking.bookable_id, booking.diff?.y)"
                 :x="dateToX(booking._start_at || booking.start_at)"
                 :ghost="booking.ghost"
               >
@@ -428,7 +428,7 @@ export default {
   emits: [
     'updateDate',
     'updateRange',
-    'clickBooking',
+    'openBooking',
     'updateDebouncedDate',
     'updateDebouncedRange',
   ],
@@ -457,20 +457,6 @@ export default {
     }
   },
   async mounted() {
-    // this.loadLocale(this.lang)
-    this._bookings = [...this.bookings].map((m) => {
-      const realStart = dayjs(m.start_at).date
-      const start = dayjs(m.start_at).setTime(this.slotMinTime)
-      const startDiff = dayjs(realStart).diff(dayjs(start), 'minute')
-      const realEnd = dayjs(m.end_at).date
-      const end = dayjs(m.end_at).setTime(this.slotMaxTime)
-      const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute')
-      const result = { ...m }
-      if (startDiff < 0) result._start_at = dayjs(start).format('iso')
-      if (endDiff > 0) result._end_at = dayjs(end).format('iso')
-      return result
-    })
-    this._bookables = [...this.bookables]
     const root = document.documentElement
     root.style.setProperty('--row-height', `${this.rowHeight}px`)
 
@@ -490,6 +476,22 @@ export default {
     })
   },
   watch: {
+    bookings(bookings) {
+      this._bookings = [...this.bookings].map((m) => {
+        const realStart = dayjs(m.start_at).date
+        const start = dayjs(m.start_at).setTime(this.slotMinTime)
+        const startDiff = dayjs(realStart).diff(dayjs(start), 'minute')
+        const realEnd = dayjs(m.end_at).date
+        const end = dayjs(m.end_at).setTime(this.slotMaxTime)
+        const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute')
+        const result = { ...m }
+        if (startDiff < 0) result._start_at = dayjs(start).format('iso')
+        if (endDiff > 0) result._end_at = dayjs(end).format('iso')
+        return result
+      })
+      this._bookables = [...this.bookables]
+      // console.log('Watch bookings => ', bookings)
+    },
     pointerDate(date) {
       this.$emit('updateDate', date)
       this.$emit('updateRange', {
@@ -670,8 +672,10 @@ export default {
       return this._bookings.filter((f) => {
         if (dayjs(f.start_at).isAfter(dayjs(this.rangeX.end))) return false
         if (dayjs(f.end_at).isBefore(dayjs(this.rangeX.start))) return false
+        // console.log('Filter booking ', f.start_at, this.rangeX.end)
         const visibleBookables = this.rangeY.rows.map((m) => m.id)
-        return visibleBookables.includes(f.bookableId)
+        // console.log('TEST => ', f.resort_purchase.customer)
+        return visibleBookables.includes(f.bookable_id)
       })
     },
     scroller() {
@@ -921,7 +925,7 @@ export default {
     },
     endMove(event) {
       if (event.clientX === this.point.x && event.clientY === this.point.y) {
-        this.$emit('clickBooking', this.point.data.booking)
+        this.$emit('openBooking', this.point.data.booking)
       }
       let i = -1
       const ghost = this._bookings.find((f) => {
@@ -1078,7 +1082,7 @@ export default {
         const checkDate =
           (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) &&
           (d.isBefore(end, 'minute') || d.isSame(end, 'minute'))
-        return f.bookableId === bookable.id && checkDate
+        return f.bookable_id === bookable.id && checkDate
       })
 
       if (clickOnBooking) {
@@ -1096,7 +1100,7 @@ export default {
 
       const collision = this._bookings.find((f) => {
         return (
-          f.bookableId === bookable.id &&
+          f.bookable_id === bookable.id &&
           !dayjs(f.end_at).isBefore(dayjs(date), 'day') &&
           !dayjs(f.start_at).isAfter(dayjs(date), 'day')
         )
