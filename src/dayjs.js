@@ -421,6 +421,7 @@ export function dayjs(s) {
     endDay = '23:59:59',
   ) {
     const timeDiff = date - otherDate.date
+    // console.log('TIME DIFF ', date, otherDate, timeDiff)
     if (unit === 'day') {
       return Math.round(timeDiff / (1000 * 60 * 60 * 24))
     } else if (unit === 'month') {

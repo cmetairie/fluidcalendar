@@ -118,7 +118,10 @@
               class="t__fluid__calendar__selection"
             ></span>
             <!-- <div class="t__fluid__calendar__content__translate"> -->
-            <div class="t__fluid__calendar__unavailabilities" :style="{ transform: `translateY(${positionY}px)` }">
+            <div
+              class="t__fluid__calendar__unavailabilities"
+              :style="{ transform: `translateY(${positionY}px)` }"
+            >
               <FluidDraggable
                 v-for="unavail of unavailabilities"
                 :key="unavail.id"
@@ -148,7 +151,7 @@
                 v-for="booking of visibleBookings"
                 :key="booking.id"
                 :y="bookableToY(booking.bookableId, booking.diff?.y)"
-                :x="dateToX(booking.start_at)"
+                :x="dateToX(booking._start_at || booking.start_at)"
                 :ghost="booking.ghost"
               >
                 <FluidCalendarBooking
@@ -157,14 +160,19 @@
                   :rowHeight="rowHeight"
                   :collisions="collisions"
                   :width="
-                    getWidth({ start: booking.start_at, end: booking.end_at })
+                    getWidth({
+                      start: booking._start_at || booking.start_at,
+                      end: booking._end_at || booking.end_at,
+                    })
                   "
                   :slotMinTime="slotMinTime"
                   :slotMaxTime="slotMaxTime"
                   :slotDuration="slotDuration"
                   @resize="(size) => resizeBooking(booking, size)"
                   :ratio="ratio"
-                  :refX="translateX + dateToX(booking.start_at)"
+                  :refX="
+                    translateX + dateToX(booking._start_at || booking.start_at)
+                  "
                 >
                   <slot
                     v-if="$slots.booking"
@@ -433,7 +441,18 @@ export default {
   },
   async mounted() {
     // this.loadLocale(this.lang)
-    this._bookings = [...this.bookings]
+    this._bookings = [...this.bookings].map((m) => {
+      const realStart = dayjs(m.start_at).date
+      const start = dayjs(m.start_at).setTime(this.slotMinTime)
+      const startDiff = dayjs(realStart).diff(dayjs(start), 'minute')
+      const realEnd = dayjs(m.end_at).date
+      const end = dayjs(m.end_at).setTime(this.slotMaxTime)
+      const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute')
+      const result = { ...m }
+      if (startDiff < 0) result._start_at = dayjs(start).format('iso')
+      if (endDiff > 0) result._end_at = dayjs(end).format('iso')
+      return result
+    })
     this._bookables = [...this.bookables]
     const root = document.documentElement
     root.style.setProperty('--row-height', `${this.rowHeight}px`)
@@ -777,7 +796,11 @@ export default {
       //   .format('iso')
     },
     getWidth({ start, end }) {
-      return this.dateToX(end) - this.dateToX(start)
+      // console.log('*** get width', start, end)
+      return (
+        this.dateToX(dayjs(end).format('iso')) -
+        this.dateToX(dayjs(start).format('iso'))
+      )
     },
     pinch(p) {
       if (p.zoom > 2 && p.zoom < 40) {
@@ -1090,14 +1113,14 @@ export default {
       return date
     },
     dateToX(date) {
-      const diffInDays = dayjs(date).diff(dayjs(this.rangeX.start))
+      const diffInDays = dayjs(date).get() - dayjs(this.rangeX.start).get()
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute')
       const offset = ((this.offsetStart + this.offsetEnd) * diffInDays) / 60
-      // console.log('OFFSET ', diffInDays)
+      // console.log('**** ', date, offset)
       return (diff - offset) * this.widthByMinute
     },
     centerViewTo(unTimedDate, speed = 0.5) {
-      console.log('Center => ', unTimedDate)
+      // console.log('Center => ', unTimedDate)
       const date = dayjs(unTimedDate).setTime(this.slotMinTime)
       const d = dayjs(date)
       const r = dayjs(this.rangeX.start)
