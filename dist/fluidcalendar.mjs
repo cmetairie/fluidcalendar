@@ -457,6 +457,54 @@ function dayjs(s) {
     return `${resultHours}:${resultMinutes}`
   }
 
+  function removeDuration(duration, minutesToSubtract) {
+    const parts = duration.split(':');
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    const seconds = parseInt(parts[2], 10);
+
+    // Convert the duration to total minutes
+    let totalMinutes = hours * 60 + minutes;
+
+    // Subtract the specified minutes
+    totalMinutes -= minutesToSubtract;
+
+    // Ensure totalMinutes is not negative
+    if (totalMinutes < 0) {
+      throw new Error('Subtracted duration exceeds the original duration')
+    }
+
+    // Convert total minutes back to HH:MM:SS
+    const newHours = Math.floor(totalMinutes / 60);
+    const newMinutes = totalMinutes % 60;
+
+    // Format the new duration string
+    const newDuration = [newHours, newMinutes, seconds]
+      .map((part) => part.toString().padStart(2, '0'))
+      .join(':');
+
+    return newDuration
+  }
+
+  function minutesToHHMMSS(minutes) {
+    // Ensure that the input is a number and not negative
+    if (typeof minutes !== 'number' || minutes < 0) {
+      throw new Error('Input must be a non-negative number')
+    }
+
+    // Calculate hours, minutes, and seconds
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    const seconds = 0; // Since the input is in minutes, seconds will always be 0
+
+    // Format each part to ensure two digits
+    const formattedHours = String(hours).padStart(2, '0');
+    const formattedMinutes = String(remainingMinutes).padStart(2, '0');
+    const formattedSeconds = String(seconds).padStart(2, '0');
+
+    // Combine into a single string
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+  }
   // Return an object with public methods
   return {
     diff,
@@ -477,6 +525,8 @@ function dayjs(s) {
     diffHours,
     getDuration,
     addDuration,
+    removeDuration,
+    minutesToHHMMSS,
   }
 }
 
@@ -6542,7 +6592,7 @@ var script$a = {
     stl() {
       const stl = [];
       stl.push({ width: this.width + 'px' });
-      stl.push({ height: this.rowHeight - 4 + 'px' });
+      stl.push({ height: this.rowHeight + 'px' });
       return stl
     },
     sltContent() {
@@ -6584,9 +6634,6 @@ var script$a = {
     },
   },
   methods: {
-    format(date) {
-      return dayjs(date).format('DD MMM')
-    },
     click() {
       console.log('Click', this.booking);
     },
@@ -6601,6 +6648,7 @@ var script$a = {
     },
     endSize(event) {
       this.baseX = event.clientX;
+      this.$emit('resize', null);
       document.removeEventListener('mousemove', this.size);
       document.removeEventListener('mouseup', this.endSize);
     },
@@ -6616,6 +6664,7 @@ function render$a(_ctx, _cache, $props, $setup, $data, $options) {
   return (openBlock(), createElementBlock(Fragment, null, [
     createCommentVNode(" <div> "),
     createCommentVNode(" <button class=\"t__fluid__calendar__booking\" :style=\"stl\" :class=\"clss\">\n      222\n    </button> "),
+    createCommentVNode(" <Trans value=\"0\" mode=\"fromBottom\" :speed=\"0.25\" appear reverse alpha> "),
     createElementVNode("button", {
       class: normalizeClass(["t__fluid__calendar__booking", $options.clss]),
       style: normalizeStyle($options.stl)
@@ -6645,6 +6694,7 @@ function render$a(_ctx, _cache, $props, $setup, $data, $options) {
         ], 32 /* HYDRATE_EVENTS */)
       ], 512 /* NEED_PATCH */)
     ], 6 /* CLASS, STYLE */),
+    createCommentVNode(" </Trans> "),
     createCommentVNode(" </div> ")
   ], 2112 /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */))
 }
@@ -7529,9 +7579,11 @@ var script$3 = {
   emits: [
     'updateDate',
     'updateRange',
-    'clickBooking',
+    'openBooking',
     'updateDebouncedDate',
     'updateDebouncedRange',
+    'createNewBooking',
+    'updateBooking',
   ],
   data() {
     return {
@@ -7555,25 +7607,24 @@ var script$3 = {
       point: {},
       _bookings: [],
       _bookables: [],
+      willResize: null,
     }
   },
   async mounted() {
-    // this.loadLocale(this.lang)
-    // this._bookings = [...this.bookings].map((m) => {
-    //   const realStart = dayjs(m.start_at).date
-    //   const start = dayjs(m.start_at).setTime(this.slotMinTime)
-    //   const startDiff = dayjs(realStart).diff(dayjs(start), 'minute')
-    //   const realEnd = dayjs(m.end_at).date
-    //   const end = dayjs(m.end_at).setTime(this.slotMaxTime)
-    //   const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute')
-    //   const result = { ...m }
-    //   if (startDiff < 0) result._start_at = dayjs(start).format('iso')
-    //   if (endDiff > 0) result._end_at = dayjs(end).format('iso')
-    //   return result
-    // })
-    // this._bookables = [...this.bookables]
+    // console.log('********* MOUNTED')
     const root = document.documentElement;
     root.style.setProperty('--row-height', `${this.rowHeight}px`);
+
+    this.zoom = Math.min(
+      Math.max((1000 - this.slotDurationInMinutes) / 90, 3),
+      30,
+    );
+
+    // console.log('DUUUUU ', (1000 - this.slotDurationInMinutes) / 20)
+
+    this.centerViewTo(this.dates[0], 0.001);
+
+    // console.log('INIT ZOOM ', dayjs().getDuration(this.slotDur))
 
     this.$refs.fluidCalendar.addEventListener('wheel', (e) => {
       e.preventDefault();
@@ -7591,20 +7642,23 @@ var script$3 = {
     });
   },
   watch: {
-    bookings(bookings) {
-      this._bookings = [...this.bookings].map((m) => {
-        const realStart = dayjs(m.start_at).date;
-        const start = dayjs(m.start_at).setTime(this.slotMinTime);
-        const startDiff = dayjs(realStart).diff(dayjs(start), 'minute');
-        const realEnd = dayjs(m.end_at).date;
-        const end = dayjs(m.end_at).setTime(this.slotMaxTime);
-        const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute');
-        const result = { ...m };
-        if (startDiff < 0) result._start_at = dayjs(start).format('iso');
-        if (endDiff > 0) result._end_at = dayjs(end).format('iso');
-        return result
-      });
-      this._bookables = [...this.bookables];
+    bookings: {
+      immediate: true,
+      handler(bookings) {
+        this._bookings = [...this.bookings].map((m) => {
+          const realStart = dayjs(m.start_at).date;
+          const start = dayjs(m.start_at).setTime(this.slotMin);
+          const startDiff = dayjs(realStart).diff(dayjs(start), 'minute');
+          const realEnd = dayjs(m.end_at).date;
+          const end = dayjs(m.end_at).setTime(this.slotMax);
+          const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute');
+          const result = { ...m };
+          if (startDiff < 0) result._start_at = dayjs(start).format('iso');
+          if (endDiff > 0) result._end_at = dayjs(end).format('iso');
+          return result
+        });
+        this._bookables = [...this.bookables];
+      },
       // console.log('Watch bookings => ', bookings)
     },
     pointerDate(date) {
@@ -7626,6 +7680,8 @@ var script$3 = {
       const oldWidthByMinute = o / 10;
       const nextWidthByMinute = v / 10;
 
+      if (!this.pincher) return
+
       const pincherX =
         this.pincher.x -
         this.$refs.fluidCalendar.getBoundingClientRect().left -
@@ -7640,51 +7696,60 @@ var script$3 = {
     width: {
       immediate: true,
       async handler(width, oldWidth) {
-        const now = dayjs();
-        if (!oldWidth) {
-          console.log('CENTER VIEW');
-          this.centerViewTo(now.date, 0.001);
-        }
+        dayjs();
       },
     },
   },
   computed: {
+    slotMin() {
+      // if (this.slotMinTime === '00:00:00') return '00:00:01'
+      return this.slotMinTime
+    },
+    slotMax() {
+      if (this.slotMaxTime === '00:00:00') return '23:59:59'
+      return this.slotMaxTime
+    },
+    slotDur() {
+      const min = dayjs().getDuration(this.slotMin);
+      const max = dayjs().getDuration(this.slotMax);
+      const duration = dayjs().getDuration(this.slotDuration);
+      // console.log(
+      //   'MATH MIN ',
+      //   Math.min(duration, max - min),
+      //   minutesToHHMMSS(Math.min(duration, max - min)),
+      // )
+      return dayjs().minutesToHHMMSS(Math.min(duration, max - min))
+    },
     slotDurationInMinutes() {
-      return dayjs().getDuration(this.slotDuration)
+      return dayjs().getDuration(this.slotDur)
     },
     offsetStart() {
-      return dayjs().diffHours('00:00:00', this.slotMinTime)
+      return dayjs().diffHours('00:00:00', this.slotMin)
     },
     offsetEnd() {
-      return dayjs().diffHours('24:00:00', this.slotMaxTime)
+      return dayjs().diffHours('24:00:00', this.slotMax)
     },
     slots() {
-      const [hours, minutes, seconds] = this.slotDuration.split(':').map(Number);
+      const [hours, minutes, seconds] = this.slotDur.split(':').map(Number);
       return [hours, minutes, seconds]
-      // slotDuration , slotMinTime, slotMaxTime
     },
     hours() {
-      // const [hours, minutes, seconds] = this.slotDuration.split(':').map(Number)
+      // if (!this.displayHours) return []
       const hours = [];
-      const [minHours, minMinutes] = this.slotMinTime.split(':').map(Number);
-      const [maxHours] = this.slotMaxTime.split(':').map(Number);
+      const [minHours, minMinutes] = this.slotMin.split(':').map(Number);
+      const [maxHours] = this.slotMax.split(':').map(Number);
       const h = (maxHours - minHours) * 60;
       let startX = 0;
-      // console.log(
-      //   'Calc hours => ',
-      //   h,
-      //   this.slotDuration,
-      //   dayjs().getDuration(this.slotDuration),
-      // )
 
-      let firstLabel = this.slotMinTime.split(':');
+      let firstLabel = this.slotMin.split(':');
       firstLabel = `${firstLabel[0]}:${firstLabel[1]}`;
       const slotDuration = this.slotDurationInMinutes;
       const nbSlots = splitNumber(h / slotDuration);
-      // console.log('Nb slots => ', nbSlots, slotDuration, minHours)
       let j = 0;
-      for (let i = 0; i < nbSlots.value; i++) {
+
+      for (let i = 0; i <= nbSlots.value; i++) {
         j = i + 1;
+        // console.log('nbSlots => ', nbSlots)
         if (i === 0 && nbSlots.value === 0) {
           hours.push({
             index: 0,
@@ -7703,7 +7768,7 @@ var script$3 = {
         } else {
           startX = startX + this.widthByMinute * slotDuration;
           const label = dayjs().addDuration(
-            this.slotMinTime,
+            this.slotMin,
             this.slotDurationInMinutes * i,
           );
           hours.push({
@@ -7716,9 +7781,10 @@ var script$3 = {
       }
       if (nbSlots.rest) {
         const label = dayjs().addDuration(
-          this.slotMinTime,
+          this.slotMin,
           this.slotDurationInMinutes * j,
         );
+        console.log('REST ?', label, slotDuration * nbSlots.rest);
         hours.push({
           index: j,
           x: startX + this.widthByMinute * slotDuration,
@@ -7804,19 +7870,9 @@ var script$3 = {
             this.rangeDays * this.minutesByCell,
         ) * -1;
 
-      // console.log('Add ', minutes)
-
-      // console.log(
-      //   'Minutes = >',
-      //   dayjs().startOf('day', this.slotMinTime).date,
-      //   minutes,
-      // )
-
-      // console.log(dayjs().startOf('day', this.slotMinTime).date)
-
       return dayjs()
-        .startOf('day', this.slotMinTime)
-        .gptAdd(minutes, 'minute', this.slotMinTime, this.slotMaxTime)
+        .startOf('day', this.slotMin)
+        .gptAdd(minutes, 'minute', this.slotMin, this.slotMax)
         .format('iso')
     },
     widthByMinute() {
@@ -7826,7 +7882,7 @@ var script$3 = {
       return this.widthByMinute * this.minutesByCell
     },
     minutesByCell() {
-      return dayjs().duration(this.slotMinTime, this.slotMaxTime)
+      return dayjs().duration(this.slotMin, this.slotMax)
     },
     decalY() {
       return (this.positionY / this.rowHeight) | 0
@@ -7861,21 +7917,17 @@ var script$3 = {
       const s = -this.rangeDays * 1440 - this.decalX * this.threshold * 1440;
       const e = this.rangeDays * 1440 - this.decalX * this.threshold * 1440;
 
-      const start = dayjs(dayjs().startOf('day', this.slotMinTime).date)
+      const start = dayjs(dayjs().startOf('day', this.slotMin).date)
         .add(s, 'minute')
         .startOf('day', this.slotMinTime)
         .format('iso');
 
-      const end = dayjs(dayjs().startOf('day', this.slotMinTime).date)
+      const end = dayjs(dayjs().startOf('day', this.slotMin).date)
         .add(e, 'minute')
-        .endOf('day', this.slotMaxTime)
+        .endOf('day', this.slotMax)
         .format('iso');
 
       const diffInDays = dayjs(end).diff(dayjs(start)) + 1;
-
-      // let slots = []
-
-      // console.log('Slots => ', dayjs().startOf('day', this.slotMinTime).date)
 
       let cells = [];
       for (let i = 0; i < diffInDays; i++) {
@@ -7895,18 +7947,23 @@ var script$3 = {
   },
   methods: {
     resizeBooking(booking, v) {
-      if (!v) return
+      if (!v) {
+        this.$emit('updateBooking', booking);
+        this.willResize = null;
+        return
+      }
 
       const nextDate = dayjs(this.xToDate(v))
-        .snapToTime(
-          this.slotMinTime,
-          this.slotDuration,
-          false,
-          this.slotMaxTime,
-        )
+        .snapToTime(this.slotMin, this.slotDur, false, this.slotMax)
         .format('iso');
 
+      if (dayjs(nextDate).isBefore(dayjs(booking.start_at), 'minute')) return
+      if (dayjs(nextDate).isSame(dayjs(booking.end_at), 'minute')) return
       booking.end_at = booking._end_at = nextDate;
+
+      this.willResize = booking;
+
+      // this.$emit('updateBooking', booking)
     },
     getWidth({ start, end }) {
       return (
@@ -7915,7 +7972,7 @@ var script$3 = {
       )
     },
     pinch(p) {
-      if (p.zoom > 2 && p.zoom < 40) {
+      if (p.zoom > 1 && p.zoom < 40) {
         this.pincher = p;
         this.zoom = p.zoom;
       }
@@ -7930,7 +7987,6 @@ var script$3 = {
         // snap: true
       };
       const data = this.pointToData(this.point);
-      // console.log('POINT ', data)
       this.point.data = data;
       if (data.collision) {
         this.addCollision(data.collision.id);
@@ -7938,7 +7994,6 @@ var script$3 = {
       } else if (data.booking) {
         document.removeEventListener('mousemove', this.mouseMoveListener);
         document.removeEventListener('mouseup', this.endMove);
-        // console.log('Click booking ', event, data)
         this.mouseMoveStartPoint = { x: event.clientX, y: event.clientY };
         this.mouseMoveListener = (event) => {
           this.move(event, data.booking);
@@ -7967,10 +8022,10 @@ var script$3 = {
         xInMinutes: m,
       };
       const nBStart = dayjs(booking.start_at)
-        .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
+        .gptAdd(m, 'minute', this.slotMin, this.slotMax)
         .format('iso');
       const nBEnd = dayjs(booking.end_at)
-        .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
+        .gptAdd(m, 'minute', this.slotMin, this.slotMax)
         .format('iso');
       const newBooking = {
         ...booking,
@@ -7982,22 +8037,12 @@ var script$3 = {
         ghosted: true,
       };
       const gStart = dayjs(booking.start_at)
-        .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
-        .snapToTime(
-          this.slotMinTime,
-          this.slotDuration,
-          false,
-          this.slotMaxTime,
-        )
+        .gptAdd(m, 'minute', this.slotMin, this.slotMax)
+        .snapToTime(this.slotMin, this.slotDur, false, this.slotMax)
         .format('iso');
       const gEnd = dayjs(booking.end_at)
-        .gptAdd(m, 'minute', this.slotMinTime, this.slotMaxTime)
-        .snapToTime(
-          this.slotMinTime,
-          this.slotDuration,
-          false,
-          this.slotMaxTime,
-        )
+        .gptAdd(m, 'minute', this.slotMin, this.slotMax)
+        .snapToTime(this.slotMin, this.slotDur, false, this.slotMax)
         .format('iso');
       const ghost = {
         ...booking,
@@ -8006,7 +8051,7 @@ var script$3 = {
         _start_at: gStart,
         end_at: gEnd,
         _end_at: gEnd,
-        bookableId: this.yToBookable(
+        bookable_id: this.yToBookable(
           event.clientY -
             this.$refs.fluidCalendar.getBoundingClientRect().top +
             this.positionY * -1,
@@ -8023,10 +8068,14 @@ var script$3 = {
       }
       const i = this._bookings.findIndex((f) => f.id === booking.id);
       this._bookings.splice(i, 1, newBooking);
+      // this.$emit('updateBooking', newBooking)
     },
     endMove(event) {
       if (event.clientX === this.point.x && event.clientY === this.point.y) {
-        this.$emit('clickBooking', this.point.data.booking);
+        this.$emit('openBooking', this.point.data.booking);
+        document.removeEventListener('mousemove', this.mouseMoveListener);
+        document.removeEventListener('mouseup', this.endMove);
+        return
       }
       let i = -1;
       const ghost = this._bookings.find((f) => {
@@ -8044,6 +8093,7 @@ var script$3 = {
       delete newBooking.ghost;
       this._bookings.splice(i, 1);
       this._bookings.splice(ghostedIndex, 1, newBooking);
+      this.$emit('updateBooking', newBooking);
       document.removeEventListener('mousemove', this.mouseMoveListener);
       document.removeEventListener('mouseup', this.endMove);
     },
@@ -8061,17 +8111,19 @@ var script$3 = {
       }
       if (current.bookable.id != this.dragData.bookable.id) return
 
-      // console.log('Drag ', current)
+      // console.log('Drag ', current.snapDown.date)
 
       this.dragData = {
         ...this.dragData,
         snapEnd: current.snapUp.format('iso'),
-        snapStartX: this.dateToX(this.dragData.snapStart.format('iso')),
+        snapStartX: this.dateToX(this.dragData.snapDown.format('iso')),
         snapEndX: this.dateToX(current.snapUp.format('iso')),
+        dateStart: this.dragData.snapDown.format('iso'),
+        dateEnd: current.snapUp.format('iso'),
         // width: current.x - this.dragData.x,
       };
 
-      // console.log('Drag Data ', this.dragData)
+      // console.log('Drag Data ', this.dragData.dateStart, this.dragData.dateEnd)
 
       return
       // if (data.collision) return // Collision
@@ -8080,12 +8132,21 @@ var script$3 = {
     },
     endDrag(event) {
       this.collisions = [];
+
       document.body.style.cursor = 'default';
       document.body.style.userSelect = 'auto';
       //   document.body.style.pointerEvents = 'auto'
       document.removeEventListener('mousemove', this.drag);
       document.removeEventListener('mouseup', this.endDrag);
-      // this.dragData = null
+      if (!this.dragData) return
+      if (this.dragData.dateStart && this.dragData.dateEnd) {
+        this.$emit('createNewBooking', {
+          start_at: this.dragData.dateStart,
+          end_at: this.dragData.dateEnd,
+          bookable_type_id: this.dragData.bookable.bookable_type_id,
+          bookable_id: this.dragData.bookable.id,
+        });
+      }
     },
     addCollision(id) {
       if (this.collisions.includes(id)) return
@@ -8148,7 +8209,7 @@ var script$3 = {
         this.$refs.fluidCalendar.getBoundingClientRect().top +
         this.positionY * -1;
       const date = this.xToDate(x);
-      const snapStart = this.xToDate(x, true);
+      // const snapStart = this.xToDate(x, true)
       const snapDown = this.xToDate(x, true);
       const snapUp = this.xToDate(x, true, true);
       const bookable = this.yToBookable(top);
@@ -8157,7 +8218,7 @@ var script$3 = {
         return {
           snapUp: snapUp,
           snapDown: snapDown,
-          snapStart: snapStart,
+          // snapStart: snapStart,
           date: date,
           x: this.dateToX(date),
           // y: this.bookableToY(this.yToBookable(top).id),
@@ -8166,19 +8227,32 @@ var script$3 = {
 
       const clickOnBooking = this._bookings.find((f) => {
         const d = dayjs(date);
-        const start = dayjs(f.start_at);
-        const end = dayjs(f.end_at);
+        const start = dayjs(f._start_at || f.start_at);
+        const end = dayjs(f._end_at || f.end_at);
+
+        // if (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) {
+        //   console.log(
+        //     'CLICK ',
+        //     d.date,
+        //     end.date,
+        //     d.isBefore(end, 'minute') || d.isSame(end, 'minute'),
+        //     f.resort_purchase.customer.firstName,
+        //   )
+        // }
+
         const checkDate =
           (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) &&
           (d.isBefore(end, 'minute') || d.isSame(end, 'minute'));
         return f.bookable_id === bookable.id && checkDate
       });
 
+      console.log('clickOnBooking => ', clickOnBooking);
+
       if (clickOnBooking) {
         return {
           snapUp: snapUp,
           snapDown: snapDown,
-          snapStart: snapStart,
+          // snapStart: snapStart,
           date: date,
           bookable: bookable,
           x: this.dateToX(date),
@@ -8197,7 +8271,7 @@ var script$3 = {
       return {
         snapUp: snapUp,
         snapDown: snapDown,
-        snapStart: snapStart,
+        // snapStart: snapStart,
         date: date,
         bookable: bookable,
         x: this.dateToX(date),
@@ -8220,16 +8294,16 @@ var script$3 = {
       let date = dayjs(this.rangeX.start).gptAdd(
         days,
         'minute',
-        this.slotMinTime,
-        this.slotMaxTime,
+        this.slotMin,
+        this.slotMax,
       ).date;
 
       if (snap) {
         return dayjs(date).snapToTime(
-          this.slotMinTime,
-          this.slotDuration,
+          this.slotMin,
+          this.slotDur,
           up,
-          this.slotMaxTime,
+          this.slotMax,
         )
       }
       return date
@@ -8243,7 +8317,7 @@ var script$3 = {
     },
     centerViewTo(unTimedDate, speed = 0.5) {
       // console.log('Center => ', unTimedDate)
-      const date = dayjs(unTimedDate).setTime(this.slotMinTime);
+      const date = dayjs(unTimedDate).setTime(this.slotMin);
       const d = dayjs(date);
       const r = dayjs(this.rangeX.start);
       const diff = r.diff(d, 'minute') / this.ratio;
@@ -8308,6 +8382,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_FluidPinch = resolveComponent("FluidPinch");
 
   return (openBlock(), createElementBlock("div", _hoisted_1$3, [
+    createCommentVNode(" {{ zoom }} "),
     ($props.debug)
       ? (openBlock(), createElementBlock("div", _hoisted_2$2, [
           createElementVNode("pre", null, toDisplayString({
@@ -8473,9 +8548,9 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                       end: booking._end_at || booking.end_at,
                     })
                   ,
-                        slotMinTime: $props.slotMinTime,
-                        slotMaxTime: $props.slotMaxTime,
-                        slotDuration: $props.slotDuration,
+                        slotMinTime: $options.slotMin,
+                        slotMaxTime: $options.slotMax,
+                        slotDuration: $options.slotDur,
                         onResize: (size) => $options.resizeBooking(booking, size),
                         ratio: $options.ratio,
                         refX: 
@@ -9083,9 +9158,11 @@ var script = {
   emits: [
     'updateDate',
     'updateRange',
-    'clickBooking',
+    'openBooking',
     'updateDebouncedDate',
     'updateDebouncedRange',
+    'createNewBooking',
+    'updateBooking',
   ],
   props: {
     lang: {
@@ -9203,7 +9280,6 @@ const _hoisted_5 = /*#__PURE__*/createElementVNode("br", null, null, -1 /* HOIST
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_FluidCalendarDesktop = resolveComponent("FluidCalendarDesktop");
-  const _component_FluidCalendarMobile = resolveComponent("FluidCalendarMobile");
 
   return (openBlock(), createElementBlock("div", {
     class: normalizeClass(["t__fluid__calendar__wrapper", { '--debug': $props.debug }]),
@@ -9222,48 +9298,29 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           createTextVNode(" " + toDisplayString($data.frameRate) + " FPS ", 1 /* TEXT */)
         ]))
       : createCommentVNode("v-if", true),
-    ($data.desktop)
-      ? (openBlock(), createBlock(_component_FluidCalendarDesktop, mergeProps({ key: 1 }, _ctx.$props, {
-          h: $data.h,
-          w: $data.w,
-          onUpdateDate: _cache[0] || (_cache[0] = (v) => _ctx.$emit('updateDate', v)),
-          onUpdateDebouncedDate: _cache[1] || (_cache[1] = (v) => _ctx.$emit('updateDebouncedDate', v)),
-          onUpdateRange: _cache[2] || (_cache[2] = (v) => _ctx.$emit('updateRange', v)),
-          onUpdateDebouncedRange: _cache[3] || (_cache[3] = (v) => _ctx.$emit('updateDebouncedRange', v)),
-          onClickBooking: _cache[4] || (_cache[4] = (v) => _ctx.$emit('clickBooking', v))
-        }), {
-          date: withCtx(({date}) => [
-            renderSlot(_ctx.$slots, "date", { date: date })
-          ]),
-          booking: withCtx(({booking}) => [
-            renderSlot(_ctx.$slots, "booking", { booking: booking })
-          ]),
-          bookable: withCtx(({bookable}) => [
-            renderSlot(_ctx.$slots, "bookable", { bookable: bookable })
-          ]),
-          _: 3 /* FORWARDED */
-        }, 16 /* FULL_PROPS */, ["h", "w"]))
-      : createCommentVNode("v-if", true),
-    ($data.mobile)
-      ? (openBlock(), createBlock(_component_FluidCalendarMobile, mergeProps({ key: 2 }, _ctx.$props, {
-          h: $data.h,
-          w: $data.w,
-          onUpdateDate: _cache[5] || (_cache[5] = (v) => _ctx.$emit('updateDate', v)),
-          onUpdateRange: _cache[6] || (_cache[6] = (v) => _ctx.$emit('updateRange', v)),
-          onClickBooking: _cache[7] || (_cache[7] = (v) => _ctx.$emit('clickBooking', v))
-        }), {
-          date: withCtx(({date}) => [
-            renderSlot(_ctx.$slots, "date", { date: date })
-          ]),
-          booking: withCtx(({booking}) => [
-            renderSlot(_ctx.$slots, "booking", { booking: booking })
-          ]),
-          bookable: withCtx(({bookable}) => [
-            renderSlot(_ctx.$slots, "bookable", { bookable: bookable })
-          ]),
-          _: 3 /* FORWARDED */
-        }, 16 /* FULL_PROPS */, ["h", "w"]))
-      : createCommentVNode("v-if", true)
+    createVNode(_component_FluidCalendarDesktop, mergeProps(_ctx.$props, {
+      h: $data.h,
+      w: $data.w,
+      onUpdateDate: _cache[0] || (_cache[0] = (v) => _ctx.$emit('updateDate', v)),
+      onUpdateDebouncedDate: _cache[1] || (_cache[1] = (v) => _ctx.$emit('updateDebouncedDate', v)),
+      onUpdateRange: _cache[2] || (_cache[2] = (v) => _ctx.$emit('updateRange', v)),
+      onUpdateDebouncedRange: _cache[3] || (_cache[3] = (v) => _ctx.$emit('updateDebouncedRange', v)),
+      onOpenBooking: _cache[4] || (_cache[4] = (v) => _ctx.$emit('openBooking', v)),
+      onCreateNewBooking: _cache[5] || (_cache[5] = (v) => _ctx.$emit('createNewBooking', v)),
+      onUpdateBooking: _cache[6] || (_cache[6] = (v) => _ctx.$emit('updateBooking', v))
+    }), {
+      date: withCtx(({date}) => [
+        renderSlot(_ctx.$slots, "date", { date: date })
+      ]),
+      booking: withCtx(({booking}) => [
+        renderSlot(_ctx.$slots, "booking", { booking: booking })
+      ]),
+      bookable: withCtx(({bookable}) => [
+        renderSlot(_ctx.$slots, "bookable", { bookable: bookable })
+      ]),
+      _: 3 /* FORWARDED */
+    }, 16 /* FULL_PROPS */, ["h", "w"]),
+    createCommentVNode(" <FluidCalendarMobile\n      v-if=\"mobile\"\n      v-bind=\"$props\"\n      :h=\"h\"\n      :w=\"w\"\n      @updateDate=\"(v) => $emit('updateDate', v)\"\n      @updateRange=\"(v) => $emit('updateRange', v)\"\n      @openBooking=\"(v) => $emit('openBooking', v)\"\n    >\n      <template #date=\"{date}\">\n        <slot name=\"date\" :date=\"date\" />\n      </template>\n      <template #booking=\"{booking}\">\n        <slot name=\"booking\" :booking=\"booking\" />\n      </template>\n      <template #bookable=\"{bookable}\">\n        <slot name=\"bookable\" :bookable=\"bookable\" />\n      </template>\n    </FluidCalendarMobile> ")
   ], 2 /* CLASS */))
 }
 

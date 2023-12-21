@@ -12,7 +12,7 @@
       {{ frameRate }} FPS
     </div>
     <FluidCalendarDesktop
-      v-if="desktop"
+    v-if="desktop"
       v-bind="$props"
       :h="h"
       :w="w"
@@ -21,6 +21,8 @@
       @updateRange="(v) => $emit('updateRange', v)"
       @updateDebouncedRange="(v) => $emit('updateDebouncedRange', v)"
       @openBooking="(v) => $emit('openBooking', v)"
+      @createNewBooking="(v) => $emit('createNewBooking', v)"
+      @updateBooking="(v) => $emit('updateBooking', v)"
     >
       <template #date="{date}">
         <slot name="date" :date="date" />
@@ -67,6 +69,8 @@ export default {
     'openBooking',
     'updateDebouncedDate',
     'updateDebouncedRange',
+    'createNewBooking',
+    'updateBooking',
   ],
   props: {
     lang: {

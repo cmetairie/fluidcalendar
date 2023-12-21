@@ -415,6 +415,7 @@
 
 .t__fluid__calendar__booking.--ghost .t__fluid__calendar__booking__inner {
   background: var(--color-bg2);
+  background: red;
   border-color: rgba(0, 0, 0, 0.1);
   border-style: dashed;
 }

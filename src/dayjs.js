@@ -455,6 +455,54 @@ export function dayjs(s) {
     return `${resultHours}:${resultMinutes}`
   }
 
+  function removeDuration(duration, minutesToSubtract) {
+    const parts = duration.split(':')
+    const hours = parseInt(parts[0], 10)
+    const minutes = parseInt(parts[1], 10)
+    const seconds = parseInt(parts[2], 10)
+
+    // Convert the duration to total minutes
+    let totalMinutes = hours * 60 + minutes
+
+    // Subtract the specified minutes
+    totalMinutes -= minutesToSubtract
+
+    // Ensure totalMinutes is not negative
+    if (totalMinutes < 0) {
+      throw new Error('Subtracted duration exceeds the original duration')
+    }
+
+    // Convert total minutes back to HH:MM:SS
+    const newHours = Math.floor(totalMinutes / 60)
+    const newMinutes = totalMinutes % 60
+
+    // Format the new duration string
+    const newDuration = [newHours, newMinutes, seconds]
+      .map((part) => part.toString().padStart(2, '0'))
+      .join(':')
+
+    return newDuration
+  }
+
+  function minutesToHHMMSS(minutes) {
+    // Ensure that the input is a number and not negative
+    if (typeof minutes !== 'number' || minutes < 0) {
+      throw new Error('Input must be a non-negative number')
+    }
+
+    // Calculate hours, minutes, and seconds
+    const hours = Math.floor(minutes / 60)
+    const remainingMinutes = minutes % 60
+    const seconds = 0 // Since the input is in minutes, seconds will always be 0
+
+    // Format each part to ensure two digits
+    const formattedHours = String(hours).padStart(2, '0')
+    const formattedMinutes = String(remainingMinutes).padStart(2, '0')
+    const formattedSeconds = String(seconds).padStart(2, '0')
+
+    // Combine into a single string
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+  }
   // Return an object with public methods
   return {
     diff,
@@ -475,5 +523,7 @@ export function dayjs(s) {
     diffHours,
     getDuration,
     addDuration,
+    removeDuration,
+    minutesToHHMMSS,
   }
 }

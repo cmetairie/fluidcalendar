@@ -3,6 +3,7 @@
   <!-- <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
       222
     </button> -->
+  <!-- <Trans value="0" mode="fromBottom" :speed="0.25" appear reverse alpha> -->
   <button class="t__fluid__calendar__booking" :style="stl" :class="clss">
     <!-- <button>m</button> -->
     <div ref="inner" class="t__fluid__calendar__booking__inner">
@@ -30,6 +31,7 @@
       </button>
     </div>
   </button>
+  <!-- </Trans> -->
   <!-- </div> -->
 </template>
 
@@ -87,7 +89,7 @@ export default {
     stl() {
       const stl = []
       stl.push({ width: this.width + 'px' })
-      stl.push({ height: this.rowHeight - 4 + 'px' })
+      stl.push({ height: this.rowHeight + 'px' })
       return stl
     },
     sltContent() {
@@ -162,6 +164,7 @@ export default {
     },
     endSize(event) {
       this.baseX = event.clientX
+      this.$emit('resize', null)
       document.removeEventListener('mousemove', this.size)
       document.removeEventListener('mouseup', this.endSize)
     },
