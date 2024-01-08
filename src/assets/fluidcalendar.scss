@@ -106,8 +106,8 @@
       100% - var(--bookables-width)
     );
   // overflow: hidden;
-  border-bottom: solid var(--color-border-m) 0.5px;
-  border-left: solid var(--color-border-m) 0.5px;
+  // border-bottom: solid var(--color-border-m) 0.5px;
+  // border-left: solid var(--color-border-m) 0.5px;
 }
 .t__fluid__calendar__area {
   position: absolute;
@@ -160,6 +160,23 @@
 .t__fluid__calendar__inner {
   line-height: 0;
   height: 100000px;
+}
+.t__fluid__calendar__outer {
+  pointer-events: none;
+  line-height: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.t__fluid__calendar__grid__outer {
+  line-height: 0;
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  color: var(--color-border-m);
 }
 .t__fluid__calendar__header__cell {
   user-select: none;
@@ -286,7 +303,7 @@
 .t__fluid__calendar__bookables {
   position: relative;
   z-index: 2;
-  background: var(--color-bg1);
+  background: var(--color-bg2);
   border-top: solid var(--color-border-m) 0.5px;
 }
 
@@ -295,15 +312,15 @@
   display: block;
   position: absolute;
   top: 0;
-  right: calc(var(--space) * -0.75);
+  left: 100%;
   bottom: 0;
-  width: calc(var(--space) * 0.75);
+  width: calc(var(--space) * 1);
   background: linear-gradient(
     90deg,
     var(--color-border) 0%,
     rgba(0, 0, 0, 0) 100%
   );
-  opacity: 0.25;
+  opacity: 0.5;
 }
 
 .t__fluid__calendar__bookables__header {
@@ -354,7 +371,7 @@
       content: '';
       display: block;
       position: absolute;
-      bottom: 0.5px;
+      bottom: 0;
       right: 0;
       left: 0;
       height: 0.5px;
@@ -498,12 +515,15 @@
   z-index: 3;
   // opacity: 0.4;
 }
-
+.t__fluid__calendar__bookables__inner {
+  background: var(--color-bg1);
+}
 .t__fluid__calendar__bookables__inner,
 .t__fluid__calendar__bookings,
 .t__fluid__calendar__canva,
 .t__fluid__calendar__inner,
-.t__fluid__calendar__mobile__inner {
+.t__fluid__calendar__mobile__inner,
+.t__fluid__calendar__outer {
   will-change: transform;
 }
 
@@ -530,6 +550,7 @@
   // white-space: nowrap;
   // overflow: hidden;
   // text-overflow: ellipsis;
+  animation: slideFromBottomSoft 0.2s;
 }
 .t__fluid__calendar__booking__label {
   display: block;

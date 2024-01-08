@@ -8422,14 +8422,26 @@ const _hoisted_14 = /*#__PURE__*/createElementVNode("rect", {
   height: "100%",
   fill: "url(#grid)"
 }, null, -1 /* HOISTED */);
+const _hoisted_15 = {
+  class: "t__fluid__calendar__grid__outer",
+  xmlns: "http://www.w3.org/2000/svg"
+};
+const _hoisted_16 = ["width", "height"];
+const _hoisted_17 = ["width", "height"];
+const _hoisted_18 = ["d"];
+const _hoisted_19 = /*#__PURE__*/createElementVNode("rect", {
+  width: "100%",
+  height: "100%",
+  fill: "url(#gridouter)"
+}, null, -1 /* HOISTED */);
 
 function render$3(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_FluidCalendarNavigator = resolveComponent("FluidCalendarNavigator");
   const _component_FluidCalendarScroller = resolveComponent("FluidCalendarScroller");
   const _component_FluidCalendarUnavail = resolveComponent("FluidCalendarUnavail");
   const _component_FluidDraggable = resolveComponent("FluidDraggable");
   const _component_FluidCalendarBooking = resolveComponent("FluidCalendarBooking");
   const _component_FluidPinch = resolveComponent("FluidPinch");
+  const _component_FluidCalendarNavigator = resolveComponent("FluidCalendarNavigator");
 
   return (openBlock(), createElementBlock("div", _hoisted_1$3, [
     createCommentVNode(" {{ zoom }} "),
@@ -8505,11 +8517,6 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
               }), 128 /* KEYED_FRAGMENT */))
             ], 4 /* STYLE */)
           ], 512 /* NEED_PATCH */),
-          createVNode(_component_FluidCalendarNavigator, {
-            faking: $data.fakeMove,
-            onIncrement: $options.navIncrement,
-            x: ""
-          }, null, 8 /* PROPS */, ["faking", "onIncrement"]),
           createVNode(_component_FluidCalendarScroller, {
             y: "",
             onPosition: $options.navPosition,
@@ -8668,7 +8675,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                     createElementVNode("span", {
                       class: normalizeClass(["t__fluid__calendar__header__cell__date", { '--up': $options.displayHours }]),
                       style: normalizeStyle({
-                    transform: `translateY(${$options.displayHours ? -10 : 0}px)`,
+                    transform: `translateY(${$options.displayHours ? -6 : 0}px)`,
                   })
                     }, toDisplayString($options.format(cell.date)), 7 /* TEXT, CLASS, STYLE */),
                     ($options.displayHours)
@@ -8715,6 +8722,40 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   _hoisted_14
                 ]))
               ], 4 /* STYLE */),
+              createElementVNode("div", {
+                class: "t__fluid__calendar__outer",
+                style: normalizeStyle({
+                width: $options.width + 'px',
+                transform: `translateY(${$data.positionY}px)`,
+                top: Math.min($options.fullHeight, $props.h) + 1 + 'px',
+              })
+              }, [
+                (openBlock(), createElementBlock("svg", _hoisted_15, [
+                  createElementVNode("defs", null, [
+                    createElementVNode("pattern", {
+                      id: "gridouter",
+                      width: $options.cellWidth,
+                      height: $data.rowHeight,
+                      patternUnits: "userSpaceOnUse"
+                    }, [
+                      createElementVNode("rect", {
+                        x: "0",
+                        y: "0",
+                        width: $options.cellWidth,
+                        height: $data.rowHeight,
+                        fill: "#f8fafe"
+                      }, null, 8 /* PROPS */, _hoisted_17),
+                      createElementVNode("path", {
+                        d: `M 0 0 L 0 ${$data.rowHeight}`,
+                        fill: "none",
+                        stroke: "currentColor",
+                        "stroke-width": "1"
+                      }, null, 8 /* PROPS */, _hoisted_18)
+                    ], 8 /* PROPS */, _hoisted_16)
+                  ]),
+                  _hoisted_19
+                ]))
+              ], 4 /* STYLE */),
               createCommentVNode(" </div> ")
             ], 4 /* STYLE */)
           ], 32 /* HYDRATE_EVENTS */),
@@ -8723,7 +8764,12 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
         ], 6 /* CLASS, STYLE */)
       ]),
       _: 3 /* FORWARDED */
-    }, 8 /* PROPS */, ["zoom", "onPinch"])
+    }, 8 /* PROPS */, ["zoom", "onPinch"]),
+    createVNode(_component_FluidCalendarNavigator, {
+      faking: $data.fakeMove,
+      onIncrement: $options.navIncrement,
+      x: ""
+    }, null, 8 /* PROPS */, ["faking", "onIncrement"])
   ]))
 }
 
@@ -9263,7 +9309,7 @@ var script = {
   emits: ['updateDate', 'updateRange'],
   data() {
     return {
-      displayFR: true,
+      displayFR: false,
       mobile: false,
       desktop: false,
       h: 0,

@@ -89,11 +89,6 @@
           </div>
         </div>
 
-        <FluidCalendarNavigator
-          :faking="fakeMove"
-          @increment="navIncrement"
-          x
-        />
         <FluidCalendarScroller
           y
           @position="navPosition"
@@ -334,6 +329,44 @@
                 <rect width="100%" height="100%" fill="url(#grid)" />
               </svg>
             </div>
+            <div
+              class="t__fluid__calendar__outer"
+              :style="{
+                width: width + 'px',
+                transform: `translateY(${positionY}px)`,
+                top: Math.min(fullHeight, h) + 1 + 'px',
+              }"
+            >
+              <svg
+                class="t__fluid__calendar__grid__outer"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <pattern
+                    id="gridouter"
+                    :width="cellWidth"
+                    :height="rowHeight"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <rect
+                      x="0"
+                      y="0"
+                      :width="cellWidth"
+                      :height="rowHeight"
+                      fill="#f8fafe"
+                    />
+                    <path
+                      :d="`M 0 0 L 0 ${rowHeight}`"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1"
+                    />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#gridouter)" />
+              </svg>
+            </div>
+
             <!-- </div> -->
           </div>
         </div>
@@ -345,6 +378,7 @@
     </div> -->
       </div>
     </FluidPinch>
+    <FluidCalendarNavigator :faking="fakeMove" @increment="navIncrement" x />
   </div>
 </template>
 

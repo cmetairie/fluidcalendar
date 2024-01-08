@@ -1,1 +1,1 @@
-{"version":3,"sourceRoot":"","sources":["../src/assets/vars.scss","../src/assets/fluidcalendartheme.scss"],"names":[],"mappings":"AAAA;EACE;EAAmB;EACrB;EAAqB;;;ACArB;EACE;EACA;EACA;EACA;;AAGF;EACE;EAIA;EACA;EACA;EACA;EACA;EACA;EACA;EACA;;;AAGF;EACE","file":"fluidcalendartheme.css"}
+{"version":3,"sourceRoot":"","sources":["../src/assets/vars.scss","../src/assets/fluidcalendartheme.scss"],"names":[],"mappings":"AAAA;EACE;EAAmB;EACrB;EAAqB;;;ACArB;EACE;EACA;EACA;EACA;;AAGF;EACE;EAIA;EACA;EACA;EACA;EACA;EACA;EACA;;;AAIF;EACE","file":"fluidcalendartheme.css"}

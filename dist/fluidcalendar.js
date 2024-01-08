@@ -8424,14 +8424,26 @@ const _hoisted_14 = /*#__PURE__*/vue.createElementVNode("rect", {
   height: "100%",
   fill: "url(#grid)"
 }, null, -1 /* HOISTED */);
+const _hoisted_15 = {
+  class: "t__fluid__calendar__grid__outer",
+  xmlns: "http://www.w3.org/2000/svg"
+};
+const _hoisted_16 = ["width", "height"];
+const _hoisted_17 = ["width", "height"];
+const _hoisted_18 = ["d"];
+const _hoisted_19 = /*#__PURE__*/vue.createElementVNode("rect", {
+  width: "100%",
+  height: "100%",
+  fill: "url(#gridouter)"
+}, null, -1 /* HOISTED */);
 
 function render$3(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_FluidCalendarNavigator = vue.resolveComponent("FluidCalendarNavigator");
   const _component_FluidCalendarScroller = vue.resolveComponent("FluidCalendarScroller");
   const _component_FluidCalendarUnavail = vue.resolveComponent("FluidCalendarUnavail");
   const _component_FluidDraggable = vue.resolveComponent("FluidDraggable");
   const _component_FluidCalendarBooking = vue.resolveComponent("FluidCalendarBooking");
   const _component_FluidPinch = vue.resolveComponent("FluidPinch");
+  const _component_FluidCalendarNavigator = vue.resolveComponent("FluidCalendarNavigator");
 
   return (vue.openBlock(), vue.createElementBlock("div", _hoisted_1$3, [
     vue.createCommentVNode(" {{ zoom }} "),
@@ -8507,11 +8519,6 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
               }), 128 /* KEYED_FRAGMENT */))
             ], 4 /* STYLE */)
           ], 512 /* NEED_PATCH */),
-          vue.createVNode(_component_FluidCalendarNavigator, {
-            faking: $data.fakeMove,
-            onIncrement: $options.navIncrement,
-            x: ""
-          }, null, 8 /* PROPS */, ["faking", "onIncrement"]),
           vue.createVNode(_component_FluidCalendarScroller, {
             y: "",
             onPosition: $options.navPosition,
@@ -8670,7 +8677,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                     vue.createElementVNode("span", {
                       class: vue.normalizeClass(["t__fluid__calendar__header__cell__date", { '--up': $options.displayHours }]),
                       style: vue.normalizeStyle({
-                    transform: `translateY(${$options.displayHours ? -10 : 0}px)`,
+                    transform: `translateY(${$options.displayHours ? -6 : 0}px)`,
                   })
                     }, vue.toDisplayString($options.format(cell.date)), 7 /* TEXT, CLASS, STYLE */),
                     ($options.displayHours)
@@ -8717,6 +8724,40 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                   _hoisted_14
                 ]))
               ], 4 /* STYLE */),
+              vue.createElementVNode("div", {
+                class: "t__fluid__calendar__outer",
+                style: vue.normalizeStyle({
+                width: $options.width + 'px',
+                transform: `translateY(${$data.positionY}px)`,
+                top: Math.min($options.fullHeight, $props.h) + 1 + 'px',
+              })
+              }, [
+                (vue.openBlock(), vue.createElementBlock("svg", _hoisted_15, [
+                  vue.createElementVNode("defs", null, [
+                    vue.createElementVNode("pattern", {
+                      id: "gridouter",
+                      width: $options.cellWidth,
+                      height: $data.rowHeight,
+                      patternUnits: "userSpaceOnUse"
+                    }, [
+                      vue.createElementVNode("rect", {
+                        x: "0",
+                        y: "0",
+                        width: $options.cellWidth,
+                        height: $data.rowHeight,
+                        fill: "#f8fafe"
+                      }, null, 8 /* PROPS */, _hoisted_17),
+                      vue.createElementVNode("path", {
+                        d: `M 0 0 L 0 ${$data.rowHeight}`,
+                        fill: "none",
+                        stroke: "currentColor",
+                        "stroke-width": "1"
+                      }, null, 8 /* PROPS */, _hoisted_18)
+                    ], 8 /* PROPS */, _hoisted_16)
+                  ]),
+                  _hoisted_19
+                ]))
+              ], 4 /* STYLE */),
               vue.createCommentVNode(" </div> ")
             ], 4 /* STYLE */)
           ], 32 /* HYDRATE_EVENTS */),
@@ -8725,7 +8766,12 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
         ], 6 /* CLASS, STYLE */)
       ]),
       _: 3 /* FORWARDED */
-    }, 8 /* PROPS */, ["zoom", "onPinch"])
+    }, 8 /* PROPS */, ["zoom", "onPinch"]),
+    vue.createVNode(_component_FluidCalendarNavigator, {
+      faking: $data.fakeMove,
+      onIncrement: $options.navIncrement,
+      x: ""
+    }, null, 8 /* PROPS */, ["faking", "onIncrement"])
   ]))
 }
 
@@ -9265,7 +9311,7 @@ var script = {
   emits: ['updateDate', 'updateRange'],
   data() {
     return {
-      displayFR: true,
+      displayFR: false,
       mobile: false,
       desktop: false,
       h: 0,

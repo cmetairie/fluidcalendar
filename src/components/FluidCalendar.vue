@@ -121,7 +121,7 @@ export default {
   emits: ['updateDate', 'updateRange'],
   data() {
     return {
-      displayFR: true,
+      displayFR: false,
       mobile: false,
       desktop: false,
       h: 0,
