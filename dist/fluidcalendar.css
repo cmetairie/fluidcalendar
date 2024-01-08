@@ -159,7 +159,7 @@
 .t__fluid__calendar__header__cell {
   user-select: none;
   position: relative;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -184,7 +184,8 @@
   position: relative;
   display: flex;
   align-items: center;
-  border-radius: 6px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -194,15 +195,10 @@
   height: 1.45rem;
   z-index: 2;
 }
-.t__fluid__calendar__header__cell__date.--up {
-  background: var(--color-bg1);
-  border: solid #d5d9ea 0.5px;
-}
-
 .t__fluid__calendar__header__time__cells {
   position: absolute;
   right: 0;
-  bottom: 0.35rem;
+  bottom: 0.1rem;
   left: 0;
   animation: slideFromBottomSoft 0.2s;
   opacity: 0.75;
@@ -219,26 +215,14 @@
   position: absolute;
   width: 0.5px;
   background: #aaa;
-  top: 100%;
-  bottom: -6px;
+  top: calc(100% - 1px);
+  bottom: -2px;
   left: 0;
 }
 .t__fluid__calendar__header__time__cell > span {
   font-size: 11px;
   display: block;
   transform: translateX(-50%);
-}
-.t__fluid__calendar__header__time__cell:first-child::before {
-  content: none;
-}
-.t__fluid__calendar__header__time__cell:first-child > span {
-  transform: translateX(1rem);
-}
-.t__fluid__calendar__header__time__cell:last-child > span {
-  transform: translateX(-100%) translateX(-1rem);
-}
-.t__fluid__calendar__header__time__cell:last-child::before {
-  content: none;
 }
 
 .t__fluid__calendar__pointer {

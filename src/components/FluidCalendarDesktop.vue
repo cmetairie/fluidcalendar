@@ -266,7 +266,7 @@
                   class="t__fluid__calendar__header__cell__date"
                   :class="{ '--up': displayHours }"
                   :style="{
-                    transform: `translateY(${displayHours ? 0 : 0}px)`,
+                    transform: `translateY(${displayHours ? -6 : 0}px)`,
                   }"
                 >
                   {{ format(cell.date) }}
@@ -366,6 +366,26 @@ import FluidPinch from './FluidPinch.vue'
 import { debounce, wait, splitNumber } from '../utils.js'
 
 // import '../styles.css'
+
+function disperseArray(originalArray, maxElements) {
+  const resultArray = []
+  const totalElements = originalArray.length
+
+  if (totalElements <= 2) {
+    // If the original array has 2 or fewer elements, return an empty array
+    return resultArray
+  }
+
+  // Calculate the step size. We subtract 2 from totalElements to exclude first and last items.
+  const stepSize = Math.ceil((totalElements - 2) / (maxElements + 1))
+
+  for (let i = stepSize; i < totalElements - 1; i += stepSize) {
+    resultArray.push(originalArray[i])
+  }
+
+  // If the result array has more elements than max, truncate it
+  return resultArray.slice(0, maxElements)
+}
 
 export default {
   name: 'FluidCalendarDesktop',
@@ -641,7 +661,6 @@ export default {
           this.slotMin,
           this.slotDurationInMinutes * j,
         )
-        console.log('REST ?', label, slotDuration * nbSlots.rest)
         hours.push({
           index: j,
           x: startX + this.widthByMinute * slotDuration,
@@ -651,7 +670,14 @@ export default {
           // width: this.widthByMinute * slotDuration,
         })
       }
-      return hours
+      // console.log(
+      //   'Hours => ',
+      //   hours,
+      //   this.cellWidth,
+      //   disperseArray(hours, Math.round(this.cellWidth / 100)),
+      // )
+      // return hours
+      return disperseArray(hours, Math.round(this.cellWidth / 140))
     },
     areas() {
       const h = this.hours.map((i) => i.index)
@@ -659,8 +685,10 @@ export default {
       return h
     },
     displayHours() {
+      // return true
       if (!this.hours || !this.hours.length) return
-      return this.zoom > 10 // / this.hours.length
+      // console.log('')
+      return this.zoom > 5 // / this.hours.length
     },
     displayArea() {
       return this.zoom > 8
@@ -838,7 +866,7 @@ export default {
       )
     },
     pinch(p) {
-      if (p.zoom > 1 && p.zoom < 40) {
+      if (p.zoom > 2 && p.zoom < 40) {
         this.pincher = p
         this.zoom = p.zoom
       }
