@@ -7628,10 +7628,10 @@ var script$3 = {
       _bookables: [],
       willResize: null,
       _dateToX: {},
+      _bookableToY: {},
     }
   },
   async mounted() {
-    // console.log('********* MOUNTED')
     const root = document.documentElement;
     root.style.setProperty('--row-height', `${this.rowHeight}px`);
 
@@ -7640,11 +7640,7 @@ var script$3 = {
       30,
     );
 
-    // console.log('DUUUUU ', (1000 - this.slotDurationInMinutes) / 20)
-
     this.centerViewTo(this.dates[0], 0.001);
-
-    // console.log('INIT ZOOM ', dayjs().getDuration(this.slotDur))
 
     this.$refs.fluidCalendar.addEventListener('wheel', (e) => {
       e.preventDefault();
@@ -7662,6 +7658,9 @@ var script$3 = {
     });
   },
   watch: {
+    bookables(bookables) {
+      this._bookables = bookables;
+    },
     bookings: {
       immediate: true,
       handler(bookings) {
@@ -7679,7 +7678,6 @@ var script$3 = {
         });
         this._bookables = [...this.bookables];
       },
-      // console.log('Watch bookings => ', bookings)
     },
     pointerDate(date) {
       this.$emit('updateDate', date);
@@ -7693,7 +7691,6 @@ var script$3 = {
           start: this.rangeX.start,
           end: this.rangeX.end,
         });
-        // console.log('Range ?', this.rangeX)
       }, this.debounce);
     },
     zoom(v, o) {
@@ -7713,16 +7710,9 @@ var script$3 = {
 
       this.scroll({ x: (nextDecal - oldDecal) * nextWidthByMinute });
     },
-    width: {
-      immediate: true,
-      async handler(width, oldWidth) {
-        dayjs();
-      },
-    },
   },
   computed: {
     slotMin() {
-      // if (this.slotMinTime === '00:00:00') return '00:00:01'
       return this.slotMinTime
     },
     slotMax() {
@@ -7733,11 +7723,6 @@ var script$3 = {
       const min = dayjs().getDuration(this.slotMin);
       const max = dayjs().getDuration(this.slotMax);
       const duration = dayjs().getDuration(this.slotDuration);
-      // console.log(
-      //   'MATH MIN ',
-      //   Math.min(duration, max - min),
-      //   minutesToHHMMSS(Math.min(duration, max - min)),
-      // )
       return dayjs().minutesToHHMMSS(Math.min(duration, max - min))
     },
     slotDurationInMinutes() {
@@ -7754,7 +7739,6 @@ var script$3 = {
       return [hours, minutes, seconds]
     },
     hours() {
-      // if (!this.displayHours) return []
       const hours = [];
       const [minHours, minMinutes] = this.slotMin.split(':').map(Number);
       const [maxHours] = this.slotMax.split(':').map(Number);
@@ -7769,7 +7753,6 @@ var script$3 = {
 
       for (let i = 0; i <= nbSlots.value; i++) {
         j = i + 1;
-        // console.log('nbSlots => ', nbSlots)
         if (i === 0 && nbSlots.value === 0) {
           hours.push({
             index: 0,
@@ -7813,28 +7796,16 @@ var script$3 = {
           // width: this.widthByMinute * slotDuration,
         });
       }
-      // console.log(
-      //   'Hours => ',
-      //   hours,
-      //   this.cellWidth,
-      //   disperseArray(hours, Math.round(this.cellWidth / 100)),
-      // )
-      // return hours
       return disperseArray(hours, Math.round(this.cellWidth / 140))
     },
-    areas() {
-      const h = this.hours.map((i) => i.index);
-      h.pop();
-      return h
-    },
+    // areas() {
+    //   const h = this.hours.map((i) => i.index)
+    //   h.pop()
+    //   return h
+    // },
     displayHours() {
-      // return true
       if (!this.hours || !this.hours.length) return
-      // console.log('')
-      return this.zoom > 5 // / this.hours.length
-    },
-    displayArea() {
-      return this.zoom > 8
+      return this.zoom > 5
     },
     headerHeight() {
       return 40
@@ -7842,21 +7813,12 @@ var script$3 = {
     ratio() {
       return 1440 / this.minutesByCell
     },
-    // diffCenter(){
-
-    // },
     threshold() {
       return 2
     },
     rangeDays() {
-      return 14
+      return 12
     },
-    // _bookings() {
-    //   return [...this.bookings] //this.bookings.concat(this.cal.bookings)
-    // },
-    // _bookables() {
-    //   return [...this.bookables] //this.bookables.concat(this.cal.bookables)
-    // },
     fullHeight() {
       if (!this.filteredBookables || !this.filteredBookables.length) return 0
       return this.filteredBookables.length * this.rowHeight + this.headerHeight
@@ -7872,9 +7834,7 @@ var script$3 = {
       return this._bookings.filter((f) => {
         if (dayjs(f.start_at).isAfter(dayjs(this.rangeX.end))) return false
         if (dayjs(f.end_at).isBefore(dayjs(this.rangeX.start))) return false
-        // console.log('Filter booking ', f.start_at, this.rangeX.end)
         const visibleBookables = this.rangeY.rows.map((m) => m.id);
-        // console.log('TEST => ', f.resort_purchase.customer)
         return visibleBookables.includes(f.bookable_id)
       })
     },
@@ -7883,14 +7843,6 @@ var script$3 = {
     },
     pointerDate() {
       if (!this.rangeX) return
-
-      // const days =
-      //   -this.positionX / this.widthByMinute / this.minutesByCell -
-      //   this.rangeDays
-
-      // const minutes =
-      //   -this.positionX / this.widthByMinute -
-      //   this.rangeDays * this.minutesByCell * this.widthByMinute
 
       const minutes =
         Math.floor(
@@ -8239,9 +8191,11 @@ var script$3 = {
       } else {
         id = bookableId;
       }
+      if (this._bookableToY[id]) return this._bookableToY[id]
       const bookableIndex = this.filteredBookables.findIndex((f) => f.id === id);
-      // const bkbl = this.filteredBookables.find((f) => f.id === id)
-      return bookableIndex * this.rowHeight + diffY + this.headerHeight
+      const value = bookableIndex * this.rowHeight + diffY + this.headerHeight;
+      this._bookableToY[id] = value;
+      return value
     },
     pointToData({ x, y, snap = false }) {
       const top =
@@ -8270,15 +8224,6 @@ var script$3 = {
         const start = dayjs(f._start_at || f.start_at);
         const end = dayjs(f._end_at || f.end_at);
 
-        // if (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) {
-        //   console.log(
-        //     'CLICK ',
-        //     d.date,
-        //     end.date,
-        //     d.isBefore(end, 'minute') || d.isSame(end, 'minute'),
-        //     f.resort_purchase.customer.firstName,
-        //   )
-        // }
         const checkDate =
           (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) &&
           (d.isBefore(end, 'minute') || d.isSame(end, 'minute'));
@@ -8691,7 +8636,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                           }), 256 /* UNKEYED_FRAGMENT */))
                         ]))
                       : createCommentVNode("v-if", true),
-                    createCommentVNode("v-if", true)
+                    createCommentVNode(" <div\n                  v-if=\"false\"\n                  class=\"t__fluid__calendar__header__time__areas\"\n                  :style=\"{\n                    top: rowHeight + 'px',\n                    height: Math.min(fullHeight, h) + 'px',\n                  }\"\n                >\n                  <div\n                    v-for=\"hour in hours\"\n                    class=\"t__fluid__calendar__header__time__area\"\n                    :class=\"{ '--is-rest': hour.isRest }\"\n                    :style=\"{ width: hour.width + 'px', left: hour.x + 'px' }\"\n                  ></div>\n                </div> ")
                   ], 4 /* STYLE */))
                 }), 128 /* KEYED_FRAGMENT */))
               ], 4 /* STYLE */),

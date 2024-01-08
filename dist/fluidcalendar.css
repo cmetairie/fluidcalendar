@@ -505,7 +505,7 @@
   max-width: 100%;
   font-weight: 500;
   overflow: hidden;
-  animation: slideFromBottomSoft 0.2s;
+  animation: fade 0.2s;
 }
 
 .t__fluid__calendar__booking__label {

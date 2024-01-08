@@ -541,6 +541,9 @@ export default {
     })
   },
   watch: {
+    bookables(bookables) {
+      this._bookables = bookables
+    },
     bookings: {
       immediate: true,
       handler(bookings) {
