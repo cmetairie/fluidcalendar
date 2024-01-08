@@ -283,13 +283,15 @@
 }
 
 .t__fluid__calendar__bookables__header {
+  color: var(--color-title);
   position: relative;
   display: flex;
   align-items: center;
   padding: 0 var(--space);
   z-index: 1;
   background: var(--color-bg1);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
 .t__fluid__calendar__bookables__header::before {
@@ -309,13 +311,25 @@
   display: flex;
   align-items: center;
   padding: 0 var(--space);
+  font-size: 1rem;
+  color: var(--color-title);
 }
-
 .t__fluid__calendar__bookable::before {
   content: "";
   display: block;
   position: absolute;
   top: -0.5px;
+  right: 0;
+  left: 0;
+  height: 0.5px;
+  background: var(--color-border-m);
+  z-index: 1;
+}
+.t__fluid__calendar__bookable:last-child::after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: 0;
   right: 0;
   left: 0;
   height: 0.5px;

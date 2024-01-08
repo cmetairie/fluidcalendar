@@ -9280,6 +9280,7 @@ const _hoisted_5 = /*#__PURE__*/createElementVNode("br", null, null, -1 /* HOIST
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_FluidCalendarDesktop = resolveComponent("FluidCalendarDesktop");
+  const _component_FluidCalendarMobile = resolveComponent("FluidCalendarMobile");
 
   return (openBlock(), createElementBlock("div", {
     class: normalizeClass(["t__fluid__calendar__wrapper", { '--debug': $props.debug }]),
@@ -9298,29 +9299,50 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           createTextVNode(" " + toDisplayString($data.frameRate) + " FPS ", 1 /* TEXT */)
         ]))
       : createCommentVNode("v-if", true),
-    createVNode(_component_FluidCalendarDesktop, mergeProps(_ctx.$props, {
-      h: $data.h,
-      w: $data.w,
-      onUpdateDate: _cache[0] || (_cache[0] = (v) => _ctx.$emit('updateDate', v)),
-      onUpdateDebouncedDate: _cache[1] || (_cache[1] = (v) => _ctx.$emit('updateDebouncedDate', v)),
-      onUpdateRange: _cache[2] || (_cache[2] = (v) => _ctx.$emit('updateRange', v)),
-      onUpdateDebouncedRange: _cache[3] || (_cache[3] = (v) => _ctx.$emit('updateDebouncedRange', v)),
-      onOpenBooking: _cache[4] || (_cache[4] = (v) => _ctx.$emit('openBooking', v)),
-      onCreateNewBooking: _cache[5] || (_cache[5] = (v) => _ctx.$emit('createNewBooking', v)),
-      onUpdateBooking: _cache[6] || (_cache[6] = (v) => _ctx.$emit('updateBooking', v))
-    }), {
-      date: withCtx(({date}) => [
-        renderSlot(_ctx.$slots, "date", { date: date })
-      ]),
-      booking: withCtx(({booking}) => [
-        renderSlot(_ctx.$slots, "booking", { booking: booking })
-      ]),
-      bookable: withCtx(({bookable}) => [
-        renderSlot(_ctx.$slots, "bookable", { bookable: bookable })
-      ]),
-      _: 3 /* FORWARDED */
-    }, 16 /* FULL_PROPS */, ["h", "w"]),
-    createCommentVNode(" <FluidCalendarMobile\n      v-if=\"mobile\"\n      v-bind=\"$props\"\n      :h=\"h\"\n      :w=\"w\"\n      @updateDate=\"(v) => $emit('updateDate', v)\"\n      @updateRange=\"(v) => $emit('updateRange', v)\"\n      @openBooking=\"(v) => $emit('openBooking', v)\"\n    >\n      <template #date=\"{date}\">\n        <slot name=\"date\" :date=\"date\" />\n      </template>\n      <template #booking=\"{booking}\">\n        <slot name=\"booking\" :booking=\"booking\" />\n      </template>\n      <template #bookable=\"{bookable}\">\n        <slot name=\"bookable\" :bookable=\"bookable\" />\n      </template>\n    </FluidCalendarMobile> ")
+    ($data.desktop)
+      ? (openBlock(), createBlock(_component_FluidCalendarDesktop, mergeProps({ key: 1 }, _ctx.$props, {
+          h: $data.h,
+          w: $data.w,
+          onUpdateDate: _cache[0] || (_cache[0] = (v) => _ctx.$emit('updateDate', v)),
+          onUpdateDebouncedDate: _cache[1] || (_cache[1] = (v) => _ctx.$emit('updateDebouncedDate', v)),
+          onUpdateRange: _cache[2] || (_cache[2] = (v) => _ctx.$emit('updateRange', v)),
+          onUpdateDebouncedRange: _cache[3] || (_cache[3] = (v) => _ctx.$emit('updateDebouncedRange', v)),
+          onOpenBooking: _cache[4] || (_cache[4] = (v) => _ctx.$emit('openBooking', v)),
+          onCreateNewBooking: _cache[5] || (_cache[5] = (v) => _ctx.$emit('createNewBooking', v)),
+          onUpdateBooking: _cache[6] || (_cache[6] = (v) => _ctx.$emit('updateBooking', v))
+        }), {
+          date: withCtx(({date}) => [
+            renderSlot(_ctx.$slots, "date", { date: date })
+          ]),
+          booking: withCtx(({booking}) => [
+            renderSlot(_ctx.$slots, "booking", { booking: booking })
+          ]),
+          bookable: withCtx(({bookable}) => [
+            renderSlot(_ctx.$slots, "bookable", { bookable: bookable })
+          ]),
+          _: 3 /* FORWARDED */
+        }, 16 /* FULL_PROPS */, ["h", "w"]))
+      : createCommentVNode("v-if", true),
+    ($data.mobile)
+      ? (openBlock(), createBlock(_component_FluidCalendarMobile, mergeProps({ key: 2 }, _ctx.$props, {
+          h: $data.h,
+          w: $data.w,
+          onUpdateDate: _cache[7] || (_cache[7] = (v) => _ctx.$emit('updateDate', v)),
+          onUpdateRange: _cache[8] || (_cache[8] = (v) => _ctx.$emit('updateRange', v)),
+          onOpenBooking: _cache[9] || (_cache[9] = (v) => _ctx.$emit('openBooking', v))
+        }), {
+          date: withCtx(({date}) => [
+            renderSlot(_ctx.$slots, "date", { date: date })
+          ]),
+          booking: withCtx(({booking}) => [
+            renderSlot(_ctx.$slots, "booking", { booking: booking })
+          ]),
+          bookable: withCtx(({bookable}) => [
+            renderSlot(_ctx.$slots, "bookable", { bookable: bookable })
+          ]),
+          _: 3 /* FORWARDED */
+        }, 16 /* FULL_PROPS */, ["h", "w"]))
+      : createCommentVNode("v-if", true)
   ], 2 /* CLASS */))
 }
 

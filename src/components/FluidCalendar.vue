@@ -12,7 +12,7 @@
       {{ frameRate }} FPS
     </div>
     <FluidCalendarDesktop
-    v-if="desktop"
+      v-if="desktop"
       v-bind="$props"
       :h="h"
       :w="w"
