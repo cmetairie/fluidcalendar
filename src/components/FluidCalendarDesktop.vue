@@ -88,6 +88,7 @@
             </div>
           </div>
         </div>
+
         <FluidCalendarNavigator
           :faking="fakeMove"
           @increment="navIncrement"
@@ -150,6 +151,7 @@
                 </FluidCalendarUnavail>
               </FluidDraggable>
             </div>
+
             <div
               class="t__fluid__calendar__bookings"
               :style="{ transform: `translateY(${positionY}px)` }"
@@ -458,6 +460,7 @@ export default {
       _bookings: [],
       _bookables: [],
       willResize: null,
+      _dateToX: {},
     }
   },
   async mounted() {
@@ -1184,11 +1187,19 @@ export default {
       return date
     },
     dateToX(date) {
-      const diffInDays = dayjs(date).get() - dayjs(this.rangeX.start).get()
+      const key = date + this.zoom + this.rangeX.start
+      if (this._dateToX[key]) return this._dateToX[key]
+      const diffInDays = dayjs(date).diff(
+        dayjs(this.rangeX.start),
+        'day',
+        this.slotMinTime,
+        this.slotMaxTime,
+      )
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute')
       const offset = ((this.offsetStart + this.offsetEnd) * diffInDays) / 60
-      // console.log('**** ', date, offset)
-      return (diff - offset) * this.widthByMinute
+      const value = (diff - offset) * this.widthByMinute
+      this._dateToX[key] = value
+      return value
     },
     centerViewTo(unTimedDate, speed = 0.5) {
       // console.log('Center => ', unTimedDate)
