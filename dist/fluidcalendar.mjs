@@ -6587,7 +6587,7 @@ var script$a = {
       if (this.collisions.includes(this.booking.id)) clss.push('--collision');
       if (this.booking.ghost) clss.push('--ghost');
       if (this.booking.ghosted) clss.push('--ghosted');
-      return clss
+      return clss.concat(this.booking._clss)
     },
     stl() {
       const stl = [];
@@ -7608,6 +7608,7 @@ var script$3 = {
       _bookings: [],
       _bookables: [],
       willResize: null,
+      _dateToX: {},
     }
   },
   async mounted() {
@@ -8198,9 +8199,21 @@ var script$3 = {
       return dayjs(date).format(f)
     },
     bookableToY(bookableId, diffY = 0) {
-      const bookableIndex = this.filteredBookables.findIndex(
-        (f) => f.id === bookableId,
-      );
+      let id;
+      if (typeof bookableId === 'object') {
+        if (!bookableId._order) {
+          id = bookableId.bookable_id;
+        } else {
+          id =
+            bookableId._order.canceled_at || bookableId._order.is_no_show
+              ? 'canceled'
+              : bookableId.bookable_id;
+        }
+      } else {
+        id = bookableId;
+      }
+      const bookableIndex = this.filteredBookables.findIndex((f) => f.id === id);
+      // const bkbl = this.filteredBookables.find((f) => f.id === id)
       return bookableIndex * this.rowHeight + diffY + this.headerHeight
     },
     pointToData({ x, y, snap = false }) {
@@ -8239,14 +8252,15 @@ var script$3 = {
         //     f.resort_purchase.customer.firstName,
         //   )
         // }
-
         const checkDate =
           (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) &&
           (d.isBefore(end, 'minute') || d.isSame(end, 'minute'));
-        return f.bookable_id === bookable.id && checkDate
+        if (!f._displayIn) {
+          return f.bookable_id === bookable.id && checkDate
+        } else {
+          return bookable.id === f._displayIn
+        }
       });
-
-      console.log('clickOnBooking => ', clickOnBooking);
 
       if (clickOnBooking) {
         return {
@@ -8309,11 +8323,19 @@ var script$3 = {
       return date
     },
     dateToX(date) {
-      const diffInDays = dayjs(date).get() - dayjs(this.rangeX.start).get();
+      const key = date + this.zoom + this.rangeX.start;
+      if (this._dateToX[key]) return this._dateToX[key]
+      const diffInDays = dayjs(date).diff(
+        dayjs(this.rangeX.start),
+        'day',
+        this.slotMinTime,
+        this.slotMaxTime,
+      );
       const diff = dayjs(date).diff(dayjs(this.rangeX.start), 'minute');
       const offset = ((this.offsetStart + this.offsetEnd) * diffInDays) / 60;
-      // console.log('**** ', date, offset)
-      return (diff - offset) * this.widthByMinute
+      const value = (diff - offset) * this.widthByMinute;
+      this._dateToX[key] = value;
+      return value
     },
     centerViewTo(unTimedDate, speed = 0.5) {
       // console.log('Center => ', unTimedDate)
@@ -8502,7 +8524,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 (openBlock(true), createElementBlock(Fragment, null, renderList($props.unavailabilities, (unavail) => {
                   return (openBlock(), createBlock(_component_FluidDraggable, {
                     key: unavail.id,
-                    y: $options.bookableToY(unavail.bookable_id, unavail.diff?.y),
+                    y: $options.bookableToY(unavail, unavail.diff?.y),
                     x: $options.dateToX(unavail.start_at),
                     ghost: unavail.ghost
                   }, {
@@ -8532,7 +8554,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 (openBlock(true), createElementBlock(Fragment, null, renderList($options.visibleBookings, (booking) => {
                   return (openBlock(), createBlock(_component_FluidDraggable, {
                     key: booking.id,
-                    y: $options.bookableToY(booking.bookable_id, booking.diff?.y),
+                    y: $options.bookableToY(booking, booking.diff?.y),
                     x: $options.dateToX(booking._start_at || booking.start_at),
                     ghost: booking.ghost
                   }, {

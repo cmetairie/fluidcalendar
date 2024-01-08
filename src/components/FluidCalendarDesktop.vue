@@ -133,7 +133,7 @@
               <FluidDraggable
                 v-for="unavail of unavailabilities"
                 :key="unavail.id"
-                :y="bookableToY(unavail.bookable_id, unavail.diff?.y)"
+                :y="bookableToY(unavail, unavail.diff?.y)"
                 :x="dateToX(unavail.start_at)"
                 :ghost="unavail.ghost"
               >
@@ -159,7 +159,7 @@
               <FluidDraggable
                 v-for="booking of visibleBookings"
                 :key="booking.id"
-                :y="bookableToY(booking.bookable_id, booking.diff?.y)"
+                :y="bookableToY(booking, booking.diff?.y)"
                 :x="dateToX(booking._start_at || booking.start_at)"
                 :ghost="booking.ghost"
               >
@@ -1076,9 +1076,21 @@ export default {
       return dayjs(date).format(f)
     },
     bookableToY(bookableId, diffY = 0) {
-      const bookableIndex = this.filteredBookables.findIndex(
-        (f) => f.id === bookableId,
-      )
+      let id
+      if (typeof bookableId === 'object') {
+        if (!bookableId._order) {
+          id = bookableId.bookable_id
+        } else {
+          id =
+            bookableId._order.canceled_at || bookableId._order.is_no_show
+              ? 'canceled'
+              : bookableId.bookable_id
+        }
+      } else {
+        id = bookableId
+      }
+      const bookableIndex = this.filteredBookables.findIndex((f) => f.id === id)
+      // const bkbl = this.filteredBookables.find((f) => f.id === id)
       return bookableIndex * this.rowHeight + diffY + this.headerHeight
     },
     pointToData({ x, y, snap = false }) {
@@ -1117,14 +1129,15 @@ export default {
         //     f.resort_purchase.customer.firstName,
         //   )
         // }
-
         const checkDate =
           (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) &&
           (d.isBefore(end, 'minute') || d.isSame(end, 'minute'))
-        return f.bookable_id === bookable.id && checkDate
+        if (!f._displayIn) {
+          return f.bookable_id === bookable.id && checkDate
+        } else {
+          return bookable.id === f._displayIn
+        }
       })
-
-      console.log('clickOnBooking => ', clickOnBooking)
 
       if (clickOnBooking) {
         return {

@@ -234,6 +234,12 @@
 .t__fluid__calendar__header__time__cell:first-child > span {
   transform: translateX(1rem);
 }
+.t__fluid__calendar__header__time__cell:last-child > span {
+  transform: translateX(-100%) translateX(-1rem);
+}
+.t__fluid__calendar__header__time__cell:last-child::before {
+  content: none;
+}
 
 .t__fluid__calendar__pointer {
   position: absolute;
@@ -385,6 +391,21 @@
   width: 4rem;
   z-index: 2;
 }
+.t__fluid__calendar__booking.--confirmed .t__fluid__calendar__booking__inner {
+  color: var(--color-confirmed);
+  background: var(--color-confirmed-bg);
+  border: solid var(--color-confirmed-border) 2px;
+}
+.t__fluid__calendar__booking.--canceled .t__fluid__calendar__booking__inner {
+  color: var(--color-canceled);
+  background: var(--color-canceled-bg);
+  border: solid var(--color-canceled-border) 2px;
+}
+.t__fluid__calendar__booking.--noshow .t__fluid__calendar__booking__inner {
+  color: var(--color-noshow);
+  background: var(--color-noshow-bg);
+  border: solid var(--color-noshow-border) 2px;
+}
 .t__fluid__calendar__booking.--unavailability {
   padding: 1px 0;
   border-left: solid var(--color-border-m) 0.5px;
@@ -428,9 +449,7 @@
 }
 
 .t__fluid__calendar__booking.--ghost .t__fluid__calendar__booking__inner {
-  background: var(--color-bg2);
-  background: red;
-  border-color: rgba(0, 0, 0, 0.1);
+  background: var(--color-focuslight);
   border-style: dashed;
 }
 
@@ -448,7 +467,6 @@
   position: absolute;
   background: var(--color-focuslight);
   z-index: 3;
-  opacity: 0.4;
 }
 
 .t__fluid__calendar__bookables__inner,

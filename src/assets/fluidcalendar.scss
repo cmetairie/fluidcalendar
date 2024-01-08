@@ -242,14 +242,14 @@
       transform: translateX(1rem);
     }
   }
-  // &:last-child {
-  //   > span {
-  //     transform: translateX(-100%) translateX(-1rem);
-  //   }
-  //   &::before {
-  //     content: none;
-  //   }
-  // }
+  &:last-child {
+    > span {
+      transform: translateX(-100%) translateX(-1rem);
+    }
+    &::before {
+      content: none;
+    }
+  }
   // flex: 1;
 }
 
@@ -406,6 +406,27 @@
   position: absolute;
   width: 4rem;
   z-index: 2;
+  &.--confirmed {
+    .t__fluid__calendar__booking__inner {
+      color: var(--color-confirmed);
+      background: var(--color-confirmed-bg);
+      border: solid var(--color-confirmed-border) 2px;
+    }
+  }
+  &.--canceled {
+    .t__fluid__calendar__booking__inner {
+      color: var(--color-canceled);
+      background: var(--color-canceled-bg);
+      border: solid var(--color-canceled-border) 2px;
+    }
+  }
+  &.--noshow {
+    .t__fluid__calendar__booking__inner {
+      color: var(--color-noshow);
+      background: var(--color-noshow-bg);
+      border: solid var(--color-noshow-border) 2px;
+    }
+  }
   &.--unavailability {
     padding: 1px 0;
     border-left: solid var(--color-border-m) 0.5px;
@@ -452,10 +473,11 @@
 //   transform: rotateZ(2deg);
 // }
 .t__fluid__calendar__booking.--ghost .t__fluid__calendar__booking__inner {
-  background: var(--color-bg2);
-  background: red;
-  border-color: rgba(0, 0, 0, 0.1);
+  background: var(--color-focuslight);
+  // background: red;
+  // border-color: var(--color-focus);
   border-style: dashed;
+  // opacity: 0.5;
 }
 .t__fluid__calendar__draggable {
   position: relative;
@@ -470,8 +492,10 @@
   pointer-events: none;
   position: absolute;
   background: var(--color-focuslight);
+  // border: solid var(--color-focus) 2px;
+  // border-radius: var(--radius);
   z-index: 3;
-  opacity: 0.4;
+  // opacity: 0.4;
 }
 
 .t__fluid__calendar__bookables__inner,

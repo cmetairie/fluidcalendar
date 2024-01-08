@@ -84,7 +84,7 @@ export default {
       if (this.collisions.includes(this.booking.id)) clss.push('--collision')
       if (this.booking.ghost) clss.push('--ghost')
       if (this.booking.ghosted) clss.push('--ghosted')
-      return clss
+      return clss.concat(this.booking._clss)
     },
     stl() {
       const stl = []
