@@ -7618,7 +7618,6 @@ var script$3 = {
       collisions: [],
       dragData: null,
       selection: {},
-      displayFR: true,
       rowHeight: 40,
       moment: new Date(),
       pointer: 0,
@@ -9311,7 +9310,7 @@ var script = {
   emits: ['updateDate', 'updateRange'],
   data() {
     return {
-      displayFR: false,
+      displayFR: true,
       mobile: false,
       desktop: false,
       h: 0,
