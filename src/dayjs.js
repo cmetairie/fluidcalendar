@@ -17,8 +17,9 @@ export function dayjs(s) {
   function format(s) {
     // console.log('Format ', date)
     let options = {
-      year: 'numeric',
-      month: 'short',
+      weekday: 'short', // full name of the weekday
+      // year: 'numeric',
+      month: 'short', // full name of the month
       day: 'numeric',
     }
     if (s === 'iso') return date.toISOString()

@@ -21,8 +21,9 @@ function dayjs(s) {
   function format(s) {
     // console.log('Format ', date)
     let options = {
-      year: 'numeric',
-      month: 'short',
+      weekday: 'short', // full name of the weekday
+      // year: 'numeric',
+      month: 'short', // full name of the month
       day: 'numeric',
     };
     if (s === 'iso') return date.toISOString()
@@ -6730,6 +6731,9 @@ var script$9 = {
     ratio: {
       type: Number,
     },
+    width: {
+      type: Number,
+    },
   },
   data() {
     return {
@@ -6748,8 +6752,9 @@ var script$9 = {
     },
     stl() {
       const stl = [];
-      stl.push({ width: this.width / this.ratio - 4 + 'px' });
+      stl.push({ width: this.width + 'px' });
       stl.push({ height: this.height + 'px' });
+      stl.push({ top: '1px' });
       return stl
     },
     sltContent() {
@@ -6772,15 +6777,15 @@ var script$9 = {
       }
       return stl
     },
-    width() {
-      const diff = dayjs(this.unavail.end_at).diff(
-        dayjs(this.unavail.start_at),
-        'minute',
-      );
-      return diff * this.widthByMinute + this.diff
-    },
+    // width() {
+    //   const diff = dayjs(this.unavail.end_at).diff(
+    //     dayjs(this.unavail.start_at),
+    //     'minute',
+    //   )
+    //   return diff * this.widthByMinute + this.diff
+    // },
     height() {
-      return this.rowHeight - 1
+      return this.rowHeight - 2
     },
     ghost() {
       return this.unavail.ghost
@@ -6859,16 +6864,11 @@ function render$9(_ctx, _cache, $props, $setup, $data, $options) {
           x: "1",
           y: "1",
           height: $options.height,
-          width: $options.width,
+          width: $props.width,
           fill: "url(#diagonalHatch)"
         }, null, 8 /* PROPS */, _hoisted_4$4)
       ])),
-      vue.createElementVNode("button", {
-        class: "t__fluid__calendar__booking__resize",
-        onMousedown: _cache[0] || (_cache[0] = vue.withModifiers((...args) => ($options.startSize && $options.startSize(...args)), ["stop"]))
-      }, [
-        vue.createCommentVNode(" {{ diff }} ")
-      ], 32 /* HYDRATE_EVENTS */)
+      vue.createCommentVNode(" <button\n        class=\"t__fluid__calendar__booking__resize\"\n        @mousedown.stop=\"startSize\"\n      >\n      </button> ")
     ], 512 /* NEED_PATCH */)
   ], 6 /* CLASS, STYLE */))
 }
@@ -7627,10 +7627,12 @@ var script$3 = {
       fakeMove: 0,
       point: {},
       _bookings: [],
+      _unavailabilities: [],
       _bookables: [],
       willResize: null,
       _dateToX: {},
       _bookableToY: {},
+      _visibleBookings: {},
     }
   },
   async mounted() {
@@ -7678,7 +7680,26 @@ var script$3 = {
           if (endDiff > 0) result._end_at = dayjs(end).format('iso');
           return result
         });
-        this._bookables = [...this.bookables];
+        this._bookables = this.bookables;
+      },
+    },
+    unavailabilities: {
+      immediate: true,
+      handler(unavailabilities) {
+        this._unavailabilities = unavailabilities.map((m) => {
+          // const realStart = dayjs(m.start_at).date
+          const start = dayjs(m.start_at).setTime(this.slotMin);
+          // const startDiff = dayjs(realStart).diff(dayjs(start), 'minute')
+          // const realEnd = dayjs(m.end_at).date
+          const end = dayjs(m.end_at).add(-1, 'day').setTime(this.slotMax);
+          // const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute')
+          // console.log('** ', end, end)
+          const result = { ...m };
+          result._start_at = dayjs(start).format('iso');
+          result._end_at = dayjs(end).format('iso');
+          return result
+        });
+        // this._bookables = [...this.bookables]
       },
     },
     pointerDate(date) {
@@ -7834,10 +7855,13 @@ var script$3 = {
     visibleBookings() {
       if (!this._bookings) return []
       return this._bookings.filter((f) => {
+        const isDayUse = f.bookable_type_id === -1;
         if (dayjs(f.start_at).isAfter(dayjs(this.rangeX.end))) return false
         if (dayjs(f.end_at).isBefore(dayjs(this.rangeX.start))) return false
         const visibleBookables = this.rangeY.rows.map((m) => m.id);
-        return visibleBookables.includes(f.bookable_id)
+        return visibleBookables.includes(
+          isDayUse ? f.hotel_room_id : f.bookable_id,
+        )
       })
     },
     scroller() {
@@ -7948,6 +7972,17 @@ var script$3 = {
       // this.$emit('updateBooking', booking)
     },
     getWidth({ start, end }) {
+      if (
+        start === '2024-01-08T09:00:00.000Z' &&
+        end === '2024-01-09T17:00:00.000Z'
+      ) {
+        console.log(
+          ' ==> ',
+          this.dateToX(dayjs(end).format('iso')) -
+            this.dateToX(dayjs(start).format('iso')),
+        );
+      }
+      // console.log('WIDTH => ', start, end)
       return (
         this.dateToX(dayjs(end).format('iso')) -
         this.dateToX(dayjs(start).format('iso'))
@@ -8180,20 +8215,26 @@ var script$3 = {
       return dayjs(date).format(f)
     },
     bookableToY(bookableId, diffY = 0) {
+      // console.log('bookableToY => ', bookableId)
       let id;
       if (typeof bookableId === 'object') {
+        const isDayUse = bookableId.bookable_type_id === -1;
         if (!bookableId._order) {
           id = bookableId.bookable_id;
         } else {
           id =
             bookableId._order.canceled_at || bookableId._order.is_no_show
               ? 'canceled'
+              : isDayUse
+              ? bookableId.hotel_room_id
               : bookableId.bookable_id;
         }
       } else {
         id = bookableId;
       }
+
       if (this._bookableToY[id]) return this._bookableToY[id]
+      // console.log('Bookable to Y', bookableId, id)
       const bookableIndex = this.filteredBookables.findIndex((f) => f.id === id);
       const value = bookableIndex * this.rowHeight + diffY + this.headerHeight;
       this._bookableToY[id] = value;
@@ -8225,12 +8266,16 @@ var script$3 = {
         const d = dayjs(date);
         const start = dayjs(f._start_at || f.start_at);
         const end = dayjs(f._end_at || f.end_at);
-
+        console.log('Click ', f);
         const checkDate =
           (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) &&
           (d.isBefore(end, 'minute') || d.isSame(end, 'minute'));
+        if (!checkDate) return
+        const isDayUse = f.bookable_type_id === -1;
         if (!f._displayIn) {
-          return f.bookable_id === bookable.id && checkDate
+          return isDayUse
+            ? f.hotel_room_id === bookable.id
+            : f.bookable_id === bookable.id
         } else {
           return bookable.id === f._displayIn
         }
@@ -8382,7 +8427,6 @@ const _hoisted_19 = /*#__PURE__*/vue.createElementVNode("rect", {
 }, null, -1 /* HOISTED */);
 
 function render$3(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_FluidCalendarScroller = vue.resolveComponent("FluidCalendarScroller");
   const _component_FluidCalendarUnavail = vue.resolveComponent("FluidCalendarUnavail");
   const _component_FluidDraggable = vue.resolveComponent("FluidDraggable");
   const _component_FluidCalendarBooking = vue.resolveComponent("FluidCalendarBooking");
@@ -8463,14 +8507,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
               }), 128 /* KEYED_FRAGMENT */))
             ], 4 /* STYLE */)
           ], 512 /* NEED_PATCH */),
-          vue.createVNode(_component_FluidCalendarScroller, {
-            y: "",
-            onPosition: $options.navPosition,
-            total: $options.fullHeight - $data.rowHeight,
-            position: $data.positionY,
-            height: $props.h - $data.rowHeight,
-            style: vue.normalizeStyle({ top: $data.rowHeight + 'px' })
-          }, null, 8 /* PROPS */, ["onPosition", "total", "position", "height", "style"]),
+          vue.createCommentVNode(" <FluidCalendarScroller\n          y\n          @position=\"navPosition\"\n          :total=\"fullHeight\"\n          :position=\"positionY\"\n          :height=\"h - rowHeight * 2\"\n          :style=\"{ top: rowHeight + 'px' }\"\n        /> "),
           vue.createCommentVNode(" <button class=\"t__fluid__calendar__prev\" @click=\"prev\"></button> "),
           vue.createElementVNode("div", {
             class: "t__fluid__calendar__content",
@@ -8502,11 +8539,11 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 class: "t__fluid__calendar__unavailabilities",
                 style: vue.normalizeStyle({ transform: `translateY(${$data.positionY}px)` })
               }, [
-                (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($props.unavailabilities, (unavail) => {
+                (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList($data._unavailabilities, (unavail) => {
                   return (vue.openBlock(), vue.createBlock(_component_FluidDraggable, {
                     key: unavail.id,
                     y: $options.bookableToY(unavail, unavail.diff?.y),
-                    x: $options.dateToX(unavail.start_at),
+                    x: $options.dateToX(unavail._start_at || unavail.start_at),
                     ghost: unavail.ghost
                   }, {
                     default: vue.withCtx(() => [
@@ -8514,15 +8551,23 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                         key: 'unavailability-' + unavail.id,
                         unavail: unavail,
                         widthByMinute: $options.widthByMinute,
+                        width: 
+                    $options.getWidth({
+                      start: unavail._start_at || unavail.start_at,
+                      end: unavail._end_at || unavail.end_at,
+                    })
+                  ,
                         rowHeight: $data.rowHeight,
                         ratio: $options.ratio,
-                        refX: $options.translateX + $options.dateToX(unavail.start_at)
+                        refX: 
+                    $options.translateX + $options.dateToX(unavail._start_at || unavail.start_at)
+                  
                       }, {
                         default: vue.withCtx(() => [
-                          vue.createElementVNode("span", _hoisted_5$2, vue.toDisplayString(unavail.id) + " " + vue.toDisplayString(unavail.label), 1 /* TEXT */)
+                          vue.createElementVNode("span", _hoisted_5$2, vue.toDisplayString(unavail.label), 1 /* TEXT */)
                         ]),
                         _: 2 /* DYNAMIC */
-                      }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["unavail", "widthByMinute", "rowHeight", "ratio", "refX"]))
+                      }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["unavail", "widthByMinute", "width", "rowHeight", "ratio", "refX"]))
                     ]),
                     _: 2 /* DYNAMIC */
                   }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["y", "x", "ghost"]))
@@ -8673,7 +8718,7 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
                 style: vue.normalizeStyle({
                 width: $options.width + 'px',
                 transform: `translateY(${$data.positionY}px)`,
-                top: Math.min($options.fullHeight, $props.h) + 1 + 'px',
+                top: Math.min($options.fullHeight) + 1 + 'px',
               })
               }, [
                 (vue.openBlock(), vue.createElementBlock("svg", _hoisted_15, [
@@ -9255,7 +9300,7 @@ var script = {
   emits: ['updateDate', 'updateRange'],
   data() {
     return {
-      displayFR: true,
+      displayFR: false,
       mobile: false,
       desktop: false,
       h: 0,
@@ -9269,7 +9314,7 @@ var script = {
     if (this.displayFR) {
       this.updateFrameRate();
     }
-    window.addEventListener('resize', this.manageSize);
+    // window.addEventListener('resize', this.manageSize)
     this.manageSize();
   },
   methods: {

@@ -89,14 +89,14 @@
           </div>
         </div>
 
-        <FluidCalendarScroller
+        <!-- <FluidCalendarScroller
           y
           @position="navPosition"
-          :total="fullHeight - rowHeight"
+          :total="fullHeight"
           :position="positionY"
-          :height="h - rowHeight"
+          :height="h - rowHeight * 2"
           :style="{ top: rowHeight + 'px' }"
-        />
+        /> -->
 
         <!-- <button class="t__fluid__calendar__prev" @click="prev"></button> -->
         <div class="t__fluid__calendar__content" @mousedown="mousedown">
@@ -126,22 +126,30 @@
               :style="{ transform: `translateY(${positionY}px)` }"
             >
               <FluidDraggable
-                v-for="unavail of unavailabilities"
+                v-for="unavail of _unavailabilities"
                 :key="unavail.id"
                 :y="bookableToY(unavail, unavail.diff?.y)"
-                :x="dateToX(unavail.start_at)"
+                :x="dateToX(unavail._start_at || unavail.start_at)"
                 :ghost="unavail.ghost"
               >
                 <FluidCalendarUnavail
                   :key="'unavailability-' + unavail.id"
                   :unavail="unavail"
                   :widthByMinute="widthByMinute"
+                  :width="
+                    getWidth({
+                      start: unavail._start_at || unavail.start_at,
+                      end: unavail._end_at || unavail.end_at,
+                    })
+                  "
                   :rowHeight="rowHeight"
                   :ratio="ratio"
-                  :refX="translateX + dateToX(unavail.start_at)"
+                  :refX="
+                    translateX + dateToX(unavail._start_at || unavail.start_at)
+                  "
                 >
                   <span class="t__fluid__calendar__booking__label">
-                    {{ unavail.id }} {{ unavail.label }}
+                    {{ unavail.label }}
                   </span>
                 </FluidCalendarUnavail>
               </FluidDraggable>
@@ -331,7 +339,7 @@
               :style="{
                 width: width + 'px',
                 transform: `translateY(${positionY}px)`,
-                top: Math.min(fullHeight, h) + 1 + 'px',
+                top: Math.min(fullHeight) + 1 + 'px',
               }"
             >
               <svg
@@ -380,8 +388,6 @@
 </template>
 
 <script>
-// import dayjs from 'dayjs/esm'
-
 import { dayjs } from '../dayjs.js'
 
 import gsap from 'gsap'
@@ -508,10 +514,12 @@ export default {
       fakeMove: 0,
       point: {},
       _bookings: [],
+      _unavailabilities: [],
       _bookables: [],
       willResize: null,
       _dateToX: {},
       _bookableToY: {},
+      _visibleBookings: {},
     }
   },
   async mounted() {
@@ -559,7 +567,26 @@ export default {
           if (endDiff > 0) result._end_at = dayjs(end).format('iso')
           return result
         })
-        this._bookables = [...this.bookables]
+        this._bookables = this.bookables
+      },
+    },
+    unavailabilities: {
+      immediate: true,
+      handler(unavailabilities) {
+        this._unavailabilities = unavailabilities
+          // .filter((f) => {
+          //   const bookables = this._bookables.map((m) => m.id)
+          //   return bookables.includes(f.bookable_id)
+          // })
+          .map((m) => {
+            const start = dayjs(m.start_at).setTime(this.slotMin)
+            const end = dayjs(m.end_at).add(-1, 'day').setTime(this.slotMax)
+            const result = { ...m }
+            result._start_at = dayjs(start).format('iso')
+            result._end_at = dayjs(end).format('iso')
+            return result
+          })
+        // this._bookables = [...this.bookables]
       },
     },
     pointerDate(date) {
@@ -702,6 +729,8 @@ export default {
     },
     rangeDays() {
       return 12
+      // console.log('** z', this.zoom, )
+      return Math.min(Math.max(((1 / this.zoom) * 10, 3), 15))
       const width = screen.width
       const nbDays = this.widthByMinute * 60 * 24
       console.log('NB DAYS ?', width / nbDays)
@@ -723,10 +752,13 @@ export default {
     visibleBookings() {
       if (!this._bookings) return []
       return this._bookings.filter((f) => {
+        const isDayUse = f.bookable_type_id === -1
         if (dayjs(f.start_at).isAfter(dayjs(this.rangeX.end))) return false
         if (dayjs(f.end_at).isBefore(dayjs(this.rangeX.start))) return false
         const visibleBookables = this.rangeY.rows.map((m) => m.id)
-        return visibleBookables.includes(f.bookable_id)
+        return visibleBookables.includes(
+          isDayUse ? f.hotel_room_id : f.bookable_id,
+        )
       })
     },
     scroller() {
@@ -837,6 +869,17 @@ export default {
       // this.$emit('updateBooking', booking)
     },
     getWidth({ start, end }) {
+      // if (
+      //   start === '2024-01-08T09:00:00.000Z' &&
+      //   end === '2024-01-09T17:00:00.000Z'
+      // ) {
+      //   console.log(
+      //     ' ==> ',
+      //     this.dateToX(dayjs(end).format('iso')) -
+      //       this.dateToX(dayjs(start).format('iso')),
+      //   )
+      // }
+      // console.log('WIDTH => ', start, end)
       return (
         this.dateToX(dayjs(end).format('iso')) -
         this.dateToX(dayjs(start).format('iso'))
@@ -1047,7 +1090,7 @@ export default {
         const max =
           this.positionY -
           this.h +
-          (this._bookables.length + 1) * this.rowHeight
+          (this._bookables.length + 3) * this.rowHeight
         const nextY = this.positionY - y
         if (nextY > 0) {
           this.positionY = 0
@@ -1055,7 +1098,7 @@ export default {
         }
         if (max < 0) {
           this.positionY =
-            ((this._bookables.length + 1) * this.rowHeight - this.h) * -1
+            ((this._bookables.length + 3) * this.rowHeight - this.h) * -1
         }
 
         this.positionY = this.positionY - y
@@ -1081,20 +1124,26 @@ export default {
       return dayjs(date).format(f)
     },
     bookableToY(bookableId, diffY = 0) {
+      // console.log('bookableToY => ', bookableId)
       let id
       if (typeof bookableId === 'object') {
+        const isDayUse = bookableId.bookable_type_id === -1
         if (!bookableId._order) {
           id = bookableId.bookable_id
         } else {
           id =
             bookableId._order.canceled_at || bookableId._order.is_no_show
               ? 'canceled'
+              : isDayUse
+              ? bookableId.hotel_room_id
               : bookableId.bookable_id
         }
       } else {
         id = bookableId
       }
-      if (this._bookableToY[id]) return this._bookableToY[id]
+
+      // if (this._bookableToY[id]) return this._bookableToY[id]
+      // console.log('Bookable to Y', bookableId, id)
       const bookableIndex = this.filteredBookables.findIndex((f) => f.id === id)
       const value = bookableIndex * this.rowHeight + diffY + this.headerHeight
       this._bookableToY[id] = value
@@ -1126,12 +1175,16 @@ export default {
         const d = dayjs(date)
         const start = dayjs(f._start_at || f.start_at)
         const end = dayjs(f._end_at || f.end_at)
-
+        console.log('Click ', f)
         const checkDate =
           (d.isAfter(start, 'minute') || d.isSame(start, 'minute')) &&
           (d.isBefore(end, 'minute') || d.isSame(end, 'minute'))
+        if (!checkDate) return
+        const isDayUse = f.bookable_type_id === -1
         if (!f._displayIn) {
-          return f.bookable_id === bookable.id && checkDate
+          return isDayUse
+            ? f.hotel_room_id === bookable.id
+            : f.bookable_id === bookable.id
         } else {
           return bookable.id === f._displayIn
         }

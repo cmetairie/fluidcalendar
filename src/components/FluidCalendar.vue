@@ -121,7 +121,7 @@ export default {
   emits: ['updateDate', 'updateRange'],
   data() {
     return {
-      displayFR: true,
+      displayFR: false,
       mobile: false,
       desktop: false,
       h: 0,
@@ -135,7 +135,7 @@ export default {
     if (this.displayFR) {
       this.updateFrameRate()
     }
-    window.addEventListener('resize', this.manageSize)
+    // window.addEventListener('resize', this.manageSize)
     this.manageSize()
   },
   methods: {

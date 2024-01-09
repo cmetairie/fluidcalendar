@@ -55,7 +55,7 @@
 }
 
 .t__fluid__calendar__wrapper {
-  // overflow-x: hidden;
+  // overflow: hidden;
 }
 
 .t__fluid__calendar__wrapper.--debug {
@@ -206,6 +206,7 @@
 }
 
 .t__fluid__calendar__header__cell__date {
+  color: var(--color-title);
   position: relative;
   display: flex;
   align-items: center;
@@ -223,6 +224,10 @@
     // background: var(--color-bg1);
     // border: solid #d5d9ea 0.5px;
   }
+  // background: red;
+  // &::first-letter {
+  //   text-transform: uppercase;
+  // }
 }
 .t__fluid__calendar__header__time__cells {
   position: absolute;
@@ -550,11 +555,11 @@
   // white-space: nowrap;
   // overflow: hidden;
   // text-overflow: ellipsis;
-  animation: fade 0.2s;
+  // animation: fade 0.2s;
 }
 .t__fluid__calendar__booking__label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   font-weight: 500;

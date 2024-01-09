@@ -39,12 +39,11 @@
           fill="url(#diagonalHatch)"
         />
       </svg>
-      <button
+      <!-- <button
         class="t__fluid__calendar__booking__resize"
         @mousedown.stop="startSize"
       >
-        <!-- {{ diff }} -->
-      </button>
+      </button> -->
     </div>
   </div>
 </template>
@@ -77,6 +76,9 @@ export default {
     ratio: {
       type: Number,
     },
+    width: {
+      type: Number,
+    },
   },
   data() {
     return {
@@ -95,8 +97,9 @@ export default {
     },
     stl() {
       const stl = []
-      stl.push({ width: this.width / this.ratio - 4 + 'px' })
+      stl.push({ width: this.width + 'px' })
       stl.push({ height: this.height + 'px' })
+      stl.push({ top: '1px' })
       return stl
     },
     sltContent() {
@@ -119,15 +122,15 @@ export default {
       }
       return stl
     },
-    width() {
-      const diff = dayjs(this.unavail.end_at).diff(
-        dayjs(this.unavail.start_at),
-        'minute',
-      )
-      return diff * this.widthByMinute + this.diff
-    },
+    // width() {
+    //   const diff = dayjs(this.unavail.end_at).diff(
+    //     dayjs(this.unavail.start_at),
+    //     'minute',
+    //   )
+    //   return diff * this.widthByMinute + this.diff
+    // },
     height() {
-      return this.rowHeight - 1
+      return this.rowHeight - 2
     },
     ghost() {
       return this.unavail.ghost

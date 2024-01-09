@@ -198,6 +198,7 @@
 }
 
 .t__fluid__calendar__header__cell__date {
+  color: var(--color-title);
   position: relative;
   display: flex;
   align-items: center;
@@ -505,12 +506,11 @@
   max-width: 100%;
   font-weight: 500;
   overflow: hidden;
-  animation: fade 0.2s;
 }
 
 .t__fluid__calendar__booking__label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   font-weight: 500;
