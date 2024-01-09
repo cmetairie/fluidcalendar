@@ -96,7 +96,6 @@ export default {
       const p = (position / scrollerHeight) * 100
       const result =
         ((this.total - scrollerHeight + btnHeight + btnWidth) / 100) * p * -1
-      // console.log()
       return result
     },
     toLocalPosition(position) {
@@ -146,7 +145,7 @@ export default {
           const incY = event.clientY - position.top - this.diffY
           const min = 0
           const max = position.height - btn.height
-          console.log('INCY => ', incY, max)
+          // console.log('INCY => ', incY, max)
           let move
           if (incY <= min) {
             move = 0

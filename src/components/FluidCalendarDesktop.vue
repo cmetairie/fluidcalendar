@@ -89,14 +89,15 @@
           </div>
         </div>
 
-        <!-- <FluidCalendarScroller
+        <FluidCalendarScroller
+          v-if="h - rowHeight * 2 < fullHeight + rowHeight * 2 - 2"
           y
           @position="navPosition"
-          :total="fullHeight"
+          :total="fullHeight + rowHeight * 2 - 2"
           :position="positionY"
           :height="h - rowHeight * 2"
           :style="{ top: rowHeight + 'px' }"
-        /> -->
+        />
 
         <!-- <button class="t__fluid__calendar__prev" @click="prev"></button> -->
         <div class="t__fluid__calendar__content" @mousedown="mousedown">
@@ -523,6 +524,7 @@ export default {
     }
   },
   async mounted() {
+    // console.log('MOUNMOUNMOUNMOUNMOUNMOUNMOUN')
     const root = document.documentElement
     root.style.setProperty('--row-height', `${this.rowHeight}px`)
 
@@ -537,7 +539,8 @@ export default {
       e.preventDefault()
 
       const speedX = e.deltaX * 0.75
-      const speedY = this.fullHeight > this.h ? e.deltaY * 0.75 : 0
+      const speedY =
+        this.fullHeight + this.rowHeight * 2 > this.h ? e.deltaY * 0.75 : 0
 
       const scroller = {}
 
@@ -549,8 +552,14 @@ export default {
     })
   },
   watch: {
+    dates(dates) {
+      console.log('WATCH DATES => ', dates)
+      this.centerViewTo(dates[0])
+    },
     bookables(bookables) {
+      console.log('Watch bookables => ', bookables)
       this._bookables = bookables
+      this.init()
     },
     bookings: {
       immediate: true,
@@ -590,6 +599,7 @@ export default {
       },
     },
     pointerDate(date) {
+      // console.log('EMIT DATE ', date)
       this.$emit('updateDate', date)
       this.$emit('updateRange', {
         start: this.rangeX.start,
@@ -849,6 +859,14 @@ export default {
     },
   },
   methods: {
+    init() {
+      this.zoom = Math.min(
+        Math.max((1000 - this.slotDurationInMinutes) / 90, 3),
+        30,
+      )
+
+      this.centerViewTo(this.dates[0], 0.001)
+    },
     resizeBooking(booking, v) {
       if (!v) {
         this.$emit('updateBooking', booking)
@@ -927,6 +945,7 @@ export default {
       document.addEventListener('mouseup', this.endDrag)
     },
     move(event, booking) {
+      // console.log('MOVE ', booking)
       const x = event.clientX - this.mouseMoveStartPoint.x
       const y = event.clientY - this.mouseMoveStartPoint.y
       const m = x / this.widthByMinute
@@ -970,8 +989,14 @@ export default {
             this.$refs.fluidCalendar.getBoundingClientRect().top +
             this.positionY * -1,
         )?.id,
+        hotel_room_id: this.yToBookable(
+          event.clientY -
+            this.$refs.fluidCalendar.getBoundingClientRect().top +
+            this.positionY * -1,
+        )?.id,
         ghost: true,
       }
+      // console.log('Ghost => ', ghost)
       const ghosti = this._bookings.findIndex(
         (f) => f.id === booking.id + '--ghost',
       )
@@ -1087,20 +1112,16 @@ export default {
       }
 
       if (y != undefined) {
-        const max =
-          this.positionY -
-          this.h +
-          (this._bookables.length + 3) * this.rowHeight
         const nextY = this.positionY - y
+        const max = this.h - (this._bookables.length + 3.15) * this.rowHeight
         if (nextY > 0) {
           this.positionY = 0
           return
         }
-        if (max < 0) {
-          this.positionY =
-            ((this._bookables.length + 3) * this.rowHeight - this.h) * -1
+        if (nextY < max) {
+          this.positionY = max
+          return
         }
-
         this.positionY = this.positionY - y
       }
     },
@@ -1112,14 +1133,14 @@ export default {
         this.positionY = y
       }
     },
-    prev() {
-      const date = dayjs(this.pointerDate).add(-5, 'day').date
-      this.centerViewTo(date)
-    },
-    next() {
-      const date = dayjs(this.pointerDate).add(5, 'day').date
-      this.centerViewTo(date)
-    },
+    // prev() {
+    //   const date = dayjs(this.pointerDate).add(-5, 'day').date
+    //   this.centerViewTo(date)
+    // },
+    // next() {
+    //   const date = dayjs(this.pointerDate).add(5, 'day').date
+    //   this.centerViewTo(date)
+    // },
     format(date, f = 'DD MMMM') {
       return dayjs(date).format(f)
     },
@@ -1265,8 +1286,8 @@ export default {
       this._dateToX[key] = value
       return value
     },
-    centerViewTo(unTimedDate, speed = 0.5) {
-      // console.log('Center => ', unTimedDate)
+    centerViewTo(unTimedDate, speed = 0.35) {
+      console.log('** ** centerViewTo ', unTimedDate)
       const date = dayjs(unTimedDate).setTime(this.slotMin)
       const d = dayjs(date)
       const r = dayjs(this.rangeX.start)

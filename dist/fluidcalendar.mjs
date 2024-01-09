@@ -7634,6 +7634,7 @@ var script$3 = {
     }
   },
   async mounted() {
+    // console.log('MOUNMOUNMOUNMOUNMOUNMOUNMOUN')
     const root = document.documentElement;
     root.style.setProperty('--row-height', `${this.rowHeight}px`);
 
@@ -7648,7 +7649,8 @@ var script$3 = {
       e.preventDefault();
 
       const speedX = e.deltaX * 0.75;
-      const speedY = this.fullHeight > this.h ? e.deltaY * 0.75 : 0;
+      const speedY =
+        this.fullHeight + this.rowHeight * 2 > this.h ? e.deltaY * 0.75 : 0;
 
       const scroller = {};
 
@@ -7660,8 +7662,14 @@ var script$3 = {
     });
   },
   watch: {
+    dates(dates) {
+      console.log('WATCH DATES => ', dates);
+      this.centerViewTo(dates[0]);
+    },
     bookables(bookables) {
+      console.log('Watch bookables => ', bookables);
       this._bookables = bookables;
+      this.init();
     },
     bookings: {
       immediate: true,
@@ -7684,23 +7692,24 @@ var script$3 = {
     unavailabilities: {
       immediate: true,
       handler(unavailabilities) {
-        this._unavailabilities = unavailabilities.map((m) => {
-          // const realStart = dayjs(m.start_at).date
-          const start = dayjs(m.start_at).setTime(this.slotMin);
-          // const startDiff = dayjs(realStart).diff(dayjs(start), 'minute')
-          // const realEnd = dayjs(m.end_at).date
-          const end = dayjs(m.end_at).add(-1, 'day').setTime(this.slotMax);
-          // const endDiff = dayjs(realEnd).diff(dayjs(end), 'minute')
-          // console.log('** ', end, end)
-          const result = { ...m };
-          result._start_at = dayjs(start).format('iso');
-          result._end_at = dayjs(end).format('iso');
-          return result
-        });
+        this._unavailabilities = unavailabilities
+          // .filter((f) => {
+          //   const bookables = this._bookables.map((m) => m.id)
+          //   return bookables.includes(f.bookable_id)
+          // })
+          .map((m) => {
+            const start = dayjs(m.start_at).setTime(this.slotMin);
+            const end = dayjs(m.end_at).add(-1, 'day').setTime(this.slotMax);
+            const result = { ...m };
+            result._start_at = dayjs(start).format('iso');
+            result._end_at = dayjs(end).format('iso');
+            return result
+          });
         // this._bookables = [...this.bookables]
       },
     },
     pointerDate(date) {
+      // console.log('EMIT DATE ', date)
       this.$emit('updateDate', date);
       this.$emit('updateRange', {
         start: this.rangeX.start,
@@ -7950,6 +7959,14 @@ var script$3 = {
     },
   },
   methods: {
+    init() {
+      this.zoom = Math.min(
+        Math.max((1000 - this.slotDurationInMinutes) / 90, 3),
+        30,
+      );
+
+      this.centerViewTo(this.dates[0], 0.001);
+    },
     resizeBooking(booking, v) {
       if (!v) {
         this.$emit('updateBooking', booking);
@@ -7970,16 +7987,16 @@ var script$3 = {
       // this.$emit('updateBooking', booking)
     },
     getWidth({ start, end }) {
-      if (
-        start === '2024-01-08T09:00:00.000Z' &&
-        end === '2024-01-09T17:00:00.000Z'
-      ) {
-        console.log(
-          ' ==> ',
-          this.dateToX(dayjs(end).format('iso')) -
-            this.dateToX(dayjs(start).format('iso')),
-        );
-      }
+      // if (
+      //   start === '2024-01-08T09:00:00.000Z' &&
+      //   end === '2024-01-09T17:00:00.000Z'
+      // ) {
+      //   console.log(
+      //     ' ==> ',
+      //     this.dateToX(dayjs(end).format('iso')) -
+      //       this.dateToX(dayjs(start).format('iso')),
+      //   )
+      // }
       // console.log('WIDTH => ', start, end)
       return (
         this.dateToX(dayjs(end).format('iso')) -
@@ -8028,6 +8045,7 @@ var script$3 = {
       document.addEventListener('mouseup', this.endDrag);
     },
     move(event, booking) {
+      // console.log('MOVE ', booking)
       const x = event.clientX - this.mouseMoveStartPoint.x;
       const y = event.clientY - this.mouseMoveStartPoint.y;
       const m = x / this.widthByMinute;
@@ -8071,8 +8089,14 @@ var script$3 = {
             this.$refs.fluidCalendar.getBoundingClientRect().top +
             this.positionY * -1,
         )?.id,
+        hotel_room_id: this.yToBookable(
+          event.clientY -
+            this.$refs.fluidCalendar.getBoundingClientRect().top +
+            this.positionY * -1,
+        )?.id,
         ghost: true,
       };
+      // console.log('Ghost => ', ghost)
       const ghosti = this._bookings.findIndex(
         (f) => f.id === booking.id + '--ghost',
       );
@@ -8176,20 +8200,16 @@ var script$3 = {
       }
 
       if (y != undefined) {
-        const max =
-          this.positionY -
-          this.h +
-          (this._bookables.length + 1) * this.rowHeight;
         const nextY = this.positionY - y;
+        const max = this.h - (this._bookables.length + 3.15) * this.rowHeight;
         if (nextY > 0) {
           this.positionY = 0;
           return
         }
-        if (max < 0) {
-          this.positionY =
-            ((this._bookables.length + 1) * this.rowHeight - this.h) * -1;
+        if (nextY < max) {
+          this.positionY = max;
+          return
         }
-
         this.positionY = this.positionY - y;
       }
     },
@@ -8201,14 +8221,14 @@ var script$3 = {
         this.positionY = y;
       }
     },
-    prev() {
-      const date = dayjs(this.pointerDate).add(-5, 'day').date;
-      this.centerViewTo(date);
-    },
-    next() {
-      const date = dayjs(this.pointerDate).add(5, 'day').date;
-      this.centerViewTo(date);
-    },
+    // prev() {
+    //   const date = dayjs(this.pointerDate).add(-5, 'day').date
+    //   this.centerViewTo(date)
+    // },
+    // next() {
+    //   const date = dayjs(this.pointerDate).add(5, 'day').date
+    //   this.centerViewTo(date)
+    // },
     format(date, f = 'DD MMMM') {
       return dayjs(date).format(f)
     },
@@ -8231,7 +8251,7 @@ var script$3 = {
         id = bookableId;
       }
 
-      if (this._bookableToY[id]) return this._bookableToY[id]
+      // if (this._bookableToY[id]) return this._bookableToY[id]
       // console.log('Bookable to Y', bookableId, id)
       const bookableIndex = this.filteredBookables.findIndex((f) => f.id === id);
       const value = bookableIndex * this.rowHeight + diffY + this.headerHeight;
@@ -8354,8 +8374,8 @@ var script$3 = {
       this._dateToX[key] = value;
       return value
     },
-    centerViewTo(unTimedDate, speed = 0.5) {
-      // console.log('Center => ', unTimedDate)
+    centerViewTo(unTimedDate, speed = 0.35) {
+      console.log('** ** centerViewTo ', unTimedDate);
       const date = dayjs(unTimedDate).setTime(this.slotMin);
       const d = dayjs(date);
       const r = dayjs(this.rangeX.start);
@@ -8425,6 +8445,7 @@ const _hoisted_19 = /*#__PURE__*/createElementVNode("rect", {
 }, null, -1 /* HOISTED */);
 
 function render$3(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_FluidCalendarScroller = resolveComponent("FluidCalendarScroller");
   const _component_FluidCalendarUnavail = resolveComponent("FluidCalendarUnavail");
   const _component_FluidDraggable = resolveComponent("FluidDraggable");
   const _component_FluidCalendarBooking = resolveComponent("FluidCalendarBooking");
@@ -8505,7 +8526,14 @@ function render$3(_ctx, _cache, $props, $setup, $data, $options) {
               }), 128 /* KEYED_FRAGMENT */))
             ], 4 /* STYLE */)
           ], 512 /* NEED_PATCH */),
-          createCommentVNode(" <FluidCalendarScroller\n          y\n          @position=\"navPosition\"\n          :total=\"fullHeight\"\n          :position=\"positionY\"\n          :height=\"h - rowHeight * 2\"\n          :style=\"{ top: rowHeight + 'px' }\"\n        /> "),
+          createVNode(_component_FluidCalendarScroller, {
+            y: "",
+            onPosition: $options.navPosition,
+            total: $options.fullHeight + $data.rowHeight * 2 - 2,
+            position: $data.positionY,
+            height: $props.h - $data.rowHeight * 2,
+            style: normalizeStyle({ top: $data.rowHeight + 'px' })
+          }, null, 8 /* PROPS */, ["onPosition", "total", "position", "height", "style"]),
           createCommentVNode(" <button class=\"t__fluid__calendar__prev\" @click=\"prev\"></button> "),
           createElementVNode("div", {
             class: "t__fluid__calendar__content",
@@ -9309,6 +9337,7 @@ var script = {
     }
   },
   async mounted() {
+    // console.log('*** MOUNT FLUID CALENDAR ***')
     if (this.displayFR) {
       this.updateFrameRate();
     }

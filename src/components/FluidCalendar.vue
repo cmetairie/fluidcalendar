@@ -132,10 +132,11 @@ export default {
     }
   },
   async mounted() {
+    // console.log('*** MOUNT FLUID CALENDAR ***')
     if (this.displayFR) {
       this.updateFrameRate()
     }
-    // window.addEventListener('resize', this.manageSize)
+    window.addEventListener('resize', this.manageSize)
     this.manageSize()
   },
   methods: {
@@ -152,10 +153,20 @@ export default {
     },
     manageSize() {
       const wrapper = this.$refs.wrapper.getBoundingClientRect()
+      const documentHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight,
+        document.body.clientHeight,
+        document.documentElement.clientHeight,
+      )
       // console.log('Wrapper top ?', wrapper.top, wrapper.bottom)
-      const documentHeight = window.innerHeight - wrapper.top * 2
+      // const documentHeight = d - wrapper.top * 2
+      // console.log('*** documentHeight => ', d, documentHeight)
       const documentWidth = window.innerWidth - wrapper.left * 2
       const coords = this.$refs.wrapper?.getBoundingClientRect()
+      // console.log('Coords => ', coords.y)
       if (coords) {
         const w = coords.width
         if (w > 800) {
@@ -166,12 +177,8 @@ export default {
           this.desktop = false
         }
 
-        // this.height = screen.height
-        this.h = this.debug
-          ? documentHeight - coords.y - 150
-          : documentHeight - coords.y
+        this.h = this.debug ? documentHeight - 150 : documentHeight
         this.w = documentWidth
-        // console.log('COORDS => ', coords.width)
       }
     },
   },
